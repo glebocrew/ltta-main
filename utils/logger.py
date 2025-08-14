@@ -13,7 +13,7 @@ class Logger:
         self.module_name = module_name
 
         if os_path.exists(path):
-            self.log_file = open(path, encoding="utf-8", mode="a")
+            self.log_file = open(path, encoding="utf-8", mode="a", buffering=1)
         else:
             self.log_file = open(file=path, encoding="utf-8", mode="a")
             self.log_file.write(f"{datetime.now()} INFO [{self.module_name}] Created file {path} where the logs will be displayed.\n")
@@ -25,3 +25,7 @@ class Logger:
         :param message: your comment
         """
         self.log_file.write(f"{datetime.now()} {status.upper()} [{self.module_name}] {message}\n")
+        self.log_file.flush()
+    
+    def stop(self):
+        self.log_file.close()

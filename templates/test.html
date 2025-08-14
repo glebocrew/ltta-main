@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <title>TEST</title>
+    </head>
+    <body>
+        {% if flashed_message %}
+        <h1>{{ flashed_message }}</h1>
+        {% endif %}
+        {% if not flashed_message %}
+        <h1>It seems that there's no flashed message...</h1>
+        {% endif %}
+    </body>
+</html>

@@ -1,6 +1,7 @@
 venv
 __pycache__
 ltta.sock
-passwords.txt
+passwords.json
 tests.py
-logs.txt
+logs
+conf.json

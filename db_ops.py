@@ -1,10 +1,10 @@
 from mariadb import Connection, Cursor
 from utils.logger import Logger
-import os
+import sys, os
 
 # imports
 
-mariadb_logger = Logger("logs.txt", __file__)
+mariadb_logger = Logger("logs/mariadb.txt", __file__)
 
 # logger
 
@@ -18,15 +18,15 @@ class MariaConnection:
         self.conf = connection_conf
 
         try:
-            mariadb_logger.log("info", f"Connecting to mariadb with arguments {connection_conf}.")
+            mariadb_logger.log("info", f"[{os.getpid()}] Connecting to mariadb to {self.conf["host"]}:{self.conf["port"]}.")
             self.mariaconnection = Connection(**self.conf)
             self.mariaconnection.autocommit = True
 
-            mariadb_logger.log("info", f"Successfully connected to mariadb.")
+            mariadb_logger.log("info", f"Successfully connected to database.")
         except Exception as e:
             mariadb_logger.log("error", f"Connection to mariadb was not established: arguments are not correct. Full exception: {e}")
             mariadb_logger.log("fatal", f"MariaDB module (.py) was stopped. Read logs upper.")
-            os.exit(1)
+            sys.exit(2)
         
         self.cursor = Cursor(self.mariaconnection)
         self.queries = {
@@ -38,12 +38,12 @@ class MariaConnection:
         Selecting all from some table
         :param table_name: name of table you want to select
         """
-        mariadb_logger.log("info", f"Selecting all from {table_name}")
+        mariadb_logger.log("info", f"[{os.getpid()}] Selecting all from {table_name}")
         try:
             self.cursor.execute(self.queries["select_all"].replace("table_name", table_name))
-            mariadb_logger.log("info", f"Succesfully selected all from {table_name}")
+            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully selected all from {table_name}")
         except Exception as e:
-            mariadb_logger.log("error", f"Selecting all from {table_name} failed! Full error: {e}")
+            mariadb_logger.log("error", f"[{os.getpid()}] Selecting all from {table_name} failed! Full error: {e}")
 
         return self.cursor.fetchall()
             
