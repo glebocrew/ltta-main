@@ -3,3 +3,4 @@ __pycache__
 ltta.sock
 passwords.txt
 tests.py
+logs.txt
