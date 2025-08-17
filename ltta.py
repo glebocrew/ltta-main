@@ -32,12 +32,11 @@ app.secret_key = "dummy_key"
 app.template_folder = "templates/"
 app.static_folder = "static/"
 
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' 
+# app.config['SESSION_TYPE'] = 'filesystem'
+# app.config['SESSION_COOKIE_HTTPONLY'] = False # While PROD replace on True
+# app.config['SESSION_COOKIE_SECURE'] = False # While PROD replace on True
+# app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' 
 
-Session(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -125,11 +124,6 @@ def login():
 @app.route("/registration", methods = ['GET', 'POST'])
 def registration():
     if request.method == 'POST':
-        if "last_submit" in session:
-            if datetime.now() - session["last_submit"] < timedelta(minutes=1): 
-                remaining = (timedelta(minutes=1) - (datetime.now() - session["last_submit"])).seconds
-                return render_template("registration.html", message=f"The form hasn't been sent! Please wait {remaining} seconds")
-
         username = request.form.get("username") # TODO: if username is not in mariadb! V COMPLETED
 
         if connection.find_user_by_username("users", username):
@@ -160,17 +154,8 @@ def registration():
         faculty = request.form.get("faculty")
 
         code = ''.join(secrets.choice('0123456789qwertyuiopasdfghjklzxcvbnm') for _ in range(6))
-        
-        session["temp_user"] = {
-                "username": username,
-                "password": password,
-                "name": name,
-                "surname": surname,
-                "email": email,
-                "grade": grade,
-                "faculty": faculty,
-                "code": code
-        }
+
+        connection.insert_new_temp_profile("codes", username, code, datetime.now(), email, name, surname, grade, faculty, password)
             
 
         logger.log("info", f"New registration detected: {username} {email} {name} {surname} {password} {repeat_password} {grade} {faculty}")
@@ -181,8 +166,6 @@ def registration():
 
         server.sendmail(sender_email, email, message.as_string())
 
-        session['last_submit'] = datetime.now()
-        session.modified = True
 
 
         # TODO: email 
@@ -193,11 +176,19 @@ def registration():
 @app.route("/verification/<email>", methods = ['GET', 'POST'])
 def verification(email):
     if request.method == 'POST': # TODO: actions after verification (insertation in table users)
-        logger.log("INFO", f"Entered a code with: {session}")
-        if "temp_user" not in session or "code" not in session['temp_user']:
-            return redirect("/login") # replace to /registration after test
+        temp_user = connection.get_temp_profile_by_email("codes", email)   
+        code_time = datetime.strptime(temp_user[2], "%Y-%m-%d %H:%M:%S.%f")
+
+
+        if (datetime.now() - code_time).total_seconds() > 300: # in secs
+            flash("timeout")
+            return redirect("/registration")
         
-        if request.form.get("code") == session["temp_user"]["code"]:
+
+        if str(request.form.get("code")) == temp_user[1]:
+            # TODO: create a new user in MAIN users table
+            connection.create_new_user("users", temp_user[7], temp_user[3], temp_user[4], temp_user[0], temp_user[8], temp_user[5], temp_user[6])
+            connection.drop_temp_profile_by_email("codes", email)
             return redirect("/login")
         else:
             return redirect(url_for('verification', email=email))

@@ -61,7 +61,7 @@ Table users is:
 username | name | surname | email | password | rating | role | grade | faculty | avatar |
 ---------|-------|-------|-------|----------|--------|------|-------|---------|--------|
 TEXT  | TEXT | TEXT |VARCHAR(50)| TEXT     | FLOAT  |VARCHAR(20)|TINYINT|VARCHAR(50)| BLOB |
-glebocrew | Глеб | Гриценко | glebocrew@yandex.ru | 0srut908530823804hew (sha256) | 0 | admin (or editor/user) | 10 | Computer Science | 1B 20 1A ... (binary image) |
+glebocrew | Глеб | Гриценко | glebocrew@yandex.ru | 0srut908530823804hew (sha256) | 0 | admin (or editor/user) | 10 | МатИнфо | 1B 20 1A ... (binary image) |
 
 To create this table use:
 ```sql
@@ -92,20 +92,20 @@ INSERT INTO events (title, datetime, content, image, participants) VALUES ("За
 ```
 
 ### Codes 
-email | code | datetime
-------|------|----------
-VARCHAR(50) | TEXT | TEXT
-glebocrew@yandex.ru | 123456 | 19:03:50.116672
+email | code | datetime | name | surname | grade | faculty | username
+------|------|----------|------|---------|-------|---------|---------
+VARCHAR(50) | TEXT | TEXT | TEXT | TEXT  | TINYINT | VARCHAR(50) | TEXT
+glebocrew@yandex.ru | 123456 | 19:03:50.116672 | Глеб | Гриценко | 10 | МатИнфо | glebocrew
 
 To be clear.
 Datetime -- is the exact time when the verification code was given.
 
 To create table:
 ```sql
-CREATE TABLE codes (email VARCHAR(50), code TEXT, datetime TEXT);
+CREATE TABLE codes (email VARCHAR(50), code TEXT, datetime TEXT, name TEXT, surname TEXT, grade TINYINT, faculty VARCHAR(50), username TEXT, password TEXT);
 ```
 
 To insert a code:
 ```sql
-INSERT INTO codes (email, code, datetime) VALUES ("glebocrew@yandex.ru", "123456", "19:03:50.116672");
+INSERT INTO codes (email, code, datetime, name, surname, grade, faculty, username, password) VALUES ("glebocrew@yandex.ru", "123456", "19:03:50.116672", "Глеб", "Гриценко", 10, "МатИнфо", "glebocrew", "123");
 ```
