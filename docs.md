@@ -52,25 +52,26 @@ flowchart TD
     app.py --> db_ops.py --> mariadb-server --> ltta_database
     ltta_database --> users
     ltta_database --> events
+    ltta_database --> codes
 ```
 
 ### Users
 
 Table users is:
-username | email | password | rating | role | grade | faculty | avatar |
----------|-------|----------|--------|------|-------|---------|--------|
-TEXT |VARCHAR(50)| TEXT     | FLOAT  |VARCHAR(20)|TINYINT|VARCHAR(50)| BLOB |
-glebocrew | glebocrew@yandex.ru | 0srut908530823804hew (sha256) | 0 | admin (or editor/user) | 10 | Computer Science | 1B 20 1A ... (binary image) |
+username | name | surname | email | password | rating | role | grade | faculty | avatar |
+---------|-------|-------|-------|----------|--------|------|-------|---------|--------|
+TEXT  | TEXT | TEXT |VARCHAR(50)| TEXT     | FLOAT  |VARCHAR(20)|TINYINT|VARCHAR(50)| BLOB |
+glebocrew | Глеб | Гриценко | glebocrew@yandex.ru | 0srut908530823804hew (sha256) | 0 | admin (or editor/user) | 10 | Computer Science | 1B 20 1A ... (binary image) |
 
 To create this table use:
 ```sql
-CREATE TABLE users (username TEXT PRIMARY KEY, email VARCHAR(50) PRIMARY KEY, password TEXT, rating FLOAT, role VARCHAR(20), grade TINYINT, faculty VARCHAR(50), avatar BLOB);
+CREATE TABLE users (username TEXT, name TEXT, surname TEXT, email VARCHAR(50), password TEXT, rating FLOAT, role VARCHAR(20), grade TINYINT, faculty VARCHAR(50), avatar BLOB);
 ```
 
 When the user has just registered we need to add him to this table
 
 ```sql
-INSERT INTO users (username, email, password, rating, role, grade, faculty, avatar) VALUES ("username", "email@example.com", "sha256ijfgdogsodfij", 0, "user", 10, "МатИнфо", "10 1A 1B 52...");
+INSERT INTO users (username, name, surname, email, password, rating, role, grade, faculty, avatar) VALUES ("username", "Глеб", "Гриценко", "email@example.com", "sha256ijfgdogsodfij", 0, "user", 10, "МатИнфо", "10 1A 1B 52...");
 ```
 
 ### Events
@@ -88,4 +89,23 @@ CREATE TABLE events (title TEXT, datetime TEXT, content TEXT, image BLOB, partic
 To insert new event:
 ```sql
 INSERT INTO events (title, datetime, content, image, participants) VALUES ("Заголовок События", "2025-08-14 19:03:50.116672", "Это очень интересное событие где будет Грандмастер Старший и Младший", "52 1A 2B 4A ...", "");
+```
+
+### Codes 
+email | code | datetime
+------|------|----------
+VARCHAR(50) | TEXT | TEXT
+glebocrew@yandex.ru | 123456 | 19:03:50.116672
+
+To be clear.
+Datetime -- is the exact time when the verification code was given.
+
+To create table:
+```sql
+CREATE TABLE codes (email VARCHAR(50), code TEXT, datetime TEXT);
+```
+
+To insert a code:
+```sql
+INSERT INTO codes (email, code, datetime) VALUES ("glebocrew@yandex.ru", "123456", "19:03:50.116672");
 ```

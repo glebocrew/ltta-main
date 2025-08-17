@@ -5,5 +5,11 @@
         "user": "ltta",
         "password": "oushdfigsdfgsdghfugsdofgoisjdfg",
         "db": "ltta"
+    },
+    "mailbox":{
+        "port": 465,
+        "smtp_server": "smtp.yandex.ru",
+        "sender_email": "glebocrew@yandex.ru",
+        "password":"gfperashruecluhu"
     }
 }

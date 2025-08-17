@@ -1,5 +1,6 @@
 from mariadb import Connection, Cursor
 from utils.logger import Logger
+from flask_login import UserMixin
 import sys, os
 
 # imports
@@ -30,10 +31,13 @@ class MariaConnection:
         
         self.cursor = Cursor(self.mariaconnection)
         self.queries = {
-            "select_all": "SELECT * FROM table_name;" 
+            "select_all": "SELECT * FROM table_name;",
+            "find_user_by_username": "SELECT * FROM table_name WHERE username = ?;",
+            "find_user_by_email": "SELECT * FROM table_name WHERE email = ?;",
+            "find_user_by_login_and_password": "SELECT * FROM table_name WHERE username = ? AND password = ?;"
         }
 
-    def select_all(self, table_name):
+    def select_all(self, table_name: str):
         """
         Selecting all from some table
         :param table_name: name of table you want to select
@@ -46,4 +50,78 @@ class MariaConnection:
             mariadb_logger.log("error", f"[{os.getpid()}] Selecting all from {table_name} failed! Full error: {e}")
 
         return self.cursor.fetchall()
-            
+    
+    def find_user_by_username(self, table_name: str, username: str):
+        """
+        Returns True if user was found.
+        Returns False if user was not found.
+
+        :param table_name: name of table you want to select
+        :param username: username of user
+        """
+        try:
+            self.cursor.execute(self.queries["find_user_by_username"].replace("table_name", table_name), (username,))
+            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully looked for user in {table_name}")
+        except Exception as e:
+            mariadb_logger.log("error", f"[{os.getpid()}] Finding user in {table_name} failed! Full error: {e}")
+
+        if self.cursor.fetchone():
+            return True
+        else:
+            return False
+        
+    def find_user_by_email(self, table_name: str, email: str):
+        """
+        Returns True if email was found.
+        Returns False if email was not found.
+
+        :param table_name: name of table you want to select
+        :param email: email of user
+        """
+        try:
+            self.cursor.execute(self.queries["find_user_by_email"].replace("table_name", table_name), (email,))
+            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully looked for email in {table_name}")
+        except Exception as e:
+            mariadb_logger.log("error", f"[{os.getpid()}] Finding email in {table_name} failed! Full error: {e}")
+        
+        
+        if self.cursor.fetchone():
+            return True
+        else:
+            return False
+        
+    def find_user_by_login_and_password(self, table_name: str, username: str, password: str):
+        """
+        Returns True if user was found.
+        Returns False if user was not found.
+
+        :param table_name: name of table you want to select
+        :param username: username of user
+        :param password: password of user
+        """
+        try:
+            self.cursor.execute(self.queries["find_user_by_login_and_password"].replace("table_name", table_name), (username, password,))
+            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully looked for user by username and password in {table_name}")
+        except Exception as e:
+            mariadb_logger.log("error", f"[{os.getpid()}] Finding user by username and password in {table_name} failed! Full error: {e}")
+        
+        
+        if self.cursor.fetchone():
+            return True
+        else:
+            return False
+
+
+    def insert_new_code(self, table_name: str, username: str, code: str, datetime: str):
+        """
+        Inserts new verification code
+
+        :param table_name: name of table you want to select
+        :param username: username of user
+        :param code: code of user
+        :param datetime: code of user
+        """
+
+class User(UserMixin):
+    def __init__(self, username):
+        self.id = username

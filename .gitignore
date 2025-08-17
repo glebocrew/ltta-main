@@ -5,3 +5,4 @@ passwords.json
 tests.py
 logs
 conf.json
+flask_session
