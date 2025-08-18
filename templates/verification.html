@@ -13,7 +13,7 @@
             <p>Do not close this page!</p>
 
             <label for="code">code</label>
-            <input type="text" name="code">
+            <input type="text" name="code" required pattern=".*\S+.*">
 
             <button type="submit">submit</button>
             
@@ -21,6 +21,14 @@
             {% if message %}
                 <p>{{ message }}</p>
             {% endif %}
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         </form>
     </body>
 </html>

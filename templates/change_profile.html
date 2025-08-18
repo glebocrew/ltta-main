@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <title>Profile Page</title>
+    </head>
+
+    <body>
+        <h1>Profile Page</h1>
+        {% if user_data %}
+                <h2>Profile</h2>
+
+                <form method="POST" enctype="multipart/form-data">
+
+                    <img src="{{ url_for('static', filename=user_data['avatar']) }}">
+
+                    <input class="avatar" name="avatar" type="file" accept=".png, .jpg, .gif" >
+
+                    <input class="username" name="username" value="{{ user_data['username'] }}" required pattern=".*\S+.*">
+
+                    <input class="email" name="email" value="{{ user_data['email'] }}" required pattern=".*\S+.*">
+
+                    <input class="name" name="name" value="{{ user_data['name'] }}" required pattern=".*\S+.*">
+                    <input class="surname" name="surname" value="{{ user_data['surname'] }}" required pattern=".*\S+.*">
+                    
+                    <label for="grade">grade</label>
+                    <select name="grade">
+                            <option>{{ user_data['grade'] }}</option>
+		                    <option>8</option>
+	                        <option>9</option>
+	                        <option>10</option>
+	                        <option>11</option>
+	                </select>
+
+                    <label for="faculty">faculty</label>
+                    <select name="faculty">
+		                <option>{{ user_data['faculty'] }}</option>
+		                <option>МатИнфо</option>
+	                    <option>Гум</option>
+	                    <option>СоцЭк</option>
+	                    <option>МатЭк</option>
+	                </select>
+                    
+                    <!-- <label for="password">password:</label> -->
+                    <!-- <input class="password" name="password" required pattern=".*\S+.*" type="password"> -->
+
+                    <button class="save_1" type="button" >Save Changes</button>
+
+                    <div class="accept" id="accept_block" style="display: none;"> 
+                        <input id="accept_input">
+                        <button id="accept_final" type="submit" disabled>Submit</button>
+                    </div>
+<!-- 
+                    <input class="grade" name="grade" value="{{ user_data['grade'] }} ">
+                    <input class="faculty" name="faculty" value="{{ user_data['faculty'] }}"> -->
+
+            </form>
+
+            <h2>Statistics</h2>
+
+            <p class="rating">{{ user_data["rating"] }}</p>
+            {% if message %}
+                <p>{{ message }}</p>
+            {% endif %}
+
+
+        {% endif %}
+        
+        <label name="username"></label>
+    </body>
+    <script>
+        const save_1 = document.querySelector(".save_1");
+        const accept_block = document.getElementById("accept_block");
+
+        save_1.addEventListener("click", function(){
+            accept_block.style.display = "block";
+        });
+
+        const accept_input = document.getElementById('accept_input');
+        const accept_final = document.getElementById('accept_final');
+        const username = '{{ user_data["username"] }}';
+
+        accept_input.addEventListener('input', function() {
+            if (accept_input.value === username) {
+                accept_final.disabled = false;
+            } else {
+                accept_final.disabled = true;
+            }
+        });
+        
+        </script>
+</html>

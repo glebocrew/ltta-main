@@ -11,5 +11,8 @@
         "smtp_server": "smtp.yandex.ru",
         "sender_email": "glebocrew@yandex.ru",
         "password":"gfperashruecluhu"
+    },
+    "global":{
+        
     }
 }

@@ -10,16 +10,16 @@
         <h1>Registration</h1>
         <form method="POST">
             <label for="username">username</label>
-            <input type="text" name="username">
+            <input type="text" name="username" required pattern=".*\S+.*">
 
             <label for="name">name</label>
-            <input type="text" name="name">  
+            <input type="text" name="name" required pattern=".*\S+.*">  
 
             <label for="surname">surname</label>
-            <input type="text" name="surname">
+            <input type="text" name="surname" required pattern=".*\S+.*">
             
             <label for="email">email</label>
-            <input type="text" name="email">
+            <input type="text" name="email" required pattern=".*\S+.*">
             
             <label for="grade">grade</label>
             <select name="grade">
@@ -38,16 +38,24 @@
 	        </select>
 
             <label for="password">password</label>
-            <input type="password" name="password">
+            <input type="password" name="password" required pattern=".*\S+.*">
 
             <label for="repeat_password">repeat password</label>
-            <input type="password" name="repeat_password">
+            <input type="password" name="repeat_password" required pattern=".*\S+.*">
 
 
             <button type="submit" id="SubmitButton">submit</button>
             {% if message %}
                 <p>{{ message }}</p>
             {% endif %}
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
         </form>
     </body>
 </html>

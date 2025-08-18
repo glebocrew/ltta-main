@@ -9,7 +9,7 @@ mariadb_logger = Logger("logs/mariadb.txt", __file__)
 
 # logger
 
-DEFAULT_AVATAR = open("static/img/user.png", "rb").read()
+DEFAULT_AVATAR = "img/avatars/default.png"
 
 # default user image
 
@@ -42,7 +42,9 @@ class MariaConnection:
             "insert_new_temp_profile": "INSERT INTO table_name (email, code, datetime, name, surname, grade, faculty, username, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
             "get_temp_profile_by_email": "SELECT * FROM table_name WHERE email = ?;",
             "drop_temp_profile_by_email": "DELETE FROM table_name WHERE email = ?;",
-            "create_new_user": "INSERT INTO users (username, name, surname, email, password, rating, role, grade, faculty, avatar) VALUES (?, ?, ?, ?, ?, 0, 'user', ?, ?, ?);"
+            "create_new_user": "INSERT INTO users (username, name, surname, email, password, rating, role, grade, faculty, avatar) VALUES (?, ?, ?, ?, ?, 0, 'user', ?, ?, ?);",
+            "get_user_by_username": "SELECT * FROM table_name WHERE username = ?;",
+            "update_profile": "UPDATE table_name SET username = ?, name = ?, surname = ?, email = ?, grade = ?, faculty = ?, avatar = ? WHERE username = ?;"
         }
 
     def select_all(self, table_name: str):
@@ -123,7 +125,7 @@ class MariaConnection:
         """
         Drops temp profile by email
 
-        :param table_name: name of table you want to select
+        :param table_name: name of table you want to delete from
         :param email: email of user
         """
         try:
@@ -137,7 +139,7 @@ class MariaConnection:
         """
         Inserts new temp profile
 
-        :param table_name: name of table you want to select
+        :param table_name: name of table you want to insert
         :param username: username of user
         :param code: code of user
         :param datetime: when the code was given
@@ -177,19 +179,77 @@ class MariaConnection:
     def create_new_user(self, table_name: str, username: str, name: str, surname: str, email: str, password: str, grade: str, faculty: str):
         """
         Creates new user
+        :param table_name: name of table you want to insert
         :param username: username of user
         :param name: name of user
         :param surname: surname of user
         :param email: email of user
         :param password: password of user
-        :param grade: email of user
-        :param faculty:  email of user
+        :param grade: grade of user
+        :param faculty:  faculty of user INSERT INTO users (username, name, surname, email, password, rating, role, grade, faculty, avatar) VALUES (?, ?, ?, ?, ?, 0, 'user', ?, ?, ?);
         """
         try:
-            self.cursor.execute(self.queries["create_new_user"].replace("table_name", table_name), (username, name, surname, email, password, grade, faculty, DEFAULT_AVATAR))
+            self.cursor.execute(self.queries["create_new_user"].replace("table_name", table_name), (username, name, surname, email, password, grade, faculty, DEFAULT_AVATAR,))
             mariadb_logger.log("info", f"[{os.getpid()}] Succesfully added user in {table_name}")
         except Exception as e:
             mariadb_logger.log("error", f"[{os.getpid()}] Adding user in {table_name} failed! Full error: {e}")
+    
+    def get_user_by_username(self, table_name: str, username: str):
+        """
+        Finds all user infomation by his username
+        
+        :param table_name: name of table you want to select
+        :param username: username of user
+
+        Returns dict with this user information: 
+        Username, Name, Surname, Email, Password, Rating, Role, Grade, Faculty, Avatar
+        """
+
+        try:
+            self.cursor.execute(self.queries["get_user_by_username"].replace("table_name", table_name), (username,))
+            user_info = self.cursor.fetchone()
+            if user_info:
+
+                mapped_user_info = {
+                    "username": username,
+                    "name": user_info[1],
+                    "surname": user_info[2],
+                    "email": user_info[3],
+                    "password": user_info[4],
+                    "rating": user_info[5],
+                    "role": user_info[6],
+                    "grade": user_info[7],
+                    "faculty": user_info[8],
+                    "avatar": user_info[9]
+                }
+
+                mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got user in {table_name}")
+
+                return mapped_user_info
+            else:
+                return -1
+        except Exception as e:
+            mariadb_logger.log("error", f"[{os.getpid()}] Getting user from {table_name} failed! Full error: {e}")
+
+    def update_profile(self, table_name: str, username: str, name: str, surname: str, email: str, grade: int, faculty: str, avatar: str, old_username: str):
+        """
+        Updates updatable fields
+
+        :param table_name: name of table you want to insert
+        :param username: username of user
+        :param name: name of user
+        :param surname: surname of user
+        :param email: email of user
+        :param grade: grade of user
+        :param faculty:  faculty of user
+        :param avatar: avatar of user
+        :param old_username: old username of user
+        """           # """UPDATE table_name SET username = ?, name = ?, surname = ?, email = ?, grade = ?, faculty = ?, avatar = ? WHERE username = ?;"""
+        try:
+            self.cursor.execute(self.queries["update_profile"].replace("table_name", table_name), (username, name, surname, email, grade, faculty, avatar, old_username,))
+            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully updated user in {table_name}")
+        except Exception as e:
+            mariadb_logger.log("error", f"[{os.getpid()}] Updating user in {table_name} failed! Full error: {e}")
         
         
 

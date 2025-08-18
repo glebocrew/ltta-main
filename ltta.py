@@ -2,6 +2,7 @@ from flask import *
 from flask_login import *
 from utils.logger import Logger
 from flask_session import Session
+import flask_login
 
 ## flask
 
@@ -22,6 +23,7 @@ from json import load
 from random import randint
 from datetime import datetime, timedelta
 import secrets
+import glob
 
 ## others
 
@@ -155,7 +157,6 @@ def registration():
 
         code = ''.join(secrets.choice('0123456789qwertyuiopasdfghjklzxcvbnm') for _ in range(6))
 
-        connection.insert_new_temp_profile("codes", username, code, datetime.now(), email, name, surname, grade, faculty, password)
             
 
         logger.log("info", f"New registration detected: {username} {email} {name} {surname} {password} {repeat_password} {grade} {faculty}")
@@ -164,7 +165,26 @@ def registration():
         message.attach(MIMEText(message_html.replace("VERIFICATION_CODE", f"{code}"), "html", "utf-8"))
         message["from"] = "glebocrew@yandex.ru"
 
-        server.sendmail(sender_email, email, message.as_string())
+        try:
+            global server
+            server.sendmail(sender_email, email, message.as_string())
+            logger.log("info", f"Sending verification code to {email}.")
+
+            connection.insert_new_temp_profile("codes", username, code, datetime.now(), email, name, surname, grade, faculty, password)
+        except smtplib.SMTPSenderRefused or smtplib.SMTPRecipientsRefused as e:
+            logger.log("error", f"Sending code on {email} failed because of its incorrectance! Full error {e}.")
+            return render_template("registration.html", message="Invalid email!")
+
+        except smtplib.SMTPServerDisconnected as e:
+            logger.log("error", f"SMTP server was disconnected! Trying to reconnect! Full error {e}")
+
+            try:
+                server = smtplib.SMTP_SSL(smtp_server, port, context=context)
+                server.login(sender_email, password)
+            except Exception as e:
+                logger.log("fatal", f"SMTP server was disconnected! Full error {e}")
+                
+            return render_template("registration.html", message="Invalid email!")
 
 
 
@@ -180,8 +200,8 @@ def verification(email):
         code_time = datetime.strptime(temp_user[2], "%Y-%m-%d %H:%M:%S.%f")
 
 
-        if (datetime.now() - code_time).total_seconds() > 300: # in secs
-            flash("timeout")
+        if (datetime.now() - code_time).total_seconds() > 300: # in secs (300)
+            flash("Code timeout. Try again!")
             return redirect("/registration")
         
 
@@ -198,8 +218,102 @@ def verification(email):
 @app.route("/profile")
 @login_required
 def profile():
-    return "<h1>profile</h1>"
+    logger.log("info", f"{current_user.id}")
+    user_data = connection.get_user_by_username("users", current_user.id)
+    if user_data != -1:
+        return render_template("profile.html", user_data=user_data)
+    
+@app.route("/change_profile", methods = ['GET', 'POST'])
+@login_required
+def change_profile():
+    user_data = connection.get_user_by_username("users", current_user.id)
+    if user_data != -1:
+        if request.method == "POST":
+            avatar = request.files.get("avatar")
+            extention = avatar.filename[-3:]
+            logger.log("info", f"avatar: {avatar}")
+
+            if avatar and avatar.filename != "":
+                if user_data["avatar"].split(sep="/")[-1] != "default.png":
+                    logger.log("info", f"Updating avatar for {user_data['username']}.")
+
+                    to_delete = glob.glob(f"static/img/avatars/{user_data['username']}.*")
+                    logger.log("info", f"Deleting previous avatars aka {to_delete}.")
+                    
+                    if to_delete:
+                        for file in to_delete:    
+                            os.remove(file)
+                            logger.log("info", f"Deleting {file}")
+                try:
+                    logger.log("info", f"Creating file {user_data['username']}.{extention}")
+
+                    avatar.save(f"static/img/avatars/{user_data['username']}.{extention}")
+                    # avatar_bits = open(avatar, "rb").read()
+                    # new_avatar = open(f"{user_data['username']}.{avatar.filename[-3:]}", "wr")
+
+                    user_data["avatar"] = f"img/avatars/{user_data['username']}.{extention}"
+
+                    # new_avatar.write(avatar_bits)
+
+
+                    logger.log("info", "File successfully created")
+                except Exception as e:
+                    logger.log("error", f"File was not created! Full error: {e}")
+
+
+                # TODO: creating new avatar and inserting path to mariadb
+
+            username = request.form.get("username")
+
+            if connection.find_user_by_username("users", username) and username != user_data["username"]:
+                return render_template("change_profile.html", user_data=user_data, message="This username is already taken!")
+ 
+
+            if username != user_data["username"]:
+                if user_data["avatar"].split("/")[-1] != "default.png":
+                    user_avatars = glob.glob(f"static/img/avatars/{user_data['username']}.*")
+                    try:
+                        logger.log("info", f"Renaming files caused by username change.")
+                        for user_avatar in user_avatars:
+                            logger.log("info", f"extention: {user_data["avatar"][-3:]}")
+                            os.rename(user_avatar, f"static/img/avatars/{username}.{user_data["avatar"][-3:]}")
+                        user_data["avatar"] = f"img/avatars/{username}.{user_data["avatar"][-3:]}"
+                        logout_user()
+
+
+                    except Exception as e:
+                        logger.log("error", f"Renaming failed! Full error {e}")
+
+            
+            name = request.form.get("name")
+            surname = request.form.get("surname")
+            # password = request.form.get("password")         
+            grade = request.form.get("grade")
+            faculty = request.form.get("faculty")
+            email = request.form.get("email") # """UPDATE table_name SET username = ?, name = ?, surname = ?, email = ?, grade = ?, faculty = ?, avatar = ? WHERE username = ?;"""
+
+            
+            connection.update_profile("users", username, name, surname, email, grade, faculty, user_data["avatar"], user_data["username"])
+            return redirect("/profile")
+
+        return render_template("change_profile.html", user_data=user_data)
+
+@login_required
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect("/")
+
+
+
 # routes
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    flash("File is too large")
+    return redirect("/change_profile")
+
+# errors
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <title>Profile Page</title>
+    </head>
+
+    <body>
+        <h1>Profile Page</h1>
+        {% if user_data %}
+            <div class="user_data">
+                <h2>Profile</h2>
+
+                <img src="{{ url_for('static', filename=user_data['avatar']) }}">
+
+
+                <p class="username">{{ user_data["username"] }}</p>
+
+                <p class="name">{{ user_data["name"] }}</p>
+                <p class="surname">{{ user_data["surname"] }}</p>
+
+                <p class="email">{{ user_data["email"] }}</p>
+
+                <p class="gradeNfaculty">{{ user_data["grade"] }} {{ user_data["faculty"] }}</p>
+
+                <button onclick="window.location.href='/change_profile'">Edit Profile</button>
+
+                <h2>Statistics</h2>
+
+                <p class="rating">{{ user_data["rating"] }}</p>
+
+            </div>
+        {% endif %}
+        
+        <label name="username"></label>
+    </body>
+</html>
