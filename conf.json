@@ -8,9 +8,9 @@
     },
     "mailbox":{
         "port": 465,
-        "smtp_server": "smtp.yandex.ru",
-        "sender_email": "glebocrew@yandex.ru",
-        "password":"gfperashruecluhu"
+        "smtp_server": "192.168.51.109",
+        "sender_email": "ltta@glebocrew.ru",
+        "password":"cs7#CJHW9y4r78"
     },
     "global":{
         

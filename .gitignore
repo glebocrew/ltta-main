@@ -6,3 +6,5 @@ tests.py
 logs
 conf.json
 flask_session
+static/img/avatars
+static/img/events

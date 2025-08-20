@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <title>Profile Page</title>
+    </head>
+
+    <body>
+        <h1>Profile Page</h1>
+        {% if event_info %}
+                <h2>Profile</h2>
+
+                <form method="POST" enctype="multipart/form-data">
+
+                    <img src="{{ url_for('static', filename=event_info['image']) }}">
+
+                    <input class="image" name="image" type="file" accept=".png, .jpg, .gif" >
+
+                    <label for="type">type</label>
+                    <select name="type">
+                            <option>{{ event_info['type'] }}</option>
+		                    <option>соревнование</option>
+	                        <option>мастер-класс</option>
+	                        <option>шоу-игра</option>
+	                </select>
+
+                    <input class="datetime" name="datetime" type="datetime-local" value="{{ event_info['datetime'] }}" required pattern=".*\S+.*">
+
+                    <input class="title" name="title" value="{{ event_info['title'] }}" required pattern=".*\S+.*">
+
+
+                    <input class="content" name="content" value="{{ event_info['content'] }}" required pattern=".*\S+.*">
+
+                    <input class="participants" name="participants" value="{{ event_info['participants'] }}">
+                    
+                    <button class="save_1" type="button" >Save Changes</button>
+
+                    <div class="accept" id="accept_block" style="display: none;"> 
+                        <input id="accept_input">
+                        <button id="accept_final" type="submit" disabled>Submit</button>
+                    </div>
+            </form>
+
+        {% endif %}
+    </body>
+    <script>
+        const save_1 = document.querySelector(".save_1");
+        const accept_block = document.getElementById("accept_block");
+
+        save_1.addEventListener("click", function(){
+            accept_block.style.display = "block";
+        });
+
+        const accept_input = document.getElementById('accept_input');
+        const accept_final = document.getElementById('accept_final');
+        const username = '{{ admin_info["name"] }} {{ admin_info["surname"] }}';
+
+        accept_input.addEventListener('input', function() {
+            if (accept_input.value === username) {
+                accept_final.disabled = false;
+            } else {
+                accept_final.disabled = true;
+            }
+        });
+
+        let submitButton = document.getElementById("submit");
+        let timezoneInput = document.getElementById("timezone");
+
+        if (submitButton && timezoneInput) {
+
+            function getTimezone() {
+                try {
+                    // Пытаемся получить точную временную зону
+                    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+                } catch (error) {
+                    // Фолбэк: вычисляем UTC смещение
+                    const offsetMinutes = new Date().getTimezoneOffset();
+                    const offsetHours = Math.abs(offsetMinutes) / 60;
+                    const sign = offsetMinutes <= 0 ? '+' : '-';
+
+                    return `UTC${sign}${String(offsetHours).padStart(2, '0')}:00`;
+                }
+            }
+
+            const timezone = getTimezone();
+            timezoneInput.value = timezone;
+
+        } else {
+            console.error("Не найдены необходимые элементы DOM");
+        }
+        
+        </script>
+</html>

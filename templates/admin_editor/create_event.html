@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <title>Creating Event Page</title>
+    </head>
+
+    <body>
+        <h1>Creating New Event</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <label for="type">type</label>
+            <select name="type">
+		        <option>соревнование</option>
+	            <option>шоу-игра</option>
+	            <option>мастер-класс</option>
+	            <option>другое</option>
+	        </select>
+
+            <label for="title">title</label>
+            <input type="text" name="title" required pattern=".*\S+.*">
+
+            <label for="datetime">datetime</label>
+            <input type="datetime-local" name="datetime" required pattern=".*\S+.*">  
+
+            <label for="content">content</label>
+            <input type="content" name="content" required pattern=".*\S+.*">
+            
+            <input class="image" name="image" type="file" accept=".png, .jpg, .gif" required>
+
+            <input class="timezone" name="timezone" type="hidden" id="timezone">
+            
+            <button type="button" onclick="showButton()">submit</button>
+            <button type="submit" id="submit" style="display: none;">sure?</button>
+            {% if message %}
+                <p>{{ message }}</p>
+            {% endif %}
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </form>
+    </body>
+    <script>
+    let submitButton = document.getElementById("submit");
+    let timezoneInput = document.getElementById("timezone");
+
+    function showButton(){
+        submitButton.style.display = "block";
+    }
+
+    // Проверка существования элементов
+    if (submitButton && timezoneInput) {
+
+        function getTimezone() {
+            try {
+                // Пытаемся получить точную временную зону
+                return Intl.DateTimeFormat().resolvedOptions().timeZone;
+            } catch (error) {
+                // Фолбэк: вычисляем UTC смещение
+                const offsetMinutes = new Date().getTimezoneOffset();
+                const offsetHours = Math.abs(offsetMinutes) / 60;
+                const sign = offsetMinutes <= 0 ? '+' : '-';
+
+                return `UTC${sign}${String(offsetHours).padStart(2, '0')}:00`;
+            }
+        }
+
+        const timezone = getTimezone();
+        timezoneInput.value = timezone;
+
+    } else {
+        console.error("Не найдены необходимые элементы DOM");
+    }
+    </script>
+</html>

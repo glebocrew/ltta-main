@@ -60,7 +60,7 @@ flowchart TD
 Table users is:
 username | name | surname | email | password | rating | role | grade | faculty | avatar |
 ---------|-------|-------|-------|----------|--------|------|-------|---------|--------|
-TEXT  | TEXT | TEXT |VARCHAR(50)| TEXT     | FLOAT  |VARCHAR(20)|TINYINT|VARCHAR(50)| BLOB |
+TEXT  | TEXT | TEXT |VARCHAR(50)| TEXT     | FLOAT  |VARCHAR(20)|TINYINT|VARCHAR(50)| TEXT |
 glebocrew | Глеб | Гриценко | glebocrew@yandex.ru | 0srut908530823804hew (sha256) | 0 | admin (or editor/user) | 10 | МатИнфо | static/img/avatars/image.png |
 
 To create this table use:
@@ -76,19 +76,19 @@ INSERT INTO users (username, name, surname, email, password, rating, role, grade
 
 ### Events
 Table event is:
-title | datetime | content | image | participants(usernames) |
-------|----------|---------|-------|-------------------------|
+type | title | datetime | content | image | participants(usernames) |
+-----|------|----------|---------|-------|-------------------------|
 TEXT  |  TEXT    | TEXT    | TEXT  |    TEXT                 |
-Событие 1 | 2025-08-14 19:03:50.116672 | Очень интересное событие от Грандмастера | 0A 10 3A 52 | glebocrew,vladicrew |
+соревнование | Событие 1 | 2025-08-14 19:03:50.116672 | Очень интересное событие от Грандмастера | /img/events/image.png | glebocrew,vladicrew |
 
 To create this table use:
 ```sql
-CREATE TABLE events (title TEXT, datetime TEXT, content TEXT, image TEXT, participants TEXT);
+CREATE TABLE events (type TEXT, title TEXT, datetime TEXT, content TEXT, image TEXT, participants TEXT);
 ```
 
 To insert new event:
 ```sql
-INSERT INTO events (title, datetime, content, image, participants) VALUES ("Заголовок События", "2025-08-14 19:03:50.116672", "Это очень интересное событие где будет Грандмастер Старший и Младший", "52 1A 2B 4A ...", "");
+INSERT INTO events (type, title, datetime, content, image, participants) VALUES ("соревнование","Заголовок События", "2025-08-14 19:03:50.116672", "Это очень интересное событие где будет Грандмастер Старший и Младший", "52 1A 2B 4A ...", "");
 ```
 
 ### Codes 

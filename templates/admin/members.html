@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <title>Members Page</title>
+    </head>
+
+    <body>
+        <h1>Members Page</h1>
+        
+        {% if members %}
+            {% for member in members %}
+                <div class="user">
+                    <img src="{{ url_for('static', filename=member['avatar']) }}">
+                    
+                    <p class="username">{{ member["username"] }}</p>
+
+                    <p class="name">{{ member["name"] }}</p>
+                    <p class="surname">{{ member["surname"] }}</p>
+
+                    <p class="email">{{ member["email"] }}</p>
+
+                    <p class="gradeNfaculty">{{ member["grade"] }} {{ member["faculty"] }}</p>
+
+                    <p class="rating">{{ member["rating"] }}</p>
+
+                    <p class="role">{{ member["role"] }}</p>
+
+                    <form method="POST">
+                        <input name="username" type="hidden" value="{{ member['username'] }}">
+                        <button type="submit">View User</button>
+                    </form>
+
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </body>
+    <style>
+        .user{
+            position: relative;
+            
+            width: 100%;
+            height: 50px;
+
+            display: flex;
+
+            margin-top: 1px;
+        }
+
+        p{
+            position: relative;
+
+            margin-left: 10px;
+        }
+    </style>
+</html>

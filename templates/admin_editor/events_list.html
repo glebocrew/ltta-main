@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <title>Events List Page</title>
+    </head>
+
+    <body>
+        <h1>Events List Page</h1>
+        
+        {% if events %}
+            {% for event in events %}
+                <div class="user">
+                    <img src="{{ url_for('static', filename=event['image']) }}">
+                    
+                    <p class="type">{{ event["type"] }}</p>
+
+                    <p class="datetime">{{ event["datetime"] }}</p>
+                    <p class="title">{{ event["title"] }}</p>
+
+                    <p class="content">{{ event["content"] }}</p>
+
+                    <form method="POST">
+                        <input name="event_title" type="hidden" value="{{ event['title'] }}">
+                        <input type="hidden" name="action" value="edit">
+                        <button type="submit">Edit Event</button>
+                    </form>
+
+                    <form method="POST">
+                        <input name="event_title" type="hidden" value="{{ event['title'] }}">
+                        <input type="hidden" name="action" value="delete">
+                        <button type="button" onclick="showButton(`submit {{event['title']}}`)">Delete Event</button>
+                    <button type="submit" id="submit {{ event['title'] }}" style="display: none;">Sure?</button>
+                    </form>
+
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </body>
+    <style>
+        .user{
+            position: relative;
+            
+            width: 100%;
+            height: 50px;
+
+            display: flex;
+
+            margin-top: 1px;
+        }
+
+        p{
+            position: relative;
+
+            margin-left: 10px;
+        }
+    </style>
+        <script>
+
+
+    function showButton(id){
+        let submitButton = document.getElementById(id);
+        submitButton.style.display = "block";
+    }
+
+    </script>
+</html>

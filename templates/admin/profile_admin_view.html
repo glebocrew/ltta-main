@@ -24,7 +24,9 @@
 
                 <p class="gradeNfaculty">{{ user_data["grade"] }} {{ user_data["faculty"] }}</p>
 
-                <button onclick="window.location.href='/edit_profile'">Edit Profile</button>
+                <p class="role">{{ user_data["role"] }}</p>
+
+                <button onclick="editProfile()">Edit Profile</button>
 
                 <h2>Statistics</h2>
 
@@ -35,4 +37,9 @@
         
         <label name="username"></label>
     </body>
+    <script>
+        function editProfile() {
+            window.location.href = `/member/{{ user_data['username'] }}/edit_profile`;
+        }
+    </script>
 </html>
