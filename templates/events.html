@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+
+        <title>Events List Page</title>
+    </head>
+
+    <body>
+        <h1>Events Page</h1>
+        
+        {% if events %}
+            {% for event in events %}
+                <div class="user">
+                    <img src="{{ url_for('static', filename=event['image']) }}">
+                    
+                    <p class="type">{{ event["type"] }}</p>
+
+                    <p class="datetime">{{ event["datetime"] }}</p>
+                    <p class="title">{{ event["title"] }}</p>
+
+                    <p class="content">{{ event["content"] }}</p>
+
+                    <form method="POST">
+                        <input name="event_title" type="hidden" value="{{ event['title'] }}">
+                        <button type="submit">View Event</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </body>
+    <style>
+        .user{
+            position: relative;
+            
+            width: 100%;
+            height: 50px;
+
+            display: flex;
+
+            margin-top: 1px;
+        }
+
+        p{
+            position: relative;
+
+            margin-left: 10px;
+        }
+    </style>
+</html>

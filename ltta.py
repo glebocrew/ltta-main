@@ -12,6 +12,11 @@ import db_ops
 
 ## db
 
+from downloads import *
+import downloads
+
+## pdfs
+
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -27,6 +32,8 @@ from functools import wraps
 import secrets
 import glob
 import pytz
+import uuid
+
 
 ## others
 
@@ -72,8 +79,8 @@ except:
 # mariadb conf
 
 @login_manager.user_loader
-def load_user(username):
-    return User(username, connection.get_user_role_by_username("users", username))
+def load_user(id):
+    return User(id, connection.get_user_by_id("users", id)["role"])
 
 
 
@@ -94,7 +101,7 @@ def login():
         # hashed password
 
         if connection.find_user_by_login_and_password("users", username, password):
-            user = User(username, connection.get_user_role_by_username("users", username))
+            user = User(connection.get_user_by_username("users", username)["id"], connection.get_user_role_by_username("users", username))
             login_user(user)
             logger.log("info", f"new SUCCESFULL login: username={username} password={password}")
 
@@ -215,7 +222,7 @@ def verification(email):
 
         if str(request.form.get("code")) == temp_user[1]:
             # TODO: create a new user in MAIN users table
-            connection.create_new_user("users", temp_user[7], temp_user[3], temp_user[4], temp_user[0], temp_user[8], temp_user[5], temp_user[6])
+            connection.create_new_user("users", temp_user[7], temp_user[3], temp_user[4], temp_user[0], temp_user[8], temp_user[5], temp_user[6], uuid.uuid4())
             connection.drop_temp_profile_by_email("codes", email)
             return redirect("/login")
         else:
@@ -227,16 +234,18 @@ def verification(email):
 @login_required
 def profile():
     logger.log("info", f"{current_user.id}")
-    user_data = connection.get_user_by_username("users", current_user.id)
+    user_data = connection.get_user_by_id("users", current_user.id)
+    user_events = connection.get_events_ids_by_user_id("events", current_user.id)
+    logger.log("info", f"{user_data}")
     if user_data != -1:
-        return render_template("profile.html", user_data=user_data)
+        return render_template("profile.html", user_data=user_data, user_events=user_events)
     
 @app.route("/edit_profile", methods = ['GET', 'POST'])
 @login_required
 def edit_profile():
-    user_data = connection.get_user_by_username("users", current_user.id)
+    user_data = connection.get_user_by_id("users", current_user.id)
     if user_data != -1:
-        if request.method == "POST":
+        if request.method == 'POST':
             avatar = request.files.get("avatar")
             extention = avatar.filename[-3:]
             logger.log("info", f"avatar: {avatar}")
@@ -311,6 +320,33 @@ def edit_profile():
 def logout():
     logout_user()
     return redirect("/")
+
+@app.route("/ratings", methods=['GET', 'POST'])
+@login_required
+def ratings():
+    ratings = connection.get_all_users("users")
+
+    if request.method == 'POST':
+        return redirect(url_for("rating", user=request.form.get("username")))
+
+    
+    return render_template("ratings.html", ratings=ratings)
+
+@app.route("/rating/<user>", methods=['GET', 'POST'])
+def rating(user):
+    user_data = connection.get_user_by_username("users", user)
+
+    if user_data == -1:
+        return "<h1>There's no such user", 404
+    
+    if request.method == 'POST':
+        user_info = connection.get_user_by_username("users", user)
+
+        create_card(f"static/{user_info['avatar']}", user_info["username"], user_info["name"], user_info["surname"], user_info["rating"], user_info["grade"], user_info["faculty"], user_info["id"])
+
+        return send_file(f"user_cards/{user_info["id"]}.pdf", as_attachment=True)
+
+    return render_template("rating.html", user_data=user_data)
 
 @app.route("/members", methods=['GET', 'POST'])
 @login_required
@@ -405,15 +441,15 @@ def edit_profile_admin(user):
 @app.route("/events_list", methods=['GET', 'POST'])
 @login_required
 def events_list():
-    if "users" in current_user.role:
+    if "user" in current_user.role:
         return redirect("/")
-    # TODO: list of events display
+    # TODO: list of events display V COMPLETED
     events = connection.get_all_events("events")
 
     # logger.log("debug", f"{events[0]["datetime"]}")
 
-    if request.method == "POST":
-        event_title = request.form.get("event_title")
+    if request.method == 'POST':
+        event_title = request.form.get("event_title").strip()
         if request.form.get("action") == "edit":
             return redirect(url_for("edit_event", event=event_title))
             pass
@@ -449,10 +485,10 @@ def create_event():
     if "user" in current_user.role:
         return redirect("/")
     
-    if request.method == "POST":
+    if request.method == 'POST':
 
         event_type = request.form.get("type")
-        title = request.form.get("title")
+        title = request.form.get("title").strip()
         content = request.form.get("content")
         timezone = request.form.get("timezone")
 
@@ -481,7 +517,7 @@ def create_event():
         logger.log("info", f"Saving event image to static/img/events/{image.filename}")
         image.save(f"static/img/events/{image.filename}")
 
-        connection.create_event("events", event_type, title, datetime_form, content, f"img/events/{image.filename}")
+        connection.create_event("events", event_type, title, datetime_form, content, f"img/events/{image.filename}", uuid.uuid4())
 
         return redirect("events_list")
 
@@ -494,58 +530,142 @@ def create_event():
 def edit_event(event):
     if "users" in current_user.role:
         return redirect("/")
+    
+
     event_info = connection.get_event_by_title("events", event)
     event_info["datetime"] = datetime.strptime(event_info["datetime"], "%Y-%m-%d %H:%M:%S")
+    logger.log("debug", f"Participants: {event_info["participants"].split(sep=",")}")
+    participants_list = [connection.get_user_by_id("users", participant)["username"] for participant in event_info["participants"].split(sep=",") if participant != ""]
+    event_info["participants"] = [connection.get_user_by_id("users", participant)["username"] for participant in event_info["participants"].split(sep=",") if participant != ""]
+    participants = ""
+    for participant in event_info["participants"]:
+        participants += participant + ","
+    event_info["participants"] = participants
+    event_info["participants"] = participants
 
+
+    logger.log("debug", f"Participants: {event_info["participants"]}")
+    matches = connection.get_matches_by_id("matches", connection.get_event_id_by_title("events", event_info['title']))
+    
+    logger.log("debug", matches)
+    logger.log("debug", connection.get_event_id_by_title("events", event_info['title']))
+    logger.log("debug", event_info['title'])
     # event_info["datetime"] = datetime.strptime(event_info["datetime"], "%Y-%m-%d %H:%M") + timedelta(hours=3)
     # event_info["datetime"] = datetime.strptime(event_info["datetime"], "%Y-%m-%d %H:%M:%S")
-
     event_info["datetime"] = event_info["datetime"].strftime("%Y-%m-%dT%H:%M")
-
     admin_info = connection.get_user_name_surname("users", current_user.id)
     admin_info = {"name": admin_info[0], "surname": admin_info[1]}
+    if request.method == 'POST':
+        if request.form.get("action") == "changes":
+            image = request.files.get("image")
+            # image_path = event_info["image"]
+            logger.log("info", f"image: {image}")
+            if image.filename and image.filename != "":
+                try:
+                    logger.log("info", f"Removing: static/{event_info["image"]}")
+                    os.remove(f"static/{event_info["image"]}")
+                    open(f"static/img/events/{image.filename}", "a").close()
+                    image.save(f"static/img/events/{image.filename}")
+                    image_path = f"img/events/{image.filename}"
+                except Exception as e:
+                    logger.log("error", f"Removing: static/{event_info["image"]} failed! Full error: {e}")
+                    image_path = f"img/events/{image.filename}"
+            else:
+                image_path = event_info["image"]
+                pass
+            event_title = request.form.get("title")
+            event_datetime = datetime.strptime(request.form.get("datetime"), "%Y-%m-%dT%H:%M").strftime("%Y-%m-%d %H:%M:%S")
+            event_type = request.form.get("type")
+            event_content = request.form.get("content")
+            event_participants = request.form.get("participants")
+            event_id = connection.get_event_id_by_title("events", event_title)
+            logger.log("info", f"Path to new event image {image_path}")
+            matches = []
+            for id in range(int(request.form.get("counter"))):
+                if not request.form.get(f"player1-{id}"):
+                    continue
+                else:
+                    matches.append({"title": event_id,
+                                    "player1": request.form.get(f"player1-{id}"),
+                                    "player2": request.form.get(f"player2-{id}"),
+                                    "winner": request.form.get(f"winner-{id}"),
+                                    "score": request.form.get(f"score-{id}"),
+                                    "id": event_id
+                                    })
+            participants = ""
+            for participant in event_participants.split(sep=","):
+                if participant != "":
+                    participants += connection.get_user_by_username("users", participant)["id"] + ","
+            event_participants = participants
+            connection.wrap_matches("matches", matches, event_id)
+            connection.update_event("events", event_type=event_type,
+                                    title=event_title, 
+                                    datetime=event_datetime, 
+                                    content=event_content, 
+                                    image=image_path, 
+                                    participants=event_participants, 
+                                    old_title=event_info["title"])
+            return redirect("/events_list")
+        elif request.form.get("action") == "finish":
+            if event_info["type"] == "соревнование":
+                logger.log("debug", f"{request.form.get("winner1")} {request.form.get("winner2")} {request.form.get("winner3")}")
 
-    if request.method == "POST":
-        image = request.files.get("image")
-        # image_path = event_info["image"]
-        logger.log("info", f"image: {image}")
 
-        if image.filename and image.filename != "":
-            try:
-                logger.log("info", f"Removing: static/{event_info["image"]}")
+                winner1_username = connection.get_user_by_username("users", request.form.get("winner1"))["id"]
+                winner2_username = connection.get_user_by_username("users", request.form.get("winner2"))["id"]
+                winner3_username = connection.get_user_by_username("users", request.form.get("winner3"))["id"]
 
-                os.remove(f"static/{event_info["image"]}")
-                open(f"static/img/events/{image.filename}", "a").close()
-                image.save(f"static/img/events/{image.filename}")
-                image_path = f"img/events/{image.filename}"
-            except Exception as e:
-                logger.log("error", f"Removing: static/{event_info["image"]} failed! Full error: {e}")
 
-                image_path = f"img/events/{image.filename}"
-        else:
-            image_path = event_info["image"]
-            pass
 
-        event_title = request.form.get("title")
-        event_datetime = datetime.strptime(request.form.get("datetime"), "%Y-%m-%dT%H:%M").strftime("%Y-%m-%d %H:%M:%S")
-        event_type = request.form.get("type")
-        event_content = request.form.get("content")
-        event_participants = request.form.get("participants")
+                connection.create_finished_event("finished_events", event_info["type"], event_info["title"], event_info["datetime"], event_info["content"], event_info["image"], event_info["participants"], event_info["id"], f"{winner1_username},{winner2_username},{winner3_username}")
+                connection.delete_event_by_title("events", event_info["title"])
+            else:
+                connection.create_finished_event("finished_events", event_type, event_title, event_datetime, event_content, image_path, participants, id, f"not_championship")
+                connection.delete_event_by_title("events", event_info["title"])
 
-        logger.log("info", f"Path to new event image {image_path}")
+            connection.wrap_matches("matches", [], event_info["title"])
+            return redirect("/events_list")
+    return render_template("admin_editor/edit_event.html", event_info=event_info, admin_info=admin_info, matches=matches, counter=len(matches), participants_list=participants_list)
 
-        
-        connection.update_event("events", event_type=event_type,
-                                title=event_title, 
-                                datetime=event_datetime, 
-                                content=event_content, 
-                                image=image_path, 
-                                participants=event_participants, 
-                                old_title=event_info["title"])
-        
-        return redirect("/events_list")
 
-    return render_template("admin_editor/edit_event.html", event_info=event_info, admin_info=admin_info)
+
+@app.route("/events", methods=['GET', 'POST'])
+@login_required
+def events():
+    events = connection.get_all_events("events")
+
+    # logger.log("debug", f"{events[0]["datetime"]}")
+
+    if request.method == 'POST':
+        event_title = request.form.get("event_title")
+        return redirect(url_for("event", event=event_title))
+    
+    return render_template("events.html", events=events)    
+
+@app.route("/event/<event>", methods=['GET', 'POST'])
+@login_required
+def event(event):
+    try:
+        event_data = connection.get_event_by_title("events", event)
+
+        participants = connection.get_participants_by_title("events", event)
+
+        logger.log("debug", f"{event_data}")
+    except:
+        return "<h1>This event doesn't exist. Try to update your page.</h1>"
+
+
+    if event_data != -1:
+
+        if request.method == 'POST':
+            event_title = request.form.get("event")
+            connection.append_participant("events", current_user.id, event_title)
+
+            return redirect("/events")
+
+        return render_template("event.html", event=event_data, participants=participants, current_user_id=current_user.id)
+    else:
+        return "<h1>This event doesn't exist. Try to update your page.</h1>"
 
 
 # routes
@@ -554,6 +674,11 @@ def edit_event(event):
 def request_entity_too_large(error):
     flash("File is too large")
     return redirect("/edit_profile")
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return "<h1>Forbidden page</h1>", 404
 
 # errors
 

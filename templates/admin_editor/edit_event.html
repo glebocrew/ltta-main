@@ -3,6 +3,8 @@
     <head>
         <meta charset="utf-8">
 
+        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+
         <title>Profile Page</title>
     </head>
 
@@ -17,15 +19,14 @@
 
                     <input class="image" name="image" type="file" accept=".png, .jpg, .gif" >
 
-                    <label for="type">type</label>
                     <select name="type">
-                            <option>{{ event_info['type'] }}</option>
-		                    <option>соревнование</option>
-	                        <option>мастер-класс</option>
-	                        <option>шоу-игра</option>
-	                </select>
+                       <option value="соревнование" {% if event_info['type'] == 'соревнование' %}selected{% endif %}>соревнование</option>
+                       <option value="мастер-класс" {% if event_info['type'] == 'мастер-класс' %}selected{% endif %}>мастер-класс</option>
+                       <option value="шоу-игра" {% if event_info['type'] == 'шоу-игра' %}selected{% endif %}>шоу-игра</option>
+                    </select>
 
-                    <input class="datetime" name="datetime" type="datetime-local" value="{{ event_info['datetime'] }}" required pattern=".*\S+.*">
+                    <input class="datetime" name="datetime" type="datetime-local" id="local" value="{{ event_info['datetime'] }}" required pattern=".*\S+.*">
+                    <input class="timezone" name="timezone" id="timezone" type="hidden">
 
                     <input class="title" name="title" value="{{ event_info['title'] }}" required pattern=".*\S+.*">
 
@@ -34,13 +35,93 @@
 
                     <input class="participants" name="participants" value="{{ event_info['participants'] }}">
                     
-                    <button class="save_1" type="button" >Save Changes</button>
 
                     <div class="accept" id="accept_block" style="display: none;"> 
                         <input id="accept_input">
                         <button id="accept_final" type="submit" disabled>Submit</button>
                     </div>
-            </form>
+
+                    {% if event_info['type'] == "соревнование" %}
+                        <input type="hidden" id="counter">
+
+                        <!-- <div id="matches">
+                        {% if matches is defined and matches %}
+                            {% for match in matches %}
+                                <div id="match-{{ matches.index(match) }}">
+                                    <input type="text" name="player1-{{ matches.index(match) }}" required pattern=".*\S+.*" value="{{ match['player1'] }}">
+                                    <input type="text" name="player2-{{ matches.index(match) }}" required pattern=".*\S+.*" value="{{ match['player2'] }}">
+                                    <input type="text" name="winner-{{ matches.index(match) }}" required pattern=".*\S+.*" value="{{ match['winner'] }}">
+                                    <input type="text" name="score-{{ matches.index(match) }}" required pattern=".*\S+.*" value="{{ match['score'] }}">
+                                    <button type="button" onclick="deleteMatch(`match-{{ matches.index(match) }}`);">Delete match</button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        </div> -->
+
+                        <div id="matches">
+
+                        {% if matches is defined and matches %}
+                            {% for match in matches %}
+                                <div id="match-{{ matches.index(match) }}">
+                                    <select name="player1-{{ matches.index(match) }}" value="{{ match['player1'] }}">
+                                        <option value="">Выберите участника</option>
+                                        {% for participant in participants_list %}
+                                            <option value="{{ participant }}" {% if match['player1'] == participant %} selected {% endif %}>{{ participant }}</option>
+                                        {% endfor %}
+                                    </select>
+                                
+                                    <select name="player2-{{ matches.index(match) }}" value="{{ match['player2'] }}">
+                                        <option value="">Выберите участника</option>
+                                        {% for participant in participants_list %}
+                                            <option value="{{ participant }}" {% if match['player2'] == participant %} selected {% endif %}>{{ participant }}</option>
+                                        {% endfor %}
+                                    </select>
+                                
+                                    <select name="winner-{{ matches.index(match) }}" value="{{ match['winner'] }}">
+                                        <option value="None" {% if match['winner'] == 'None' %} selected {% endif %}>Матч не закончен</option>
+                                        {% for participant in participants_list %}
+                                            <option value="{{ participant }}" {% if match['winner'] == participant %} selected {% endif %}>{{ participant }}</option>
+                                        {% endfor %}
+                                    </select>
+                                
+                                    <input type="text" name="score-{{ matches.index(match) }}" value="{{ match['score'] }}" placeholder="Score" required>
+
+                                    <button type="button" onclick="deleteMatch(`match-{{ matches.index(match) }}`);">Delete</button> 
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    
+                    </div>
+
+                        <button type="button" onclick="createMatch()">Create Match</button>
+                        <input type="hidden" name="counter" id="counter">
+                    {% endif %}
+                    
+                    <input type="hidden" value="changes" name="action">
+                    <button class="save_1" type="button" >Save Changes</button>
+
+                </form>
+
+                {% if event_info['type'] == 'соревнование' %}
+
+                <form method="POST">
+                    <input type="hidden" value="finish" name="action">
+                    <button type="button" onclick="finishChampionship();">Finish Event</button>
+                    <div id="winners">
+
+                    </div>
+                    <button type="submit" style="display: none" id="submit">Finish Event (sure)</button>
+                </form>
+
+                {% else %}
+
+                <form method="POST">
+                    <input type="hidden" value="finish" name="action">
+                    <button type="button" onclick="finishEvent();">Finish Event</button>
+                    <button type="submit" style="display: none" id="submit">Sure?</button>
+                </form>
+                
+                {% endif %}
 
         {% endif %}
     </body>
@@ -90,5 +171,90 @@
             console.error("Не найдены необходимые элементы DOM");
         }
         
+        {% if counter %}
+            let counter = {{ counter }}
+
+        {% else %}
+            let counter = 0;
+
+        {% endif %}
+
+        let counterObj = document.getElementById("counter");
+        let matches = document.getElementById("matches");
+        counterObj.value = counter;
+        counterObj.name = "counter";
+
+        function createMatch(){
+            let match = document.createElement("div");
+
+            match.id = `match-${counter}`;
+
+            match.innerHTML = `
+                <select name="player1-${counter}">
+                    <option value="">Выберите участника</option>
+                    {% for participant in participants_list %}
+                        <option value="{{ participant }}">{{ participant }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="player2-${counter}">
+                    <option value="">Выберите участника</option>
+                    {% for participant in participants_list %}
+                        <option value="{{ participant }}">{{ participant }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="winner-${counter}">
+                    <option value="">Выберите участника</option>
+                    <option value="None">Матч не закончен</option>
+                    {% for participant in participants_list %}
+                        <option value="{{ participant }}">{{ participant }}</option>
+                    {% endfor %}
+                </select>
+
+                <input type="text" name="score-${counter}" placeholder="Score" required pattern=".*\\S+.*">
+                <button type="button" onclick="deleteMatch('match-${counter}')">Delete</button>
+
+            `
+
+            // match.innerHTML = `
+            //     <input type="text" name="player1-${counter}" placeholder="Player 1" required pattern=".*\\S+.*">
+            //     <input type="text" name="player2-${counter}" placeholder="Player 2" required pattern=".*\\S+.*">
+            //     <input type="text" name="winner-${counter}" placeholder="Winner" required pattern=".*\\S+.*">
+            //     <input type="text" name="score-${counter}" placeholder="Score" required pattern=".*\\S+.*">
+            //     <button type="button" onclick="deleteMatch('match-${counter}')">Delete</button>
+            // `;
+
+
+            matches.appendChild(match);
+
+            counter++;
+            counterObj.value = counter;
+        }
+
+        function deleteMatch(id){
+            document.getElementById(id).remove()
+        }
+        
+        function finishEvent(){
+            let finishButton = document.getElementById("submit");
+            finishButton.style.display = "block";
+        }
+            
+        function finishChampionship(){
+            const finishButton = document.getElementById("submit");
+            const winners_div = document.getElementById("winners");
+
+            winners_div.innerHTML = `
+            <input name="winner1">
+            <input name="winner2">
+            <input name="winner3">
+            `;
+            
+
+            finishButton.style.display = "block";
+        }
+
+
         </script>
 </html>

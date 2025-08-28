@@ -3,6 +3,8 @@
     <head>
         <meta charset="utf-8">
 
+        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+
         <title>Main Page</title>
     </head>
 
@@ -15,7 +17,10 @@
             <p><a href="/logout">Logout</a></p>
             <p><a href="/members">Members [admin view]</a></p>
             <p><a href="/events_list">Events [admin+editor view]</a></p>
+            <p><a href="/events">Events [user view]</a></p>
             <p><a href="/create_event">Create_event [admin+editor view]</a></p>
+            <p><a href="/ratings">Ratings [user view]</a></p>
+            
         </nav>
     </body>
 </html>

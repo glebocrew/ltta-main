@@ -58,38 +58,52 @@ flowchart TD
 ### Users
 
 Table users is:
-username | name | surname | email | password | rating | role | grade | faculty | avatar |
----------|-------|-------|-------|----------|--------|------|-------|---------|--------|
-TEXT  | TEXT | TEXT |VARCHAR(50)| TEXT     | FLOAT  |VARCHAR(20)|TINYINT|VARCHAR(50)| TEXT |
-glebocrew | Глеб | Гриценко | glebocrew@yandex.ru | 0srut908530823804hew (sha256) | 0 | admin (or editor/user) | 10 | МатИнфо | static/img/avatars/image.png |
+username | name | surname | email | password | rating | role | grade | faculty | avatar | id |
+---------|------|---------|-------|----------|--------|------|-------|---------|--------|----|
+TEXT  | TEXT | TEXT |VARCHAR(50)| TEXT     | FLOAT  |VARCHAR(20)|TINYINT|VARCHAR(50)| TEXT | TEXT |
+glebocrew | Глеб | Гриценко | glebocrew@yandex.ru | 0srut908530823804hew (sha256) | 0 | admin (or editor/user) | 10 | МатИнфо | static/img/avatars/image.png | 10203104 |
 
 To create this table use:
 ```sql
-CREATE TABLE users (username TEXT, name TEXT, surname TEXT, email VARCHAR(50), password TEXT, rating FLOAT, role VARCHAR(20), grade TINYINT, faculty VARCHAR(50), avatar TEXT);
+CREATE TABLE users (username TEXT, name TEXT, surname TEXT, email VARCHAR(50), password TEXT, rating FLOAT, role VARCHAR(20), grade TINYINT, faculty VARCHAR(50), avatar TEXT, id TEXT);
 ```
 
 When the user has just registered we need to add him to this table
 
 ```sql
-INSERT INTO users (username, name, surname, email, password, rating, role, grade, faculty, avatar) VALUES ("username", "Глеб", "Гриценко", "email@example.com", "sha256ijfgdogsodfij", 0, "user", 10, "МатИнфо", "static/img/avatars/image.png");
+INSERT INTO users (username, name, surname, email, password, rating, role, grade, faculty, avatar, id) VALUES ("username", "Глеб", "Гриценко", "email@example.com", "sha256ijfgdogsodfij", 0, "user", 10, "МатИнфо", "static/img/avatars/image.png", "2ieje93-i4jt409-34j-1k-3k41");
 ```
 
 ### Events
-Table event is:
-type | title | datetime | content | image | participants(usernames) |
------|------|----------|---------|-------|-------------------------|
-TEXT  |  TEXT    | TEXT    | TEXT  |    TEXT                 |
-соревнование | Событие 1 | 2025-08-14 19:03:50.116672 | Очень интересное событие от Грандмастера | /img/events/image.png | glebocrew,vladicrew |
+Table events is:
+type | title | datetime | content | image | participants(usernames) | id 
+-----|------|----------|---------|-------|-------------------------|-------
+TEXT  |  TEXT    | TEXT    | TEXT  |    TEXT                 | TEXT |
+соревнование | Событие 1 | 2025-08-14 19:03:50.116672 | Очень интересное событие от Грандмастера | /img/events/image.png | glebocrew,vladicrew | ofemgsodfj-2345-345 |
 
 To create this table use:
 ```sql
-CREATE TABLE events (type TEXT, title TEXT, datetime TEXT, content TEXT, image TEXT, participants TEXT);
+CREATE TABLE events (type TEXT, title TEXT, datetime TEXT, content TEXT, image TEXT, participants TEXT, id TEXT);
 ```
 
 To insert new event:
 ```sql
-INSERT INTO events (type, title, datetime, content, image, participants) VALUES ("соревнование","Заголовок События", "2025-08-14 19:03:50.116672", "Это очень интересное событие где будет Грандмастер Старший и Младший", "52 1A 2B 4A ...", "");
+INSERT INTO events (type, title, datetime, content, image, participants, id) VALUES ("соревнование","Заголовок События", "2025-08-14 19:03:50.116672", "Это очень интересное событие где будет Грандмастер Старший и Младший", "52 1A 2B 4A ...", "", "qwert04o3r-123-re");
 ```
+
+### Finished-events
+Table finished_events is:
+type | title | datetime | content | image | participants(usernames) | id  | winners
+-----|------|----------|---------|-------|-------------------------|-------|-----
+TEXT  |  TEXT    | TEXT    | TEXT  |    TEXT                 | TEXT | TEXT |
+соревнование | Событие 1 | 2025-08-14 19:03:50.116672 | Очень интересное событие от Грандмастера | /img/events/image.png | glebocrew,vladicrew | ofemgsodfj-2345-345 | glebocrew,glebix,vladicrew
+
+To create this table use:
+```sql
+CREATE TABLE finished_events (type TEXT, title TEXT, datetime TEXT, content TEXT, image TEXT, participants TEXT, id TEXT, winners TEXT    );
+```
+
+
 
 ### Codes 
 email | code | datetime | name | surname | grade | faculty | username
@@ -108,4 +122,16 @@ CREATE TABLE codes (email VARCHAR(50), code TEXT, datetime TEXT, name TEXT, surn
 To insert a code:
 ```sql
 INSERT INTO codes (email, code, datetime, name, surname, grade, faculty, username, password) VALUES ("glebocrew@yandex.ru", "123456", "19:03:50.116672", "Глеб", "Гриценко", 10, "МатИнфо", "glebocrew", "123");
+```
+
+### Matches
+
+id | player1(id) | player2(id) | winner(id) | score | 
+------|-------------|-------------|------------|-------|
+TEXT  |     TEXT    |     TEXT    |     TEXT   | TEXT  |
+Крутое соревнование | 2u3-9irt-i | iu09ewrt0r=-prjepr |  2u3-9irt-i | 2:1 |
+
+
+```sql
+CREATE TABLE matches (id TEXT, player1 TEXT, player2 TEXT, winner TEXT, score TEXT);
 ```

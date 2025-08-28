@@ -5,32 +5,32 @@
 
         <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
 
-        <title>Members Page</title>
+        <title>Ratings Page</title>
     </head>
 
     <body>
-        <h1>Members Page</h1>
+        <h1>Ratings Page</h1>
         
-        {% if members %}
-            {% for member in members %}
+        {% if ratings %}
+            {% for rating in ratings %}
                 <div class="user">
-                    <img src="{{ url_for('static', filename=member['avatar']) }}">
+                    <img src="{{ url_for('static', filename=rating['avatar']) }}">
                     
-                    <p class="username">{{ member["username"] }}</p>
+                    <p class="username">{{ rating["username"] }}</p>
 
-                    <p class="name">{{ member["name"] }}</p>
-                    <p class="surname">{{ member["surname"] }}</p>
+                    <p class="name">{{ rating["name"] }}</p>
+                    <p class="surname">{{ rating["surname"] }}</p>
 
-                    <p class="email">{{ member["email"] }}</p>
+                    <p class="email">{{ rating["email"] }}</p>
 
-                    <p class="gradeNfaculty">{{ member["grade"] }} {{ member["faculty"] }}</p>
+                    <p class="gradeNfaculty">{{ rating["grade"] }} {{ rating["faculty"] }}</p>
 
-                    <p class="rating">{{ member["rating"] }}</p>
+                    <p class="rating">{{ rating["rating"] }}</p>
 
-                    <p class="role">{{ member["role"] }}</p>
+                    <p class="role">{{ rating["role"] }}</p>
 
                     <form method="POST">
-                        <input name="username" type="hidden" value="{{ member['username'] }}">
+                        <input name="username" type="hidden" value="{{ rating['username'] }}">
                         <button type="submit">View User</button>
                     </form>
 
