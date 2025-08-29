@@ -344,7 +344,7 @@ def rating(user):
 
         create_card(f"static/{user_info['avatar']}", user_info["username"], user_info["name"], user_info["surname"], user_info["rating"], user_info["grade"], user_info["faculty"], user_info["id"])
 
-        return send_file(f"user_cards/{user_info["id"]}.pdf", as_attachment=True)
+        return send_file(f"user_cards/{user_info["id"]}.pdf", as_attachment=True, download_name=f"{user_info["username"]}.pdf")
 
     return render_template("rating.html", user_data=user_data)
 
