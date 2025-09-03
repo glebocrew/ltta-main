@@ -20,22 +20,14 @@
                 <p class="title">{{ event["title"] }}</p>
                 <p class="content">{{ event["content"] }}</p>
 
+                <p>Participants</p>
+                <ul>
+                {% for participant in participants %}
+                    <li>{{ participant }}</li>
+                {% endfor %}
+                </ul>
 
-                {% if current_user_id not in participants %}
-
-
-                <input type="hidden" value="{{ event['title'] }}" name="event">
-                <button type="button" onclick="showButton(`submit`)">I will come</button>
-                <button type="submit" id="submit" style="display: none;">Sure?</button>
-                
-                {% else %}
-
-                
-                <p>You go here!</p>
-
-
-                {% endif %}
-
+                <button type="submit">Download Championship</button>
 
             </form>     
         {% endif %} 

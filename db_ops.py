@@ -56,7 +56,7 @@ class MariaConnection:
 
             "create_event": "INSERT INTO table_name (type, title, datetime, content, image, participants, id) VALUES (?, ?, ?, ?, ?, '', ?);",
             "get_all_events": "SELECT * FROM table_name;",
-            "delete_event_by_title": "DELETE FROM table_name WHERE title = ?;",
+            "delete_event_by_title": "DELETE FROM table_name WHERE id = ?;",
             "get_event_by_title": "SELECT * FROM table_name WHERE title = ?;",
             "update_event": "UPDATE table_name SET type = ?, title = ?, datetime = ?, content = ?, image = ?, participants = ? WHERE title = ?;",
             "append_participant": "UPDATE table_name SET participants = CONCAT(participants, ',', ?) WHERE title = ?",
@@ -456,29 +456,60 @@ class MariaConnection:
             temp_dict["content"] = user[3]
             temp_dict["image"] = user[4]
             temp_dict["participants"] = user[5]
+            temp_dict["id"] = user[6]
+
+            info.append(temp_dict)
+        
+        return info 
+            
+    def get_all_finished_events(self, table_name: str):
+        """
+        Return all finished events from table
+        
+        :param table_name: name of table you want to select 
+        """
+        try:
+            self.cursor.execute(self.queries["get_all_events"].replace("table_name", table_name))
+            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully selected all from {table_name}")
+        except Exception as e:
+            mariadb_logger.log("error", f"[{os.getpid()}] Selecting all from {table_name} failed! Full error: {e}")
+
+        raw_info = self.cursor.fetchall()
+
+        info = []
+        for user in raw_info:
+            temp_dict = {}
+            temp_dict["type"] = user[0]
+            temp_dict["title"] = user[1]
+            temp_dict["datetime"] = user[2]
+            temp_dict["content"] = user[3]
+            temp_dict["image"] = user[4]
+            temp_dict["participants"] = user[5]
+            temp_dict["id"] = user[6]
+            temp_dict["winners"] = user[7]
 
             info.append(temp_dict)
         
         return info 
     
-    def delete_event_by_title(self, table_name: str, title: str):
+    def delete_event_by_id(self, table_name: str, id: str):
         """
-        Deletes event by title
+        Deletes event by id
 
         :param table_name: name of table you want to delete from
-        :param title: title of event
+        :param id: id of event
         """
         try:
-            self.cursor.execute(self.queries["delete_event_by_title"].replace("table_name", table_name), (title,))
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully deleted event by title from {table_name}")
+            self.cursor.execute(self.queries["delete_event_by_title"].replace("table_name", table_name), (id,))
+            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully deleted event by id from {table_name}")
         except Exception as e:
-            mariadb_logger.log("error", f"[{os.getpid()}] Deleting event by title from {table_name} failed! Full error: {e}")
+            mariadb_logger.log("error", f"[{os.getpid()}] Deleting event by id from {table_name} failed! Full error: {e}")
         
     def get_event_by_title(self, table_name: str, title: str):
         """
         Gets event info by title
 
-        :param table_name: name of table you want to delete from
+        :param table_name: name of table you want to select
         :param title: title of event
         """
         try:
@@ -499,6 +530,39 @@ class MariaConnection:
             info["image"] = raw_info[4]
             info["participants"] = raw_info[5]
             info["id"] = raw_info[6]
+
+
+            return info 
+        else:
+            return -1 
+        
+    def get_finished_event_by_title(self, table_name: str, title: str):
+        """
+        Gets finished event info by title
+
+        :param table_name: name of table you want to select
+        :param title: title of event
+        """
+        try:
+            self.cursor.execute(self.queries["get_event_by_title"].replace("table_name", table_name), (title,))
+            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got event info by title from {table_name}")
+        except Exception as e:
+            mariadb_logger.log("error", f"[{os.getpid()}] Getting event info by title from {table_name} failed! Full error: {e}")
+        
+        raw_info = self.cursor.fetchone()
+
+        if raw_info:
+
+            info = {}
+            info["type"] = raw_info[0]
+            info["title"] = raw_info[1]
+            info["datetime"] = raw_info[2]
+            info["content"] = raw_info[3]
+            info["image"] = raw_info[4]
+            info["participants"] = raw_info[5]
+            info["id"] = raw_info[6]
+            info["winners"] = raw_info[7]
+
 
 
             return info 
@@ -558,7 +622,7 @@ class MariaConnection:
             mariadb_logger.log("error", f"[{os.getpid()}] Appending participant in event in {table_name} failed! Full error: {e}")
 
     def get_participants_by_title(self, table_name: str, title: str):
-        """Updates updatable fields
+        """Gets participants by event title
 
         :param table_name: name of table you want to insert
         

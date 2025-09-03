@@ -1,82 +1,351 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
 
-        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+<head>
+    <meta charset="utf-8">
 
-        <title>Creating Event Page</title>
-    </head>
+    <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
 
-    <body>
-        <h1>Creating New Event</h1>
-        <form method="POST" enctype="multipart/form-data">
-            <label for="type">type</label>
-            <select name="type">
-		        <option>соревнование</option>
-	            <option>шоу-игра</option>
-	            <option>мастер-класс</option>
-	            <option>другое</option>
-	        </select>
+    <title>Creating Event Page</title>
+</head>
 
-            <label for="title">title</label>
-            <input type="text" name="title" required pattern=".*\S+.*">
+<body>
+    <h1>Creating New Event</h1>
+    <form method="POST" enctype="multipart/form-data" id="main-form">
+        <label for="type">type</label>
+        <select name="type">
+            <option>соревнование</option>
+            <option>шоу-игра</option>
+            <option>мастер-класс</option>
+            <option>другое</option>
+        </select>
 
-            <label for="datetime">datetime</label>
-            <input type="datetime-local" name="datetime" required pattern=".*\S+.*">  
+        <label for="title">title</label>
+        <input type="text" name="title" required pattern=".*\S+.*">
 
-            <label for="content">content</label>
-            <input type="content" name="content" required pattern=".*\S+.*">
-            
-            <input class="image" name="image" type="file" accept=".png, .jpg, .gif" required>
+        <label for="datetime">datetime</label>
+        <input type="datetime-local" name="datetime" required pattern=".*\S+.*">
 
-            <input class="timezone" name="timezone" type="hidden" id="timezone">
-            
-            <button type="button" onclick="showButton()">submit</button>
-            <button type="submit" id="submit" style="display: none;">sure?</button>
-            {% if message %}
-                <p>{{ message }}</p>
-            {% endif %}
+        <label for="content">content</label>
+        <input type="content" name="content" required pattern=".*\S+.*">
 
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    {% for message in messages %}
-                        <p>{{ message }}</p>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </form>
-    </body>
-    <script>
+        <!-- <input class="image" name="image" type="file" accept=".png, .jpg, .gif" required> -->
+
+        <div class="image-editor" id="image-editor" style="display: none;">
+            <div class="editor-container">
+                <div class="preview-container">
+                    <img id="imagePreview" class="hidden">
+                    <div class="crop-overlay"></div>
+                </div>
+                <div class="controls">
+                    <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
+                    <div class="zoom-controls">
+                        <button id="zoomOut" type="button">-</button>
+                        <span>Масштаб</span>
+                        <button id="zoomIn" type="button">+</button>
+                    </div>
+                </div>
+                <canvas id="cropCanvas" class="hidden"></canvas>
+                <input type="file" id="imageData" name="image" style="display: none;">
+            </div>
+        </div>
+        <button type="button" onclick="changeImage()">Change Image</button>
+
+        <button type="button" onclick="showButton()">submit</button>
+        <button type="submit" id="submit" style="display: none;">sure?</button>
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </form>
+</body>
+<script>
     let submitButton = document.getElementById("submit");
-    let timezoneInput = document.getElementById("timezone");
 
-    function showButton(){
+    function showButton() {
         submitButton.style.display = "block";
     }
 
-    // Проверка существования элементов
-    if (submitButton && timezoneInput) {
+    document.addEventListener('DOMContentLoaded', function () {
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        const cropCanvas = document.getElementById('cropCanvas');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const imageDataInput = document.getElementById('imageData');
+        const previewContainer = document.querySelector('.preview-container');
 
-        function getTimezone() {
-            try {
-                // Пытаемся получить точную временную зону
-                return Intl.DateTimeFormat().resolvedOptions().timeZone;
-            } catch (error) {
-                // Фолбэк: вычисляем UTC смещение
-                const offsetMinutes = new Date().getTimezoneOffset();
-                const offsetHours = Math.abs(offsetMinutes) / 60;
-                const sign = offsetMinutes <= 0 ? '+' : '-';
+        const containerWidth = 1000;
+        const containerHeight = 500;
+        let scale = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+        let isDragging = false;
+        let startX, startY;
+        let baseX = 0, baseY = 0;
+        let dragX = 0, dragY = 0;
 
-                return `UTC${sign}${String(offsetHours).padStart(2, '0')}:00`;
+        imageUpload.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file && file.size > 5 * 1024 * 1024) {
+                alert('Файл слишком большой. Максимальный размер: 5 МБ.');
+                return;
             }
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    imagePreview.onload = function () {
+                        centerImage();
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function centerImage() {
+            scale = 1;
+            baseX = (containerWidth - imagePreview.width) / 2;
+            baseY = (containerHeight - imagePreview.height) / 2;
+            dragX = 0;
+            dragY = 0;
+            updateImagePosition();
         }
 
-        const timezone = getTimezone();
-        timezoneInput.value = timezone;
+        function updateImagePosition() {
+            offsetX = baseX + dragX;
+            offsetY = baseY + dragY;
+            imagePreview.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+        }
 
-    } else {
-        console.error("Не найдены необходимые элементы DOM");
+        const MAX_SCALE = 1.5;
+        const MIN_SCALE = 0.5;
+
+        zoomInBtn.addEventListener('click', function () {
+            scale = Math.min(scale * 1.1, MAX_SCALE);
+            updateImagePosition();
+        });
+
+        zoomOutBtn.addEventListener('click', function () {
+            scale = Math.max(scale / 1.1, MIN_SCALE);
+            updateImagePosition();
+        });
+
+        imagePreview.addEventListener('mousedown', function (e) {
+            isDragging = true;
+            startX = e.clientX - dragX;
+            startY = e.clientY - dragY;
+            imagePreview.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+            dragX = e.clientX - startX;
+            dragY = e.clientY - startY;
+            updateImagePosition();
+        });
+
+        document.addEventListener('mouseup', function () {
+            isDragging = false;
+            imagePreview.style.cursor = 'grab';
+        });
+
+        imagePreview.addEventListener('touchstart', function (e) {
+            e.preventDefault();
+            isDragging = true;
+            startX = e.touches[0].clientX - dragX;
+            startY = e.touches[0].clientY - dragY;
+            imagePreview.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('touchmove', function (e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            dragX = e.touches[0].clientX - startX;
+            dragY = e.touches[0].clientY - startY;
+            updateImagePosition();
+        });
+
+        document.addEventListener('touchend', function () {
+            isDragging = false;
+            imagePreview.style.cursor = 'grab';
+        });
+
+document.querySelector('#main-form').addEventListener('submit', function (e) {
+    e.preventDefault(); // Предотвращаем стандартную отправку
+    if (!imagePreview.src) {
+        alert('Пожалуйста, загрузите изображение сначала');
+        return;
     }
-    </script>
+
+    const width = Math.round(previewContainer.clientWidth || containerWidth);
+    const height = Math.round(previewContainer.clientHeight || containerHeight);
+    cropCanvas.width = width;
+    cropCanvas.height = height;
+    const ctx = cropCanvas.getContext('2d');
+    ctx.clearRect(0, 0, width, height);
+
+    const imgRect = imagePreview.getBoundingClientRect();
+    const contRect = previewContainer.getBoundingClientRect();
+    const displayedLeft = imgRect.left - contRect.left;
+    const displayedTop = imgRect.top - contRect.top;
+    const displayedWidth = imgRect.width;
+    const displayedHeight = imgRect.height;
+
+    const interLeft = Math.max(0, displayedLeft);
+    const interTop = Math.max(0, displayedTop);
+    const interRight = Math.min(width, displayedLeft + displayedWidth);
+    const interBottom = Math.min(height, displayedTop + displayedHeight);
+    const interWidth = Math.max(0, interRight - interLeft);
+    const interHeight = Math.max(0, interBottom - interTop);
+
+    const ratioX = imagePreview.naturalWidth / displayedWidth;
+    const ratioY = imagePreview.naturalHeight / displayedHeight;
+
+    const sx = (interLeft - displayedLeft) * ratioX;
+    const sy = (interTop - displayedTop) * ratioY;
+    const sWidth = interWidth * ratioX;
+    const sHeight = interHeight * ratioY;
+
+    if (interWidth > 0 && interHeight > 0) {
+        ctx.drawImage(
+            imagePreview,
+            sx, sy, sWidth, sHeight,
+            interLeft, interTop, interWidth, interHeight
+        );
+    }
+
+    cropCanvas.toBlob(function (blob) {
+        if (!blob) {
+            alert('Ошибка при создании изображения');
+            return;
+        }
+        const file = new File([blob], 'image.png', { type: 'image/png', lastModified: Date.now() });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        imageDataInput.files = dt.files;
+        const form = document.getElementById('main-form');
+        if (form && form instanceof HTMLFormElement) {
+            // Отправляем форму через FormData
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: form.method,
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = '/events_list'; // Перенаправление после успешной отправки
+                } else {
+                    console.error('Ошибка отправки формы');
+                }
+            }).catch(error => {
+                console.error('Ошибка сети:', error);
+            });
+        } else {
+            console.error('Форма не найдена или не является HTMLFormElement');
+        }
+    }, 'image/png', 0.9);
+});
+    });
+    const imageEditorDiv = document.getElementById('image-editor');
+    function changeImage() {
+        imageEditorDiv.style.display = "block";
+    }
+</script>
+
+
+<style>
+    .image-editor {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        font-family: Arial, sans-serif;
+    }
+
+    .editor-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .preview-container {
+        position: relative;
+        width: 100%;
+        max-width: 1000px;
+        height: 500px;
+        margin: 0 auto;
+        border: 2px dashed #ccc;
+        overflow: hidden;
+    }
+
+    #imagePreview {
+        position: absolute;
+        max-width: none;
+        cursor: move;
+        transform-origin: top left;
+        touch-action: none;
+        -webkit-user-drag: none;
+        pointer-events: auto;
+    }
+
+    .crop-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 2px solid #007bff;
+        box-sizing: border-box;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    input[type="file"] {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    #imageData {
+        width: 100%;
+        padding: 10px;
+        margin-top: 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+
+    .zoom-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .zoom-controls button {
+        padding: 5px 15px;
+        font-size: 18px;
+    }
+</style>
+
+
 </html>

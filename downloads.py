@@ -1,7 +1,3 @@
-from weasyprint import HTML
-import os
-
-
 
 def create_card(avatar: str, username: str, name: str, surname: str, rating: float, grade: str, faculty: str, id: str):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,3 +11,4 @@ def create_card(avatar: str, username: str, name: str, surname: str, rating: flo
     html_markup = html_markup.replace("GRADE_FACULTY", f"{grade} {faculty}")
 
     HTML(string=html_markup, base_url=base_dir).write_pdf(f'user_cards/{id}.pdf')
+

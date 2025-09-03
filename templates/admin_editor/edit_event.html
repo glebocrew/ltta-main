@@ -13,11 +13,29 @@
         {% if event_info %}
                 <h2>Profile</h2>
 
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" id="main-form">
 
                     <img src="{{ url_for('static', filename=event_info['image']) }}">
 
-                    <input class="image" name="image" type="file" accept=".png, .jpg, .gif" >
+                    <div class="image-editor" id="image-editor" style="display: none;">
+                        <div class="editor-container">
+                            <div class="preview-container">
+                                <img id="imagePreview" class="hidden">
+                                <div class="crop-overlay"></div>
+                            </div>
+                            <div class="controls">
+                                <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
+                                <div class="zoom-controls">
+                                    <button id="zoomOut" type="button">-</button>
+                                    <span>Масштаб</span>
+                                    <button id="zoomIn" type="button">+</button>
+                                </div>
+                            </div>
+                            <canvas id="cropCanvas" class="hidden"></canvas>
+                            <input type="file" id="imageData" name="image" style="display: none;">
+                        </div>
+                    </div>
+                    <button type="button" onclick="changeImage()">Change Image</button>
 
                     <select name="type">
                        <option value="соревнование" {% if event_info['type'] == 'соревнование' %}selected{% endif %}>соревнование</option>
@@ -255,13 +273,181 @@
             finishButton.style.display = "block";
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageUpload = document.getElementById('imageUpload');
+            const imagePreview = document.getElementById('imagePreview');
+            const cropCanvas = document.getElementById('cropCanvas');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const imageDataInput = document.getElementById('imageData');
+            const previewContainer = document.querySelector('.preview-container');
 
-        </script>
+            const containerWidth = 1000;
+            const containerHeight = 500;
+            let scale = 1;
+            let offsetX = 0;
+            let offsetY = 0;
+            let isDragging = false;
+            let startX, startY;
+            let baseX = 0, baseY = 0;
+            let dragX = 0, dragY = 0;
+
+            imageUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.size > 5 * 1024 * 1024) {
+                    alert('Файл слишком большой. Максимальный размер: 5 МБ.');
+                    return;
+                }
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.classList.remove('hidden');
+                        imagePreview.onload = function() {
+                            centerImage();
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            function centerImage() {
+                scale = 1;
+                baseX = (containerWidth - imagePreview.width) / 2;
+                baseY = (containerHeight - imagePreview.height) / 2;
+                dragX = 0;
+                dragY = 0;
+                updateImagePosition();
+            }
+
+            function updateImagePosition() {
+                offsetX = baseX + dragX;
+                offsetY = baseY + dragY;
+                imagePreview.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+            }
+
+            const MAX_SCALE = 1.5;
+            const MIN_SCALE = 0.5;
+
+            zoomInBtn.addEventListener('click', function() {
+                scale = Math.min(scale * 1.1, MAX_SCALE);
+                updateImagePosition();
+            });
+
+            zoomOutBtn.addEventListener('click', function() {
+                scale = Math.max(scale / 1.1, MIN_SCALE);
+                updateImagePosition();
+            });
+
+            imagePreview.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                startX = e.clientX - dragX;
+                startY = e.clientY - dragY;
+                imagePreview.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                dragX = e.clientX - startX;
+                dragY = e.clientY - startY;
+                updateImagePosition();
+            });
+
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                imagePreview.style.cursor = 'grab';
+            });
+
+            imagePreview.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                isDragging = true;
+                startX = e.touches[0].clientX - dragX;
+                startY = e.touches[0].clientY - dragY;
+                imagePreview.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                dragX = e.touches[0].clientX - startX;
+                dragY = e.touches[0].clientY - startY;
+                updateImagePosition();
+            });
+
+            document.addEventListener('touchend', function() {
+                isDragging = false;
+                imagePreview.style.cursor = 'grab';
+            });
+
+            document.querySelector('#main-form').addEventListener('submit', function(e) {
+                if (!imagePreview.src) {
+                    alert('Пожалуйста, загрузите изображение сначала');
+                    return;
+                }
+
+                const width = Math.round(previewContainer.clientWidth || containerWidth);
+                const height = Math.round(previewContainer.clientHeight || containerHeight);
+                cropCanvas.width = width;
+                cropCanvas.height = height;
+                const ctx = cropCanvas.getContext('2d');
+                ctx.clearRect(0, 0, width, height);
+
+                const imgRect = imagePreview.getBoundingClientRect();
+                const contRect = previewContainer.getBoundingClientRect();
+                const displayedLeft = imgRect.left - contRect.left;
+                const displayedTop = imgRect.top - contRect.top;
+                const displayedWidth = imgRect.width;
+                const displayedHeight = imgRect.height;
+
+                const interLeft = Math.max(0, displayedLeft);
+                const interTop = Math.max(0, displayedTop);
+                const interRight = Math.min(width, displayedLeft + displayedWidth);
+                const interBottom = Math.min(height, displayedTop + displayedHeight);
+                const interWidth = Math.max(0, interRight - interLeft);
+                const interHeight = Math.max(0, interBottom - interTop);
+
+                const ratioX = imagePreview.naturalWidth / displayedWidth;
+                const ratioY = imagePreview.naturalHeight / displayedHeight;
+
+                const sx = (interLeft - displayedLeft) * ratioX;
+                const sy = (interTop - displayedTop) * ratioY;
+                const sWidth = interWidth * ratioX;
+                const sHeight = interHeight * ratioY;
+
+                if (interWidth > 0 && interHeight > 0) {
+                    ctx.drawImage(
+                        imagePreview,
+                        sx, sy, sWidth, sHeight,
+                        interLeft, interTop, interWidth, interHeight
+                    );
+                }
+
+                cropCanvas.toBlob(function(blob) {
+                    if (!blob) {
+                        alert('Ошибка при создании изображения');
+                        return;
+                    }
+                    const file = new File([blob], 'image.png', { type: 'image/png', lastModified: Date.now() });
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    imageDataInput.files = dt.files;
+                    // Отправляем форму после обрезки
+                    document.querySelector('#main-form').submit();
+                }, 'image/png', 0.9);
+            });
+
+        });
+        
+        const imageEditorDiv = document.getElementById('image-editor');
+        function changeImage() {
+            imageEditorDiv.style.display = "block";
+        }
+    </script>
 
 
     <style>
-        .avatar-editor {
-            max-width: 600px;
+        .image-editor {
+            max-width: 1000px;
             margin: 20px auto;
             padding: 20px;
             border: 1px solid #ddd;
@@ -276,12 +462,13 @@
         .preview-container {
             position: relative;
             width: 100%;
-            max-width: 300px;
-            aspect-ratio: 1/1;
+            max-width: 1000px;
+            height: 500px; 
             margin: 0 auto;
             border: 2px dashed #ccc;
             overflow: hidden;
         }
+        
         #imagePreview {
             position: absolute;
             max-width: none;
@@ -291,6 +478,7 @@
             -webkit-user-drag: none;
             pointer-events: auto;
         }
+
         .crop-overlay {
             position: absolute;
             top: 0;
@@ -316,7 +504,7 @@
         .hidden {
             display: none;
         }
-        #avatarData {
+        #imageData {
             width: 100%;
             padding: 10px;
             margin-top: 20px;

@@ -10,6 +10,8 @@
 
     <body>
         <h1>Events Page</h1>
+
+        <h2>Events</h2>
         
         {% if events %}
             {% for event in events %}
@@ -24,6 +26,31 @@
                     <p class="content">{{ event["content"] }}</p>
 
                     <form method="POST">
+                        <input name="action" type="hidden" value="view">
+                        <input name="event_title" type="hidden" value="{{ event['title'] }}">
+                        <button type="submit">View Event</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <h2>Finished Events</h2>
+
+            
+        {% if finished_events %}
+            {% for event in finished_events %}
+                <div class="user">
+                    <img src="{{ url_for('static', filename=event['image']) }}">
+                    
+                    <p class="type">{{ event["type"] }}</p>
+
+                    <p class="datetime">{{ event["datetime"] }}</p>
+                    <p class="title">{{ event["title"] }}</p>
+
+                    <p class="content">{{ event["content"] }}</p>
+
+                    <form method="POST">
+                        <input name="action" type="hidden" value="view_finished">
                         <input name="event_title" type="hidden" value="{{ event['title'] }}">
                         <button type="submit">View Event</button>
                     </form>

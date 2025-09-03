@@ -99,15 +99,28 @@ def login():
         password.update(request.form.get("password").encode("utf-8"))
         password = password.hexdigest()
         # hashed password
+        try:
+            if connection.find_user_by_login_and_password("users", username, password):
+                user = User(connection.get_user_by_username("users", username)["id"], connection.get_user_role_by_username("users", username))
+                login_user(user)
+                logger.log("info", f"new SUCCESFULL login: username={username} password={password}")
 
-        if connection.find_user_by_login_and_password("users", username, password):
-            user = User(connection.get_user_by_username("users", username)["id"], connection.get_user_role_by_username("users", username))
-            login_user(user)
-            logger.log("info", f"new SUCCESFULL login: username={username} password={password}")
+                return redirect(url_for("index"))
+            else:
+                return render_template("login.html", message="go to /registration to register a new account") ## TODO: it's only if args are incorrect V COMPLETED
+        except Exception as e:
+            logger.log("info", f"Restarting mariadb...")
+            connection = MariaConnection(json_conf["db"])
 
-            return redirect(url_for("index"))
-        else:
-            return render_template("login.html", message="go to /registration to register a new account") ## TODO: it's only if args are incorrect V COMPLETED
+            if connection.find_user_by_login_and_password("users", username, password):
+                user = User(connection.get_user_by_username("users", username)["id"], connection.get_user_role_by_username("users", username))
+                login_user(user)
+                logger.log("info", f"new SUCCESFULL login: username={username} password={password}")
+
+                return redirect(url_for("index"))
+            else:
+                return render_template("login.html", message="go to /registration to register a new account") ## TODO: it's only if args are incorrect V COMPLETED
+            
         
     return render_template("login.html")
 
@@ -247,10 +260,10 @@ def edit_profile():
     if user_data != -1:
         if request.method == 'POST':
             avatar = request.files.get("avatar")
-            extention = avatar.filename[-3:]
             logger.log("info", f"avatar: {avatar}")
 
             if avatar and avatar.filename != "":
+                extention = avatar.filename[-3:]
                 if user_data["avatar"].split(sep="/")[-1] != "default.png":
                     logger.log("info", f"Updating avatar for {user_data['username']}.")
 
@@ -454,7 +467,7 @@ def events_list():
             return redirect(url_for("edit_event", event=event_title))
             pass
         elif request.form.get("action") == "delete":
-            connection.delete_event_by_title("events", event_title)
+            connection.delete_event_by_id("events", connection.get_event_id_by_title("events", event_title))
             
             i = 0
             event_id = 0
@@ -486,42 +499,33 @@ def create_event():
         return redirect("/")
     
     if request.method == 'POST':
-
         event_type = request.form.get("type")
         title = request.form.get("title").strip()
         content = request.form.get("content")
         timezone = request.form.get("timezone")
-
-        logger.log("info", f" User timezone is {timezone}")
-
         datetime_form = request.form.get("datetime")
         datetime_form = datetime.strptime(datetime_form, "%Y-%m-%dT%H:%M")
-
-        # user_timezone = pytz.timezone(timezone)
-        # user_datetime = user_timezone.localize(datetime_form)
-
-        # datetime_form = user_datetime.astimezone(pytz.UTC)
-
-
         image = request.files.get("image")
-        
-        status  = os.path.exists(f'static/img/events/{image.filename}')
-        logger.log("info", f"File static/img/events/{image.filename} status by os: {status}")
-        if os.path.exists(f"static/img/events/{image.filename}"):
-            logger.log("info", f"Removing static/img/events/{image.filename}")
-            os.remove(f"static/img/events/{image.filename}")
-        
-        logger.log("info", f"Creating static/img/events/{image.filename}")
-        open(f"static/img/events/{image.filename}", "a").close()
 
-        logger.log("info", f"Saving event image to static/img/events/{image.filename}")
-        image.save(f"static/img/events/{image.filename}")
+        if not image or not image.filename:
+            flash("Пожалуйста, загрузите изображение")
+            return render_template("admin_editor/create_event.html")
 
-        connection.create_event("events", event_type, title, datetime_form, content, f"img/events/{image.filename}", uuid.uuid4())
+        # Генерируем уникальное имя файла
+        ext = image.filename.rsplit('.', 1)[1].lower() if '.' in image.filename else 'png'
+        unique_filename = f"{uuid.uuid4()}.{ext}"
+        image_path = f"static/img/events/{unique_filename}"
 
-        return redirect("events_list")
+        try:
+            logger.log("info", f"Сохранение изображения события в {image_path}")
+            image.save(image_path)
+            connection.create_event("events", event_type, title, datetime_form, content, f"img/events/{unique_filename}", uuid.uuid4())
+            return redirect("events_list")
+        except Exception as e:
+            logger.log("error", f"Ошибка сохранения изображения: {e}")
+            flash("Ошибка при сохранении изображения")
+            return render_template("admin_editor/create_event.html")
 
-        
     return render_template("admin_editor/create_event.html")
 
 
@@ -592,7 +596,7 @@ def edit_event(event):
                                     "score": request.form.get(f"score-{id}"),
                                     "id": event_id
                                     })
-            participants = ""
+            participants_ids = ""
             for participant in event_participants.split(sep=","):
                 if participant != "":
                     participants += connection.get_user_by_username("users", participant)["id"] + ","
@@ -615,13 +619,29 @@ def edit_event(event):
                 winner2_username = connection.get_user_by_username("users", request.form.get("winner2"))["id"]
                 winner3_username = connection.get_user_by_username("users", request.form.get("winner3"))["id"]
 
+                logger.log("debug", event_info["participants"])
+                
+                participants_ids = ""
+
+                for participant in event_info["participants"].split(sep=","):                
+                    if participant != "":
+                        user_id = connection.get_user_by_username("users", participant)["id"]
+                        participants_ids += user_id + ","
+                                
 
 
-                connection.create_finished_event("finished_events", event_info["type"], event_info["title"], event_info["datetime"], event_info["content"], event_info["image"], event_info["participants"], event_info["id"], f"{winner1_username},{winner2_username},{winner3_username}")
-                connection.delete_event_by_title("events", event_info["title"])
+                connection.create_finished_event("finished_events", event_info["type"], event_info["title"], event_info["datetime"], event_info["content"], event_info["image"], participants_ids, event_info["id"], f"{winner1_username},{winner2_username},{winner3_username}")
+                connection.delete_event_by_id("events", event_info["id"])
             else:
-                connection.create_finished_event("finished_events", event_type, event_title, event_datetime, event_content, image_path, participants, id, f"not_championship")
-                connection.delete_event_by_title("events", event_info["title"])
+                participants_ids = ""
+
+                for participant in event_info["participants"].split(sep=","):                
+                    if participant != "":
+                        user_id = connection.get_user_by_username("users", participant)["id"]
+                        participants_ids += user_id + ","
+                        
+                connection.create_finished_event("finished_events", event_type, event_title, event_datetime, event_content, image_path, participants_ids, id, f"not_championship")
+                connection.delete_event_by_id("events", event_info["id"])
 
             connection.wrap_matches("matches", [], event_info["title"])
             return redirect("/events_list")
@@ -633,14 +653,19 @@ def edit_event(event):
 @login_required
 def events():
     events = connection.get_all_events("events")
+    finished_events = connection.get_all_events("finished_events")
 
     # logger.log("debug", f"{events[0]["datetime"]}")
 
     if request.method == 'POST':
-        event_title = request.form.get("event_title")
-        return redirect(url_for("event", event=event_title))
+        if request.form.get("action") == "view":
+            event_title = request.form.get("event_title")
+            return redirect(url_for("event", event=event_title))
+        elif request.form.get("action") == "view_finished":
+            event_title = request.form.get("event_title")
+            return redirect(url_for("finished_event", event=event_title))
     
-    return render_template("events.html", events=events)    
+    return render_template("events.html", events=events, finished_events=finished_events)    
 
 @app.route("/event/<event>", methods=['GET', 'POST'])
 @login_required
@@ -664,6 +689,49 @@ def event(event):
             return redirect("/events")
 
         return render_template("event.html", event=event_data, participants=participants, current_user_id=current_user.id)
+    else:
+        return "<h1>This event doesn't exist. Try to update your page.</h1>"
+
+@app.route("/finished_event/<event>", methods=['GET', 'POST'])
+@login_required
+def finished_event(event):
+    try:
+        event_data = connection.get_finished_event_by_title("finished_events", event)
+        logger.log("debug", f"{event_data}")
+
+        participants = event_data["participants"]
+        logger.log("debug", f"{participants}")
+        
+        event_participants = []
+        for participant in participants.split(sep=","):
+            if not participant: 
+                continue
+            
+            try:
+                user_data = connection.get_user_by_id("users", participant)
+                full_name = f"{user_data['name']} {user_data['surname']}"
+                event_participants.append(full_name)               
+            except Exception as e:
+                logger.log("error", f"{e}")
+    except Exception as e:
+        logger.log("error", f"{e}")
+        return "<h1>This event doesn't exist. Try to update your page.</h1>"
+
+
+    if event_data != -1:
+        if request.method == 'POST':
+            # TODO: return file with path/participants
+            
+            if event_data["type"] == "соревнование":
+                matches = connection.get_matches_by_id("matches", event_data["id"])
+                if current_user.id in event_participants:
+                    pass
+                else:
+                    pass
+
+            return redirect("/events")
+
+        return render_template("finished_event.html", event=event_data, participants=event_participants, current_user_id=current_user.id)
     else:
         return "<h1>This event doesn't exist. Try to update your page.</h1>"
 
