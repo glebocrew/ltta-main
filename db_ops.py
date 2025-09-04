@@ -35,11 +35,14 @@ class MariaConnection:
         
         self.cursor = Cursor(self.mariaconnection)
         self.queries = {
+            "test": "SHOW DATABASES;",
+
             "select_all": "SELECT * FROM table_name;",
             "find_user_by_username": "SELECT * FROM table_name WHERE username = ?;",
             "find_user_by_email": "SELECT * FROM table_name WHERE email = ?;",
             "find_user_by_login_and_password": "SELECT * FROM table_name WHERE username = ? AND password = ?;",
             "insert_new_temp_profile": "INSERT INTO table_name (email, code, datetime, name, surname, grade, faculty, username, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);",
+            "delete_user_by_id": "DELETE FROM table_name WHERE id = ?;",
 
             "get_temp_profile_by_email": "SELECT * FROM table_name WHERE email = ?;",
             "drop_temp_profile_by_email": "DELETE FROM table_name WHERE email = ?;",
@@ -71,6 +74,14 @@ class MariaConnection:
             
             "create_finished_event": "INSERT INTO table_name (type, title, datetime, content, image, participants, id, winners) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         }
+
+    def test(self):
+        """
+        Test query
+        """
+        self.cursor.execute(self.queries["test"])
+        self.cursor.fetchall()
+
 
     def select_all(self, table_name: str):
         """
@@ -169,6 +180,19 @@ class MariaConnection:
             return role
         else:
             return -1
+        
+    def delete_user_by_id(self, table_name: str, id: str):
+        """
+        Drops profile by id
+
+        :param table_name: name of table you want to delete from
+        :param id: id of user
+        """
+        try:
+            self.cursor.execute(self.queries["delete_user_by_id"].replace("table_name", table_name), (id,))
+            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully dropped user by id in {table_name}")
+        except Exception as e:
+            mariadb_logger.log("error", f"[{os.getpid()}] Dropping user by id in {table_name} failed! Full error: {e}")
 
     def drop_temp_profile_by_email(self, table_name: str, email: str):
         """
@@ -390,6 +414,7 @@ class MariaConnection:
             temp_dict["grade"] = user[7]
             temp_dict["faculty"] = user[8]
             temp_dict["avatar"] = user[9]
+            temp_dict["id"] = user[10]
 
             info.append(temp_dict)
         

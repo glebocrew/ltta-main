@@ -86,6 +86,17 @@ def load_user(id):
 
 @app.route("/")
 def index():
+    try:
+        connection.test()
+    except Exception as e:
+        logger.log("error", f"Error while connecting to mariadb. Full error {e}. Restarting...")
+        try:
+            connection = MariaConnection(json_conf["db"])
+        except Exception as e:
+            logger.log("fatal", "Mariadb args are incorrect")
+            sys.exit(0)
+
+
     return render_template("index.html")
 
 @app.route("/login", methods = ['GET', 'POST'])
@@ -369,8 +380,22 @@ def members():
         members = connection.get_all_users("users")
 
         if request.method == 'POST':
-            logger.log("info", f"Building url for {request.form.get('username')}")
-            return redirect(url_for("member", user=request.form.get("username")))
+            action = request.form.get("action")
+
+            if action == "edit":
+                logger.log("info", f"Building url for {request.form.get("username")}")
+                return redirect(url_for("member", user=request.form.get("username")))
+            elif action == "delete":
+                logger.log("debug", f"{request.form.get('id')}")
+                logger.log("debug", f"{connection.get_user_role_by_username("users", connection.get_user_by_id("users", request.form.get("id"))["username"])}")
+                                                     
+                if connection.get_user_role_by_username("users", connection.get_user_by_id("users", request.form.get("id"))["username"])[0] == "admin":
+                    flash("You can't delete admins")
+                    return redirect("members")
+                  
+                connection.delete_user_by_id("users", request.form.get("id"))
+                logger.log("debug", f"{request.form.get('id')}")
+                return redirect("members")
 
         return render_template("admin/members.html", members=members)
     else:

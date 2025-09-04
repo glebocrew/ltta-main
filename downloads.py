@@ -1,3 +1,5 @@
+import os
+from weasyprint import *
 
 def create_card(avatar: str, username: str, name: str, surname: str, rating: float, grade: str, faculty: str, id: str):
     base_dir = os.path.dirname(os.path.abspath(__file__))
