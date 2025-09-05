@@ -1,4 +1,63 @@
-html, body{
-    background-color: black;
-    color: white;
+html,
+body {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+}
+
+.flashed_messages {
+    position: fixed;
+
+    z-index: 1000;
+
+    /* bottom: 15px;
+        right: 15px; */
+
+    bottom: 15px;
+    right: 15px;
+
+    color: var(--text-color--);
+
+    color: 0;
+    bottom: -20%;
+    animation: slide_in_out 5s ease-in-out;
+}
+
+.flashed_message {
+    color: var(--text-color--);
+    font-size: var(--font-size--);
+
+    margin: 0;
+    padding: 15px;
+}
+
+@keyframes slide_in_out {
+    0% {
+        bottom: -20%;
+        background-color: none;
+        color: none;
+    }
+
+    20% {
+        bottom: 15px;
+        background-color: var(--golden--);
+        color: var(--font-size--);
+    }
+
+    80% {
+        bottom: 15px;
+        background-color: var(--golden--);
+        color: var(--font-size--);
+    }
+
+    100% {
+        background-color: none;
+        bottom: -20%;
+        color: none;
+    }
 }

@@ -1,18 +1,27 @@
 {
-    "db":{
+    "db": {
         "host": "localhost",
         "port": 3306,
         "user": "ltta",
         "password": "oushdfigsdfgsdghfugsdofgoisjdfg",
         "db": "ltta"
     },
-    "mailbox":{
+    "mailbox": {
         "port": 465,
         "smtp_server": "192.168.51.109",
         "sender_email": "ltta@glebocrew.ru",
-        "password":"cs7#CJHW9y4r78"
+        "password": "cs7#CJHW9y4r78"
     },
-    "global":{
-        
+    "faculties": {
+        "МатИнфо": "styles/icons/матинфо.png",
+        "Восток": "styles/icons/восток.png",
+        "Гум": "styles/icons/гум.png",
+        "Дизайн": "styles/icons/дизайн.png",
+        "ЕН": "styles/icons/ен.png",
+        "МатФиз": "styles/icons/матфиз.png",
+        "МатЭк": "styles/icons/матэк.png",
+        "СоцЭк": "styles/icons/соцэк.png",
+        "Юр": "styles/icons/юр.png",
+        "Футуритет": "styles/icons/футуритет.png"
     }
 }

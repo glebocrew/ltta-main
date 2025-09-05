@@ -118,7 +118,8 @@ def login():
 
                 return redirect(url_for("index"))
             else:
-                return render_template("login.html", message="go to /registration to register a new account") ## TODO: it's only if args are incorrect V COMPLETED
+                flash("Неверные данные! Если у вас нет аккаунта, зарегистрируйте его.")
+                return redirect("login") ## TODO: it's only if args are incorrect V COMPLETED
         except Exception as e:
             logger.log("info", f"Restarting mariadb...")
             connection = MariaConnection(json_conf["db"])
@@ -130,18 +131,23 @@ def login():
 
                 return redirect(url_for("index"))
             else:
-                return render_template("login.html", message="go to /registration to register a new account") ## TODO: it's only if args are incorrect V COMPLETED
+                flash("Неверные данные! Если у вас нет аккаунта, зарегистрируйте его.")
+                return redirect("login") 
+                 ## TODO: it's only if args are incorrect V COMPLETED
             
         
     return render_template("login.html")
 
 @app.route("/registration", methods = ['GET', 'POST'])
 def registration():
+    faculties = load(open("conf.json"))["faculties"]
+
     if request.method == 'POST':
         username = request.form.get("username") # TODO: if username is not in mariadb! V COMPLETED
 
         if connection.find_user_by_username("users", username):
-            return render_template("registration.html", message="This username is already taken!")
+            flash("Этот ник уже занят!")
+            redirect("registration")
             
         password = sha256()
         password.update(request.form.get("password").encode("utf-8"))
@@ -156,16 +162,26 @@ def registration():
         surname = request.form.get("surname")        
 
         if password != repeat_password:
-            return render_template("registration.html", message="The passwords don't match!")
+            flash("Пароли не совпадают")
+            redirect("registration")
 
         email = request.form.get("email") # TODO: if email is not in mariadb V COMPLETED
 
         if connection.find_user_by_email("users", email):
-            return render_template("registration.html", message="This email is already used!")
+            flash("Этот email уже занят!")
+            redirect("registration")
 
         grade = request.form.get("grade")
 
         faculty = request.form.get("faculty")
+
+        if grade not in ["8","9","10","11"] or grade == "":
+            flash("Вы не ввели класс!")
+            return redirect("registration")
+
+        if faculty not in faculties or faculty == "":
+            flash("Вы не ввели факультет!")
+            return redirect("registration")
 
         code = ''.join(secrets.choice('0123456789qwertyuiopasdfghjklzxcvbnm') for _ in range(6))
 
@@ -230,7 +246,7 @@ def registration():
         server.quit()
         return redirect(url_for("verification", email=email))
 
-    return render_template("registration.html")
+    return render_template("registration.html", faculties=faculties)
 
 @app.route("/verification/<email>", methods = ['GET', 'POST'])
 def verification(email):

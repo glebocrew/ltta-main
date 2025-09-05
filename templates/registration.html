@@ -1,63 +1,109 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
 
-        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+<head>
+    <meta charset="utf-8">
 
-        <title>Registration Page</title>
-    </head>
+    <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles/registration.css') }}" rel="stylesheet">
 
-    <body>
-        <h1>Registration</h1>
-        <form method="POST">
-            <label for="username">username</label>
-            <input type="text" name="username" required pattern=".*\S+.*">
-
-            <label for="name">name</label>
-            <input type="text" name="name" required pattern=".*\S+.*">  
-
-            <label for="surname">surname</label>
-            <input type="text" name="surname" required pattern=".*\S+.*">
-            
-            <label for="email">email</label>
-            <input type="text" name="email" required pattern=".*\S+.*">
-            
-            <label for="grade">grade</label>
-            <select name="grade">
-		        <option>8</option>
-	            <option>9</option>
-	            <option>10</option>
-	            <option>11</option>
-	        </select>
-
-            <label for="faculty">faculty</label>
-            <select name="faculty">
-		        <option>МатИнфо</option>
-	            <option>Гум</option>
-	            <option>СоцЭк</option>
-	            <option>МатЭк</option>
-	        </select>
-
-            <label for="password">password</label>
-            <input type="password" name="password" required pattern=".*\S+.*">
-
-            <label for="repeat_password">repeat password</label>
-            <input type="password" name="repeat_password" required pattern=".*\S+.*">
+    <title>Registration Page</title>
+</head>
 
 
-            <button type="submit" id="SubmitButton">submit</button>
-            {% if message %}
-                <p>{{ message }}</p>
-            {% endif %}
+<body>
+    <form method="POST" class="reg-form">
+        <div class="content">
+            <h1 class="header-1"><mark id="lavender">Master</mark> Registration</h1>
+            <div id="username" class="input-block">
+                <label for="username" class="label">никнейм</label>
+                <input type="text" name="username" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
+            <br>
+            <div id="name" class="input-block">
+                <label for="name" class="label">имя</label>
+                <input type="text" name="name" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
 
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    {% for message in messages %}
-                        <p>{{ message }}</p>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </form>
-    </body>
+            <div id="surname" class="input-block">
+                <label for="surname" class="label">фамилия</label>
+                <input type="text" name="surname" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
+            <br>
+            <div id="email" class="input-block">
+                <label for="email" class="label">email</label>
+                <input type="text" name="email" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
+            <br>
+            <div id="grade" class="input-block">
+                <div class="select" tabindex="1">
+                    <span class="select_value">класс</span>
+                    <ul class="select_dropdown">
+                        <li class="select_option">8</li>
+                        <li class="select_option">9</li>
+                        <li class="select_option">10</li>
+                        <li class="select_option">11</li>
+                    </ul>
+                </div>
+                <input type="hidden" value="" name="grade" required pattern=".*\S+.*" class="dropdown-input">
+            </div>
+            <br>
+            <div id="faculty" class="input-block">
+                <!-- <select name="faculty">
+                    <option>МатИнфо</option>
+                    <option>Восток</option>
+                    <option>Гум</option>
+                    <option>Дизайн</option>
+                    <option>ЕН</option>
+                    <option>МатФиз</option>
+                    <option>МатЭк</option>
+                    <option>СоцЭк</option>
+                    <option>Юр</option>
+                    <option>Футуритет</option>
+                </select> -->
+                <div class="select" tabindex="1">
+                    <span class="select_value">факультет</span>
+                    <ul class="select_dropdown">
+                        {% if faculties %}
+                        {% for faculty in faculties %}
+                        <li class="select_option">{{ faculty }}</li>
+                        {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+                <input type="hidden" value="" name="faculty" required pattern=".*\S+.*" class="dropdown-input">
+            </div>
+
+            <br>
+
+            <div id="password" class="input-block">
+                <label for="password" class="label">пароль</label>
+                <input type="password" name="password" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
+
+            <div id="repeat_password" class="input-block">
+                <label for="repeat_password" class="label">повторите пароль</label>
+                <input type="password" name="repeat_password" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
+
+            <div id="submit" class="input-block">
+                <button type="submit" id="SubmitButton" class="submit">готово!</button>
+            </div>
+    </form>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="flashed_messages">
+        {% for message in messages %}
+        <p class="flashed_message">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+</body>
+<script src="{{ url_for('static', filename='scripts/registration.js') }}"></script>
+
+
+
 </html>
