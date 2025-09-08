@@ -4,20 +4,33 @@
         <meta charset="utf-8">
 
         <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='styles/verification.css') }}" rel="stylesheet">
 
         <title>Verification Page</title>
     </head>
 
     <body>
-        <h1>Verification</h1>
-        <form method="POST">
-
+        <form method="POST" class="code-form">
+            <h1 class="header-1"><mark id="golden">Red Dragon</mark> Verification</h1>
             <p>Do not close this page!</p>
-
+<!-- 
             <label for="code">code</label>
-            <input type="text" name="code" required pattern=".*\S+.*">
+            <input type="text" name="code" required pattern=".*\S+.*"> -->
+            <div class="code-inputs">
+                <input type="text" class="code-input" maxlength="1" data-index="0" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" class="code-input" maxlength="1" data-index="1" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" class="code-input" maxlength="1" data-index="2" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" class="code-input" maxlength="1" data-index="3" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" class="code-input" maxlength="1" data-index="4" inputmode="numeric" pattern="[0-9]*">
+                <input type="text" class="code-input" maxlength="1" data-index="5" inputmode="numeric" pattern="[0-9]*">
+            </div>
 
-            <button type="submit">submit</button>
+            <!-- Hidden input для хранения полного кода -->
+            <input type="hidden" id="verificationCode" name="code" class="hidden-code">
+
+
+
+            <button type="submit" class="submit">submit</button>
             
 
             {% if message %}
@@ -33,4 +46,6 @@
             {% endwith %}
         </form>
     </body>
+
+<script src="{{ url_for('static', filename='scripts/verification.js') }}"></script>
 </html>

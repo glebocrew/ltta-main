@@ -14,7 +14,7 @@
 <body>
     <form method="POST" class="reg-form">
         <div class="content">
-            <h1 class="header-1"><mark id="lavender">Master</mark> Registration</h1>
+            <h1 class="header-1"><mark id="golden">Grand</mark><mark id="lavender">Master</mark> Registration</h1>
             <div id="username" class="input-block">
                 <label for="username" class="label">никнейм</label>
                 <input type="text" name="username" required pattern=".*\S+.*" class="input" autocomplete="off">
@@ -45,7 +45,7 @@
                         <li class="select_option">11</li>
                     </ul>
                 </div>
-                <input type="hidden" value="" name="grade" required pattern=".*\S+.*" class="dropdown-input">
+                <input type="hidden" value="" name="grade" required pattern=".*\S+.*" class="dropdown-input" data-target="input[name='grade']">
             </div>
             <br>
             <div id="faculty" class="input-block">
@@ -71,7 +71,7 @@
                         {% endif %}
                     </ul>
                 </div>
-                <input type="hidden" value="" name="faculty" required pattern=".*\S+.*" class="dropdown-input">
+                <input type="hidden" value="" name="faculty" required pattern=".*\S+.*" class="dropdown-input" data-target="input[name='faculty']">
             </div>
 
             <br>

@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     selectElements.forEach((selectElement, index) => {
         try {
             // Получаем селектор из data-атрибута или используем дефолтный
-            const inputSelector = selectElement.dataset.target || '.dropdown-input';
+            const inputSelector = `input[name="${selectElement.closest('.input-block').id}"]`;
             console.log(`Select ${index}: using selector`, inputSelector);
             
             const selectInstance = new CustomSelect(selectElement, inputSelector);

@@ -80,7 +80,17 @@ except:
 
 @login_manager.user_loader
 def load_user(id):
-    return User(id, connection.get_user_by_id("users", id)["role"])
+    try:
+        user_role = connection.get_user_by_id("users", id)["role"]
+    except Exception as e:
+        logger.log("error", f"Error while connecting to mariadb. Full error {e}. Restarting...")
+        try:
+            # connection.mariaconnection.close()
+            connection = MariaConnection(json_conf["db"])    
+            user_role = connection.get_user_by_id("users", id)["role"]
+        except: 
+            sys.exit(0)
+    return User(id, user_role)
 
 
 
@@ -91,6 +101,7 @@ def index():
     except Exception as e:
         logger.log("error", f"Error while connecting to mariadb. Full error {e}. Restarting...")
         try:
+            # connection.mariaconnection.close()
             connection = MariaConnection(json_conf["db"])
         except Exception as e:
             logger.log("fatal", "Mariadb args are incorrect")
@@ -122,6 +133,7 @@ def login():
                 return redirect("login") ## TODO: it's only if args are incorrect V COMPLETED
         except Exception as e:
             logger.log("info", f"Restarting mariadb...")
+            # connection.mariaconnection.close()
             connection = MariaConnection(json_conf["db"])
 
             if connection.find_user_by_login_and_password("users", username, password):
@@ -147,7 +159,7 @@ def registration():
 
         if connection.find_user_by_username("users", username):
             flash("Этот ник уже занят!")
-            redirect("registration")
+            return redirect("registration")
             
         password = sha256()
         password.update(request.form.get("password").encode("utf-8"))
@@ -163,13 +175,13 @@ def registration():
 
         if password != repeat_password:
             flash("Пароли не совпадают")
-            redirect("registration")
+            return redirect("registration")
 
         email = request.form.get("email") # TODO: if email is not in mariadb V COMPLETED
 
         if connection.find_user_by_email("users", email):
             flash("Этот email уже занят!")
-            redirect("registration")
+            return redirect("registration")
 
         grade = request.form.get("grade")
 
@@ -183,7 +195,7 @@ def registration():
             flash("Вы не ввели факультет!")
             return redirect("registration")
 
-        code = ''.join(secrets.choice('0123456789qwertyuiopasdfghjklzxcvbnm') for _ in range(6))
+        code = ''.join(secrets.choice('0123456789') for _ in range(6))
 
             
 
@@ -266,6 +278,7 @@ def verification(email):
             connection.drop_temp_profile_by_email("codes", email)
             return redirect("/login")
         else:
+            flash("Code is incorrect. Try again!")
             return redirect(url_for('verification', email=email))
 
     return render_template('verification.html', email=email)
@@ -276,9 +289,10 @@ def profile():
     logger.log("info", f"{current_user.id}")
     user_data = connection.get_user_by_id("users", current_user.id)
     user_events = connection.get_events_ids_by_user_id("events", current_user.id)
+    username_len = len(user_data["username"])
     logger.log("info", f"{user_data}")
     if user_data != -1:
-        return render_template("profile.html", user_data=user_data, user_events=user_events)
+        return render_template("profile.html", user_data=user_data, user_events=user_events, username_len=username_len)
     
 @app.route("/edit_profile", methods = ['GET', 'POST'])
 @login_required

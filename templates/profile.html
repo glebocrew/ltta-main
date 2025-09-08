@@ -1,74 +1,91 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        
-        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
 
-        <title>Profile Page</title>
-    </head>
+<head>
+    <meta charset="utf-8">
 
-    <body>
-        <h1>Profile Page</h1>
-        {% if user_data %}
+    <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles/profile.css') }}" rel="stylesheet">
+
+
+    <title>Profile Page</title>
+</head>
+
+<body>
+    <form class="profile-form">
+        <div class="content">
+            {% if user_data %}
             <div class="user_data">
-                <h2>Profile</h2>
+                {% if username_len > 0 %}
+                <div id="header" class="input-block">
+                    <h1 class="header-1"><mark id="golden">{{ user_data["username"][0] }}</mark>{{
+                        user_data["username"][1:] }}</h1>
+                </div>
+                {% else %}
+                <div id="username" class="input-block">
+                    <h1 class="header-1"><mark id="golden">{{ user_data["username"][0] }}</mark></h1>
+                </div>
+                {% endif %}
+                <div id="avatar" class="input-block">
+                    <img src="{{ url_for('static', filename=user_data['avatar']) }}" class="avatar">
+                </div>
+                <!-- 
+                <div id="username" class="input-block">
+                    <p class="username">{{ user_data["username"] }}</p>
+                </div> -->
 
-                <img src="{{ url_for('static', filename=user_data['avatar']) }}">
+                <div id="names" class="input-block">
+                    <p class="names">{{ user_data["name"] }} {{ user_data["surname"] }}</p>
+                </div>
 
+                <div id="email" class="input-block">
+                    <p class="email">{{ user_data["email"] }}</p>
+                </div>
 
-                <p class="username">{{ user_data["username"] }}</p>
+                <div id="gradeNfaculty" class="input-block">
+                    <p class="gradeNfaculty">{{ user_data["grade"] }} {{ user_data["faculty"] }}</p>
+                </div>
 
-                <p class="name">{{ user_data["name"] }}</p>
-                <p class="surname">{{ user_data["surname"] }}</p>
+                <div id="submit" class="input-block">
+                    <button onclick="window.location.href='/edit_profile'" type="button" class="submit">🖋️</button>
+                </div>
 
-                <p class="email">{{ user_data["email"] }}</p>
-
-                <p class="gradeNfaculty">{{ user_data["grade"] }} {{ user_data["faculty"] }}</p>
-
-                <button onclick="window.location.href='/edit_profile'">Edit Profile</button>
-
-                <h2>Statistics</h2>
-
-                <p class="rating">{{ user_data["rating"] }}</p>
 
             </div>
-        {% endif %}
-        
-        {% if user_events and user_events != -1 %}
-            {% for event in user_events %}
-                <div class="user">
-                    <img src="{{ url_for('static', filename=event['image']) }}">
-                    
-                    <p class="type">{{ event["type"] }}</p>
+            {% endif %}
+        </div>
+    </form>
 
-                    <p class="datetime">{{ event["datetime"] }}</p>
-                    <p class="title">{{ event["title"] }}</p>
+    <div class="statistics">
+        <div class="content">
+            <div id="header" class="input-block">
+                <h1 class="header-1"><mark id="golden">Personal</mark> Statistics</h1>
+            </div>
 
-                    <p class="content">{{ event["content"] }}</p>
+            <div id="rating" class="input-block">
+                <p class="rating">{{ user_data["rating"] }}</p>
+            </div>
+        </div>
+    </div>
+    {% if user_events and user_events != -1 %}
+    {% for event in user_events %}
+    <div class="user">
+        <img src="{{ url_for('static', filename=event['image']) }}">
 
-                    <input name="event_title" type="hidden" value="{{ event['title'] }}">
-                    <button type="button" onclick="window.location.href='/event/{{ event['title'] }}'">View Event</button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    </body>
-        <style>
-        .user{
-            position: relative;
-            
-            width: 100%;
-            height: 50px;
+        <p class="type">{{ event["type"] }}</p>
 
-            display: flex;
+        <p class="datetime">{{ event["datetime"] }}</p>
+        <p class="title">{{ event["title"] }}</p>
 
-            margin-top: 1px;
-        }
+        <p class="content">{{ event["content"] }}</p>
 
-        p{
-            position: relative;
+        <input name="event_title" type="hidden" value="{{ event['title'] }}">
+        <button type="button" onclick="window.location.href='/event/{{ event['title'] }}'">View Event</button>
+    </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</body>
 
-            margin-left: 10px;
-        }
-    </style>
+
 </html>
