@@ -65,14 +65,53 @@
         margin: 0;
     }
 
+    #rating-p{
+        font-size: 40pt;
+        color: var(--lavender--);
+
+        width: 100%;
+
+        text-align: center;
+    }
+
     .content{
         position: relative;
-        border: 3px var(--golden--) solid;
-        border-radius: 30px ;
+        border: 3px var(--golden--);
+        border-style: solid;
+        border-radius: 40% 20% 10% 20% ;
 
         padding: 10%;
         
         display: block;
+    }
+
+    .rating{
+        position: relative;
+
+        margin-left: auto;
+        margin-right: auto;
+
+        max-width: 500px;
+        max-height: 500px;
+
+        padding: 100px;
+        margin: 0;
+
+        color: var(--lavender--);
+        font-size: 40pt;
+    }
+
+    #logo{
+        position: absolute;
+
+        width: 100%;
+        height: 100%;
+
+        margin-left: auto;
+        margin-right: auto;
+
+        top: 0;
+        left: 0;
     }
 
     .label{
@@ -111,6 +150,7 @@
 
         text-align: center !important;
     }
+    
 
     .header-1{
         position: relative;
@@ -133,6 +173,8 @@
 
         margin-left: auto;
         margin-right: auto;
+
+        border-radius: 100% 100% 100% 100%;
     }
 
     .input-block{
@@ -150,10 +192,12 @@
     }
     
     .submit{
-        position: relative;
+        position: absolute;
 
         margin-left: auto;
         margin-right: auto;
+
+        right: 0;
 
         font-size: var(--font-size--);
 
@@ -163,18 +207,20 @@
         background-color: rgba(0,0,0,0) ;
 
         color: var(--text-color--);
+        outline: rgba(0,0,0,0) !important;
+        border: rgba(0,0,0,0) !important;
 
-        border: var(--golden--) 3px solid;
-        border-radius: 15px;
+        cursor: pointer;
+
+        z-index: 1000;
+
+        /* border-bottom: var(--golden--) 0px solid; */
+        /* border-radius: 15px; */
 
         transition: all 1s ease-in-out;
     }
 
-    .submit:hover{
-        /* background-color: var(--lavender--);
-        border-color: var(--lavender--); */
-        background-color: var(--lavender--);
-    }
+
 
     .flashed_messages{
         position: fixed;

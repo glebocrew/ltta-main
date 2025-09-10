@@ -1,328 +1,123 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
-        <title>Profile Page</title>
-    </head>
-    <body>
-        <h1>Profile Page</h1>
-        {% if user_data %}
-                <h2>Profile</h2>
-                <form method="POST" enctype="multipart/form-data" id="main-form">
-                    <img src="{{ url_for('static', filename=user_data['avatar']) }}">
-                    <div class="avatar-editor" id="avatar-editor" style="display: none;">
-                        <div class="editor-container">
-                            <div class="preview-container">
-                                <img id="imagePreview" class="hidden">
-                                <div class="crop-overlay"></div>
-                            </div>
-                            <div class="controls">
-                                <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
-                                <div class="zoom-controls">
-                                    <button id="zoomOut" type="button">-</button>
-                                    <span>Масштаб</span>
-                                    <button id="zoomIn" type="button">+</button>
-                                </div>
-                            </div>
-                            <canvas id="cropCanvas" class="hidden"></canvas>
-                            <input type="file" id="avatarData" name="avatar" style="display: none;">
+
+<head>
+    <meta charset="utf-8">
+    <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles/edit_profile.css') }}" rel="stylesheet">
+    <title>Profile Page</title>
+</head>
+
+<body>
+    {% if user_data %}
+    <form method="POST" enctype="multipart/form-data" class="main-form" id="main-form">
+        <div class="content">
+            <img src="{{ url_for('static', filename=user_data['avatar']) }}">
+            <div class="avatar-editor" id="avatar-editor" style="display: none;">
+                <div class="editor-container">
+                    <div class="preview-container">
+                        <img id="imagePreview" class="hidden">
+                        <div class="crop-overlay"></div>
+                    </div>
+                    <div class="controls">
+                        <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
+                        <div class="zoom-controls">
+                            <button id="zoomOut" type="button">-</button>
+                            <span>Масштаб</span>
+                            <button id="zoomIn" type="button">+</button>
                         </div>
                     </div>
-                    <button type="button" onclick="changeAvatar()">Change avatar</button>
-                    <input class="username" name="username" value="{{ user_data['username'] }}" required pattern=".*\S+.*">
-                    <input class="email" name="email" value="{{ user_data['email'] }}" required pattern=".*\S+.*">
-                    <input class="name" name="name" value="{{ user_data['name'] }}" required pattern=".*\S+.*">
-                    <input class="surname" name="surname" value="{{ user_data['surname'] }}" required pattern=".*\S+.*">
-                    <label for="grade">grade</label>
-                    <select name="grade">
-                        <option>{{ user_data['grade'] }}</option>
-                        <option>8</option>
-                        <option>9</option>
-                        <option>10</option>
-                        <option>11</option>
-                    </select>
-                    <label for="faculty">faculty</label>
-                    <select name="faculty">
-                        <option>{{ user_data['faculty'] }}</option>
-                        <option>МатИнфо</option>
-                        <option>Гум</option>
-                        <option>СоцЭк</option>
-                        <option>МатЭк</option>
-                    </select>
-                    <button class="save_1" type="button">Save Changes</button>
-                    <div class="accept" id="accept_block" style="display: none;">
-                        <input id="accept_input">
-                        <button type="submit" id="cropAvatar" disabled>Submit</button>
-                    </div>
-                </form>
-                <h2>Statistics</h2>
-                <p class="rating">{{ user_data["rating"] }}</p>
-                {% if message %}
-                    <p>{{ message }}</p>
-                {% endif %}
+                    <canvas id="cropCanvas" class="hidden"></canvas>
+                    <input type="file" id="avatarData" name="avatar" style="display: none;">
+                </div>
+            </div>
+            <div class="accept" id="accept_block">
+                <button type="button" onclick="changeAvatar()" class="submit">поменять аву</button>
+            </div>
+            <!-- <input class="username" name="username" value="{{ user_data['username'] }}" required pattern=".*\S+.*">
+            <input class="email" name="email" value="{{ user_data['email'] }}" required pattern=".*\S+.*">
+            <input class="name" name="name" value="{{ user_data['name'] }}" required pattern=".*\S+.*">
+            <input class="surname" name="surname" value="{{ user_data['surname'] }}" required pattern=".*\S+.*"> -->
+
+            <div id="username" class="input-block">
+                <label for="username" class="label">username</label>
+                <input type="text" name="username" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
+
+            <div id="name" class="input-block">
+                <label for="name" class="label">name</label>
+                <input type="text" name="name" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
+
+            <div id="surname" class="input-block">
+                <label for="surname" class="label">surname</label>
+                <input type="text" name="surname" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
+
+
+            <div id="email" class="input-block">
+                <label for="email" class="label">email</label>
+                <input type="text" name="email" required pattern=".*\S+.*" class="input" autocomplete="off">
+            </div>
+
+            <div id="grade" class="input-block">
+                <div class="select" tabindex="1">
+                    <span class="select_value">класс</span>
+                    <ul class="select_dropdown">
+                        <li class="select_option">8</li>
+                        <li class="select_option">9</li>
+                        <li class="select_option">10</li>
+                        <li class="select_option">11</li>
+                    </ul>
+                </div>
+                <input type="hidden" value="" name="grade" required pattern=".*\S+.*" class="dropdown-input"
+                    data-target="input[name='grade']">
+            </div>
+
+
+            <div id="faculty" class="input-block">
+                <div class="select" tabindex="1">
+                    <span class="select_value">факультет</span>
+                    <ul class="select_dropdown">
+                        {% if faculties %}
+                        {% for faculty in faculties %}
+                        <li class="select_option">{{ faculty }}</li>
+                        {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+                <input type="hidden" value="" name="faculty" required pattern=".*\S+.*" class="dropdown-input"
+                    data-target="input[name='faculty']">
+            </div>
+
+            <div id="submit" class="input-block">
+                <button class="save_1" type="button" id="SubmitButton">готово!</button>
+            </div>
+
+            <div class="accept" id="accept_block" style="display: none;">
+                <input id="accept_input">
+                <button type="submit" id="cropAvatar" disabled>Submit</button>
+            </div>
+        </div>
+    </form>
+    {% if message %}
+    <p>{{ message }}</p>
+    {% endif %}
+    {% endif %}
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flashed_messages">
+            {% for message in messages %}
+                <p class="flashed_message">{{ message }}</p>
+            {% endfor %}
+        </div>
         {% endif %}
-        <label name="username"></label>
-    </body>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const imageUpload = document.getElementById('imageUpload');
-            const imagePreview = document.getElementById('imagePreview');
-            const cropCanvas = document.getElementById('cropCanvas');
-            const zoomInBtn = document.getElementById('zoomIn');
-            const zoomOutBtn = document.getElementById('zoomOut');
-            const cropBtn = document.getElementById('cropAvatar'); // Оставляем для совместимости
-            const avatarDataInput = document.getElementById('avatarData');
-            const previewContainer = document.querySelector('.preview-container');
-            const containerSize = 300;
-            let scale = 1;
-            let offsetX = 0;
-            let offsetY = 0;
-            let isDragging = false;
-            let startX, startY;
-            let baseX = 0, baseY = 0;
-            let dragX = 0, dragY = 0;
+    {% endwith %}
+</body>
+<script src="{{ url_for('static', filename='scripts/edit_profile.js') }}">
+</script>
+<style>
 
-            imageUpload.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file && file.size > 5 * 1024 * 1024) {
-                    alert('Файл слишком большой. Максимальный размер: 5 МБ.');
-                    return;
-                }
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.classList.remove('hidden');
-                        imagePreview.onload = function() {
-                            centerImage();
-                        };
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+</style>
 
-            function centerImage() {
-                scale = 1;
-                baseX = (containerSize - imagePreview.width) / 2;
-                baseY = (containerSize - imagePreview.height) / 2;
-                dragX = 0;
-                dragY = 0;
-                updateImagePosition();
-            }
-
-            function updateImagePosition() {
-                offsetX = baseX + dragX;
-                offsetY = baseY + dragY;
-                imagePreview.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-            }
-
-            const MAX_SCALE = 1.5;
-            const MIN_SCALE = 0.5;
-
-            zoomInBtn.addEventListener('click', function() {
-                scale = Math.min(scale * 1.1, MAX_SCALE);
-                updateImagePosition();
-            });
-
-            zoomOutBtn.addEventListener('click', function() {
-                scale = Math.max(scale / 1.1, MIN_SCALE);
-                updateImagePosition();
-            });
-
-            imagePreview.addEventListener('mousedown', function(e) {
-                isDragging = true;
-                startX = e.clientX - dragX;
-                startY = e.clientY - dragY;
-                imagePreview.style.cursor = 'grabbing';
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isDragging) return;
-                dragX = e.clientX - startX;
-                dragY = e.clientY - startY;
-                updateImagePosition();
-            });
-
-            document.addEventListener('mouseup', function() {
-                isDragging = false;
-                imagePreview.style.cursor = 'grab';
-            });
-
-            imagePreview.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                isDragging = true;
-                startX = e.touches[0].clientX - dragX;
-                startY = e.touches[0].clientY - dragY;
-                imagePreview.style.cursor = 'grabbing';
-            });
-
-            document.addEventListener('touchmove', function(e) {
-                if (!isDragging) return;
-                e.preventDefault();
-                dragX = e.touches[0].clientX - startX;
-                dragY = e.touches[0].clientY - startY;
-                updateImagePosition();
-            });
-
-            document.addEventListener('touchend', function() {
-                isDragging = false;
-                imagePreview.style.cursor = 'grab';
-            });
-
-            document.querySelector('#main-form').addEventListener('submit', function(e) {
-                if (!imagePreview.src) {
-                    alert('Пожалуйста, загрузите изображение сначала');
-                    return;
-                }
-
-                const size = Math.round(previewContainer.clientWidth || containerSize);
-                cropCanvas.width = size;
-                cropCanvas.height = size;
-                const ctx = cropCanvas.getContext('2d');
-                ctx.clearRect(0, 0, size, size);
-
-                const imgRect = imagePreview.getBoundingClientRect();
-                const contRect = previewContainer.getBoundingClientRect();
-                const displayedLeft = imgRect.left - contRect.left;
-                const displayedTop = imgRect.top - contRect.top;
-                const displayedWidth = imgRect.width;
-                const displayedHeight = imgRect.height;
-
-                const interLeft = Math.max(0, displayedLeft);
-                const interTop = Math.max(0, displayedTop);
-                const interRight = Math.min(size, displayedLeft + displayedWidth);
-                const interBottom = Math.min(size, displayedTop + displayedHeight);
-                const interWidth = Math.max(0, interRight - interLeft);
-                const interHeight = Math.max(0, interBottom - interTop);
-
-                const ratioX = imagePreview.naturalWidth / displayedWidth;
-                const ratioY = imagePreview.naturalHeight / displayedHeight;
-
-                const sx = (interLeft - displayedLeft) * ratioX;
-                const sy = (interTop - displayedTop) * ratioY;
-                const sWidth = interWidth * ratioX;
-                const sHeight = interHeight * ratioY;
-
-                if (interWidth > 0 && interHeight > 0) {
-                    ctx.drawImage(
-                        imagePreview,
-                        sx, sy, sWidth, sHeight,
-                        interLeft, interTop, interWidth, interHeight
-                    );
-                }
-
-                cropCanvas.toBlob(function(blob) {
-                    if (!blob) {
-                        alert('Ошибка при создании изображения');
-                        return;
-                    }
-                    const file = new File([blob], 'avatar.png', { type: 'image/png', lastModified: Date.now() });
-                    const dt = new DataTransfer();
-                    dt.items.add(file);
-                    avatarDataInput.files = dt.files;
-                    // Отправляем форму после обрезки
-                    document.querySelector('form').submit();
-                }, 'image/png', 0.9);
-            });
-
-            const save_1 = document.querySelector(".save_1");
-            const accept_block = document.getElementById("accept_block");
-            const accept_input = document.getElementById('accept_input');
-            const accept_final = document.getElementById('cropAvatar');
-            const username = '{{ user_data["username"] | e }}';
-
-            save_1.addEventListener("click", function() {
-                accept_block.style.display = "block";
-            });
-
-            accept_input.addEventListener('input', function() {
-                const inputValue = accept_input.value.trim().toLowerCase();
-                const usernameValue = username.trim().toLowerCase();
-                accept_final.disabled = inputValue !== usernameValue;
-            });
-
-
-        });
-        
-        const avatarEditorDiv = document.getElementById('avatar-editor');
-        function changeAvatar() {
-            avatarEditorDiv.style.display = "block";
-        }
-    </script>
-    <style>
-        .avatar-editor {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-family: Arial, sans-serif;
-        }
-        .editor-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .preview-container {
-            position: relative;
-            width: 100%;
-            max-width: 300px;
-            aspect-ratio: 1/1;
-            margin: 0 auto;
-            border: 2px dashed #ccc;
-            overflow: hidden;
-        }
-        #imagePreview {
-            position: absolute;
-            max-width: none;
-            cursor: move;
-            transform-origin: top left;
-            touch-action: none;
-            -webkit-user-drag: none;
-            pointer-events: auto;
-        }
-        .crop-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 2px solid #007bff;
-            box-sizing: border-box;
-            pointer-events: none;
-            z-index: 10;
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-        }
-        input[type="file"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .hidden {
-            display: none;
-        }
-        #avatarData {
-            width: 100%;
-            padding: 10px;
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-        .zoom-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .zoom-controls button {
-            padding: 5px 15px;
-            font-size: 18px;
-        }
-    </style>
 </html>

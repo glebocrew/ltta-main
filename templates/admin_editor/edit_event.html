@@ -51,7 +51,7 @@
 
                     <input class="content" name="content" value="{{ event_info['content'] }}" required pattern=".*\S+.*">
 
-                    <input class="participants" name="participants" value="{{ event_info['participants'] }}">
+                    <input class="participants" style="display: none;" name="participants" value="{{ event_info['participants'] }}">
                     
 
                     <div class="accept" id="accept_block" style="display: none;"> 
@@ -381,7 +381,7 @@
 
             document.querySelector('#main-form').addEventListener('submit', function(e) {
                 if (!imagePreview.src) {
-                    alert('Пожалуйста, загрузите изображение сначала');
+                    // alert('Пожалуйста, загрузите изображение сначала');
                     return;
                 }
 
