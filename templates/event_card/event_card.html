@@ -1,60 +1,200 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Карточка события</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
 
-        <style>
-        body{
+        * {
+            --background-color--: white;
+            --text-color--: black;
+            --golden--: #ebd37c;
+            --lavender--: #6f51c1;
+            --dark-purple--: #4a3a8c;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background-color--);
+            color: var(--text-color--);
+            font-family: 'Lucida Sans', 'Lucida Grande', Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 20px;
+        }
+
+        .header {
             text-align: center;
-
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--lavender--);
+            padding-bottom: 20px;
         }
-        
-        #image {
-            position: relative;
-            width: 1000%;
-            height: fit-content;
 
+        .event-title {
+            font-size: 28pt;
+            color: var(--golden--);
+            margin: 0 0 15px 0;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        .finished-badge {
+            background: linear-gradient(135deg, var(--lavender--), var(--dark-purple--));
+            color: white;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-size: 16pt;
+            display: inline-block;
+            margin-bottom: 20px;
+            border: 2px solid var(--golden--);
+        }
+
+        .info-box {
+            background: rgba(111, 81, 193, 0.15);
+            border: 2px solid var(--lavender--);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .event-info {
+            font-size: 14pt;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .event-info strong {
+            color: var(--golden--);
+        }
+
+        .event-image {
+            max-width: 300px;
+            height: auto;
+            margin: 20px auto;
             display: block;
-            margin-left: auto;
-            margin-right: auto;
-
-            margin-top: 0;
-
-            background: url(IMAGE_PATH);
-            background-size: cover;
+            border: 3px solid var(--lavender--);
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(111, 81, 193, 0.5);
         }
 
-        .avatar{
-            position: relative;
-            
-            width: 300px;
-            height: 300px;
-            background-size: cover;
-
+        .event-content {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(111, 81, 193, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid var(--golden--);
+            font-size: 12pt;
+            line-height: 1.5;
         }
 
-        #avatar_1{
-            background: url(AVATAR-1);
+        .event-content strong {
+            color: var(--golden--);
+            font-size: 14pt;
         }
 
-        </style>
-    </head>
-    <body>
-        <div id="image"></div>
+        .winners {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(235, 211, 124, 0.1);
+            border-radius: 12px;
+            border: 2px solid var(--golden--);
+            page-break-inside: avoid;
+        }
 
-        <h1 id="title"></h1>
+        .participants {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(111, 81, 193, 0.1);
+            border-radius: 12px;
+            border: 2px solid var(--lavender--);
+            page-break-inside: avoid;
+        }
 
-        <div id="winners">
-            <div id="winner-1">
-                <div id="avatar-1" class="avatar"></div>
-                <div id="namesurname-1" class="namesurname">NAME_SURNAME_1</div>
-                <div id="gradefaculty-1" class="gradefaculty">GRADE_FACULTY_1</div>
+        .section-title {
+            color: var(--golden--);
+            font-size: 18pt;
+            margin: 0 0 15px 0;
+            text-align: center;
+            border-bottom: 1px solid var(--lavender--);
+            padding-bottom: 8px;
+        }
+
+        .participants-list, .winners-list {
+            font-size: 12pt;
+            line-height: 1.4;
+        }
+
+        .participant-item, .winner-item {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid var(--lavender--);
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10pt;
+            color: var(--lavender--);
+            border-top: 1px solid var(--lavender--);
+            padding-top: 15px;
+        }
+
+        /* Убираем лишние отступы для PDF */
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="event-title">EVENT_TITLE</div>
+            <div class="finished-badge">ЗАВЕРШЕНО</div>
+            <div class="info-box">
+                <div class="event-info">
+                    <strong>Тип события:</strong> EVENT_TYPE
+                </div>
+                <div class="event-info">
+                    <strong>Дата и время:</strong> EVENT_DATE
+                </div>
             </div>
         </div>
-
-
-    </body>
+        <div class="event-content">
+            <strong>Описание события:</strong><br>
+            EVENT_CONTENT
+        </div>
+        
+        <div class="winners">
+            <div class="section-title">🏆 Победители</div>
+            <div class="winners-list">
+                WINNERS_LIST
+            </div>
+        </div>
+        
+        <div class="participants">
+            <div class="section-title">👥 Участники</div>
+            <div class="participants-list">
+                PARTICIPANTS_LIST
+            </div>
+        </div>
+        
+        <div class="footer">
+            Карточка завершенного события сгенерирована автоматически
+        </div>
+    </div>
+</body>
 </html>

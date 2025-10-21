@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='styles/members.css') }}" rel="stylesheet">
         <title>Members Page</title>
     </head>
 
@@ -70,13 +71,15 @@
             {% endif %}
         </div>
 
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flashed_messages">
+            {% for message in messages %}
+                <p class="flashed_message">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
     </body>
     <style>
         .user{

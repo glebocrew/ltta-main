@@ -288,7 +288,7 @@ def profile():
         username_len = len(user_data["username"]) if user_data != -1 else 0
         
         if user_data != -1:
-            return render_template("profile.html", user_data=user_data, user_events=user_events, username_len=username_len, logo_path="/icons/svg/goldball.svg")
+            return render_template("profile.html", can_edit=True, user_data=user_data, user_events=user_events, username_len=username_len, logo_path="/icons/svg/goldball.svg")
         else:
             flash("Профиль не найден")
             return redirect("/")
@@ -336,7 +336,7 @@ def edit_profile():
             username = request.form.get("username")
 
             if safe_db_operation(connection.find_user_by_username, "users", username) and username != user_data["username"]:
-                return render_template("edit_profile.html", user_data=user_data, message="This username is already taken!")
+                return render_template("edit_profile.html", can_edit=True,user_data=user_data, message="This username is already taken!")
 
             if username != user_data["username"]:
                 if user_data["avatar"].split("/")[-1] != "default.png":
@@ -368,7 +368,7 @@ def edit_profile():
                 flash("Ошибка обновления профиля")
                 return redirect("/edit_profile")
 
-        return render_template("edit_profile.html", user_data=user_data,  faculties=faculties)
+        return render_template("edit_profile.html", can_edit=False, user_data=user_data,  faculties=faculties)
         
     except Exception as e:
         logger.log("error", f"Edit profile error: {e}")
@@ -418,7 +418,7 @@ def rating(user):
 
             return send_file(f"user_cards/{user_data['id']}.pdf", as_attachment=True, download_name=f"{user_data['username']}.pdf")
 
-        return render_template("rating.html", user_data=user_data)
+        return render_template("profile.html", can_edit=False, user_data=user_data, username_len=len(user_data["username"]))
     except Exception as e:
         logger.log("error", f"Rating error: {e}")
         flash("Ошибка загрузки рейтинга")
@@ -467,7 +467,9 @@ def members():
 def member(user):
     try:
         user_data = safe_db_operation(connection.get_user_by_username, "users", user)
-        return render_template("admin/profile_admin_view.html", user_data=user_data)
+        return render_template("admin/profile_admin_view.html", 
+                               user_data=user_data, 
+                               username_len=len(user_data["username"]))
     except Exception as e:
         logger.log("error", f"Member error: {e}")
         flash("Ошибка загрузки профиля")
@@ -478,6 +480,8 @@ def edit_profile_admin(user):
     try:
         user_data = safe_db_operation(connection.get_user_by_username, "users", user)
         admin_name_surname = safe_db_operation(connection.get_user_name_surname, "users", current_user.id)
+        logger.log("debug", f"user id: {current_user.id}")
+        logger.log("debug", f"user id: {admin_name_surname}")
         
         if request.method == 'POST':
             if "admin" not in user_data["role"]:
@@ -523,7 +527,7 @@ def edit_profile_admin(user):
 
                 name = request.form.get("name")
                 surname = request.form.get("surname")
-                grade = request.form.get("grade")
+                grade = int(request.form.get("grade"))
                 faculty = request.form.get("faculty")
                 role = request.form.get("role")
                 rating = request.form.get("rating")
@@ -537,13 +541,18 @@ def edit_profile_admin(user):
                 if success:
                     return redirect(url_for("member", user=username))
                 else:
-                    flash("Ошибка обновления профиля")
+                    flash(f"Ошибка обновления профиля")
             else:
                 flash("Cannot edit admin!")
                 return redirect("/members")
 
         admin_name_surname = {"name": admin_name_surname[0], "surname": admin_name_surname[1]} if admin_name_surname != -1 else {"name": "", "surname": ""}
-        return render_template("admin/edit_profile_admin_view.html", user_data=user_data, admin_name_surname=admin_name_surname)
+        
+        return render_template("admin/edit_profile_admin_view.html", 
+                               user_data=user_data, 
+                               admin_name_surname=admin_name_surname, 
+                               username_len=len(user_data["username"]), 
+                               faculties = load(open("conf.json"))["faculties"])
     except Exception as e:
         logger.log("error", f"Edit profile admin error: {e}")
         flash("Ошибка загрузки страницы")
@@ -824,16 +833,77 @@ def event(event):
             event_title = request.form.get("event")
 
             safe_db_operation(connection.append_participant, "events", current_user.id, event_title)
-            downloads.create_evnet_card()
 
-            return send_file(f"user_cards/{user_data['id']}.pdf", as_attachment=True, download_name=f"{user_data['username']}.pdf")
-            
 
         return render_template("event.html", event=event_data, participants=participants, current_user_id=current_user.id)
     except Exception as e:
         logger.log("error", f"Event error: {e}")
         flash("Ошибка загрузки события")
         return redirect("/events")
+    
+
+def download_finished_event(event_data, participants, winners):
+    """
+    Создает PDF-карточку завершенного события для скачивания
+    
+    :param event_data: словарь с данными о завершенном событии
+    :param participants: список участников события
+    :param winners: список победителей
+    """
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Читаем HTML шаблон для завершенных событий
+    template_path = "templates/event_card/event_card.html"
+
+    with open(template_path, "r", encoding="utf-8") as f:
+        html_markup = f.read()
+
+    # Заменяем плейсхолдеры на реальные данные
+    html_markup = html_markup.replace("EVENT_TITLE", event_data.get("title", "Событие"))
+    html_markup = html_markup.replace("EVENT_TYPE", event_data.get("type", "Мероприятие"))
+    html_markup = html_markup.replace("EVENT_DATE", str(event_data.get("datetime", "")))
+    html_markup = html_markup.replace("EVENT_CONTENT", event_data.get("content", "Описание отсутствует"))
+    
+    # Форматируем список победителей
+    winners_html = ""
+    if winners:
+        for i, winner in enumerate(winners, 1):
+            medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else "🏅"
+            winners_html += f"<p>{medal} {i}. {winner}</p>"
+    else:
+        winners_html = "<p>Победители не определены</p>"
+
+    html_markup = html_markup.replace("WINNERS_LIST", winners_html)
+
+    # Форматируем список участников
+    participants_html = ""
+    if participants:
+        for i, participant in enumerate(participants, 1):
+            participants_html += f"<p>{i}. {participant}</p>"
+    else:
+        participants_html = "<p>Участники отсутствуют</p>"
+
+    html_markup = html_markup.replace("PARTICIPANTS_LIST", participants_html)
+
+    # Создаем безопасное имя файла
+    safe_title = "".join(c for c in event_data.get("title", "event") if c.isalnum() or c in (' ', '-', '_')).rstrip()
+    filename = f"{safe_title}_finished.pdf"
+    filepath = f"event_cards/{filename}"
+
+    # Создаем директорию если не существует
+    os.makedirs("event_cards", exist_ok=True)
+
+    # Генерируем PDF
+    try:
+        HTML(string=html_markup, base_url=base_dir).write_pdf(
+            filepath, 
+            stylesheets=[CSS(string='@page { size: A4; margin: 20mm; }')]
+        )
+        logger.log("info", f"Successfully generated finished event PDF: {filename}")
+        return filename
+    except Exception as e:
+        logger.log("error", f"Error generating finished event PDF: {e}")
+        return create_fallback_pdf(event_data, filename)
 
 @app.route("/finished_event/<event>", methods=['GET', 'POST'])
 @login_required
@@ -854,10 +924,25 @@ def finished_event(event):
                 except Exception as e:
                     logger.log("error", f"{e}")
 
-        if request.method == 'POST':
-            return redirect("/events")
+        # Получаем информацию о победителях
+        winners = []
+        if event_data.get("winners"):
+            for winner in event_data["winners"].split(sep=","):
+                if winner:
+                    try:
+                        winner_data = safe_db_operation(connection.get_user_by_id, "users", winner)
+                        if winner_data != -1:
+                            winner_name = f"{winner_data['name']} {winner_data['surname']}"
+                            winners.append(winner_name)
+                    except Exception as e:
+                        logger.log("error", f"Error getting winner data: {e}")
 
-        return render_template("finished_event.html", event=event_data, participants=event_participants, current_user_id=current_user.id)
+        if request.method == 'POST':
+            # Создаем карточку завершенного события для скачивания
+            filename = download_finished_event(event_data, event_participants, winners)
+            return send_file(f"event_cards/{filename}", as_attachment=True, download_name=f"{event}.pdf")
+
+        return render_template("finished_event.html", event=event_data, participants=event_participants, winners=winners, current_user_id=current_user.id)
     except Exception as e:
         logger.log("error", f"Finished event error: {e}")
         flash("Ошибка загрузки завершенного события")

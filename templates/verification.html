@@ -1,51 +1,42 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
+<head>
+    <meta charset="utf-8">
+    <link href="{{ url_for('static', filename='styles/verification.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+    <title>Verification Page</title>
+</head>
 
-        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
-        <link href="{{ url_for('static', filename='styles/verification.css') }}" rel="stylesheet">
+<body>
+    <div class="verification-container">
+        <form method="POST">
+            <h1><span id="golden">Red Dragon</span> Verification</h1>
+            <p>Please enter the 6-digit verification code sent to your email. Do not close this page!</p>
 
-        <title>Verification Page</title>
-    </head>
-
-    <body>
-        <form method="POST" class="code-form">
-            <h1 class="header-1"><mark id="golden">Red Dragon</mark> Verification</h1>
-            <p>Do not close this page!</p>
-<!-- 
-            <label for="code">code</label>
-            <input type="text" name="code" required pattern=".*\S+.*"> -->
-            <div class="code-inputs">
-                <input type="text" class="code-input" maxlength="1" data-index="0" inputmode="numeric" pattern="[0-9]*">
-                <input type="text" class="code-input" maxlength="1" data-index="1" inputmode="numeric" pattern="[0-9]*">
-                <input type="text" class="code-input" maxlength="1" data-index="2" inputmode="numeric" pattern="[0-9]*">
-                <input type="text" class="code-input" maxlength="1" data-index="3" inputmode="numeric" pattern="[0-9]*">
-                <input type="text" class="code-input" maxlength="1" data-index="4" inputmode="numeric" pattern="[0-9]*">
-                <input type="text" class="code-input" maxlength="1" data-index="5" inputmode="numeric" pattern="[0-9]*">
+            <div class="code-input-group">
+                <label for="code">Verification Code</label>
+                <input type="text" id="code" name="code" class="code-input" maxlength="6" required pattern="[0-9]{6}" inputmode="numeric" placeholder="000000">
             </div>
 
-            <!-- Hidden input для хранения полного кода -->
-            <input type="hidden" id="verificationCode" name="code" class="hidden-code">
+            <button type="submit" class="verify-btn">Verify</button>
 
+            <div class="resend-info">
+                <p>Didn't receive the code? Check your spam folder or wait for the email to arrive.</p>
+                <button type="button" class="resend-btn" onclick="alert('Resend functionality not implemented yet')">Resend Code</button>
+            </div>
 
-
-            <button type="submit" class="submit">submit</button>
-            
-
-            {% if message %}
-                <p>{{ message }}</p>
-            {% endif %}
-
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    {% for message in messages %}
-                        <p>{{ message }}</p>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+            <div class="back-link">
+                <a href="{{ url_for('registration') }}">← Back to Registration</a>
+            </div>
         </form>
-    </body>
 
-<script src="{{ url_for('static', filename='scripts/verification.js') }}"></script>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="message error">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
 </html>

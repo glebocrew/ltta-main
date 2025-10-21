@@ -1,368 +1,157 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
 
-        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+<head>
+    <meta charset="utf-8">
+    <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles/edit_profile.css') }}" rel="stylesheet">
+    <title>Profile Page</title>
+</head>
 
-        <title>Profile Page</title>
-    </head>
+<body>
+    {% if user_data %}
+    <form method="POST" enctype="multipart/form-data" class="main-form" id="main-form">
+        <div class="content">
 
-    <body>
-        <h1>Profile Page</h1>
-        {% if user_data %}
-                <h2>Profile</h2>
+            <!-- Аватар -->
+            <div class="avatar-container">
+                <img src="{{ url_for('static', filename=user_data['avatar']) }}" class="avatar">
+                <div class="avatar-change-icon" onclick="changeAvatar()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 
+                             7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 
+                             0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                    </svg>
+                </div>
+            </div>
 
-                <form method="POST" enctype="multipart/form-data" id="main-form">
-
-                    <img src="{{ url_for('static', filename=user_data['avatar']) }}">
-                    
-                    <div class="avatar-editor" id="avatar-editor" style="display: none;">
-                        <div class="editor-container">
-                            <div class="preview-container">
-                                <img id="imagePreview" class="hidden">
-                                <div class="crop-overlay"></div>
-                            </div>
-                            <div class="controls">
-                                <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
-                                <div class="zoom-controls">
-                                    <button id="zoomOut" type="button">-</button>
-                                    <span>Масштаб</span>
-                                    <button id="zoomIn" type="button">+</button>
-                                </div>
-                            </div>
-                            <canvas id="cropCanvas" class="hidden"></canvas>
-                            <input type="file" id="avatarData" name="avatar" style="display: none;">
+            <!-- Редактор аватарки -->
+            <div class="avatar-editor" id="avatar-editor" style="display:none;">
+                <div class="editor-container">
+                    <div class="close-editor" onclick="closeAvatarEditor()">×</div>
+                    <div class="preview-container">
+                        <img id="imagePreview" class="hidden">
+                        <div class="crop-overlay"></div>
+                    </div>
+                    <div class="controls">
+                        <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
+                        <div class="zoom-controls">
+                            <button id="zoomOut" type="button">-</button>
+                            <span>Масштаб</span>
+                            <button id="zoomIn" type="button">+</button>
                         </div>
                     </div>
-                    <button type="button" onclick="changeAvatar()">Change avatar</button>
+                    <canvas id="cropCanvas" class="hidden"></canvas>
+                    <input type="file" id="avatarData" name="avatar" style="display:none;">
+                </div>
+            </div>
 
-                    <!-- <input class="avatar" name="avatar" type="file" accept=".png, .jpg, .gif" > -->
+            <!-- Остальные поля формы -->
+            <div id="username" class="input-block">
+                <input type="text" value="{{ user_data['username'] }}" name="username" required pattern=".*\S+.*"
+                    class="input" autocomplete="off">
+            </div>
 
-                    <input class="username" name="username" value="{{ user_data['username'] }}" required pattern=".*\S+.*">
+            <div id="name" class="input-block">
+                <input type="text" value="{{ user_data['name'] }}" name="name" required pattern=".*\S+.*" class="input"
+                    autocomplete="off">
+            </div>
 
-                    <input class="email" name="email" value="{{ user_data['email'] }}" required pattern=".*\S+.*">
+            <div id="surname" class="input-block">
+                <input type="text" value="{{ user_data['surname'] }}" name="surname" required pattern=".*\S+.*"
+                    class="input" autocomplete="off">
+            </div>
 
-                    <input class="name" name="name" value="{{ user_data['name'] }}" required pattern=".*\S+.*">
-                    <input class="surname" name="surname" value="{{ user_data['surname'] }}" required pattern=".*\S+.*">
-                    
-                    <label for="grade">grade</label>
-                    <select name="grade">
-                            <option>{{ user_data['grade'] }}</option>
-		                    <option>8</option>
-	                        <option>9</option>
-	                        <option>10</option>
-	                        <option>11</option>
-	                </select>
+            <div id="email" class="input-block">
+                <input type="text" value="{{ user_data['email'] }}" name="email" required pattern=".*\S+.*"
+                    class="input" autocomplete="off">
+            </div>
 
-                    <label for="faculty">faculty</label>
-                    <select name="faculty">
-		                <option>{{ user_data['faculty'] }}</option>
-		                <option>МатИнфо</option>
-	                    <option>Гум</option>
-	                    <option>СоцЭк</option>
-	                    <option>МатЭк</option>
-	                </select>
+            <div id="grade" class="input-block">
+                <div class="select" tabindex="1">
+                    <span class="select_value">{{ user_data['grade'] }}</span>
+                    <ul class="select_dropdown">
+                        <li class="select_option">8</li>
+                        <li class="select_option">9</li>
+                        <li class="select_option">10</li>
+                        <li class="select_option">11</li>
+                    </ul>
+                </div>
+                <input type="hidden" value="{{ user_data['grade'] }}" name="grade" class="dropdown-input">
+            </div>
 
-                    <label for="role">role</label>
-                    <select name="role">
-		                <option>{{ user_data['role'] }}</option>
-		                <option>admin</option>
-	                    <option>editor</option>
-	                    <option>user</option>
-	                </select>
-                    
-                    <input class="rating" name="rating" value="{{ user_data['rating'] }}" required pattern=".*\S+.*" type="number" step="0.000001">
-                    
-                    <!-- <label for="password">password:</label> -->
-                    <!-- <input class="password" name="password" required pattern=".*\S+.*" type="password"> -->
+            <div id="faculty" class="input-block">
+                <div class="select" tabindex="1">
+                    <span class="select_value">{{ user_data['faculty'] }}</span>
+                    <ul class="select_dropdown">
+                        {% if faculties %}
+                        {% for faculty in faculties %}
+                        <li class="select_option">{{ faculty }}</li>
+                        {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+                <input type="hidden" value="{{ user_data['faculty'] }}" name="faculty" class="dropdown-input">
+            </div>
 
-                    <button class="save_1" type="button" >Save Changes</button>
+            <div id="role" class="input-block">
+                <div class="select" tabindex="1">
+                    <span class="select_value">{{ user_data['role'] }}</span>
+                    <ul class="select_dropdown">
+                        <li class="select_option">admin</li>
+                        <li class="select_option">editor</li>
+                        <li class="select_option">user</li>
+                    </ul>
+                </div>
+                <input type="hidden" value="{{ user_data['role'] }}" name="role" class="dropdown-input">
+            </div>
 
-                    <div class="accept" id="accept_block" style="display: none;"> 
-                        <input id="accept_input">
-                        <button id="accept_final" type="submit" disabled>Submit</button>
-                    </div>
-<!-- 
-                    <input class="grade" name="grade" value="{{ user_data['grade'] }} ">
-                    <input class="faculty" name="faculty" value="{{ user_data['faculty'] }}"> -->
+            <div id="rating" class="input-block">
+                <input type="text" value="{{ user_data['rating'] }}" name="rating" required pattern=".*\S+.*"
+                    class="input" autocomplete="off">
+            </div>
 
-            </form>
+            <div id="submit" class="input-block">
+                <button class="save_1" type="button" onclick="showConfirmation()">готово!</button>
+            </div>
+        </div>
 
-            <h2>Statistics</h2>
+    </form>
 
-            <p class="rating">{{ user_data["rating"] }}</p>
-            {% if message %}
-                <p>{{ message }}</p>
-            {% endif %}
+    <!-- Диалог подтверждения -->
+    <div class="overlay" id="overlay"></div>
+    <div class="confirm-dialog" id="confirmDialog">
+        <h3>Подтверждение изменений</h3>
+        <p>Введите ваш Имя и Фамимлию для подтверждения:</p>
+        <input type="text" id="usernameConfirm" required pattern=".*\S+.*" autocomplete="off"
+            placeholder="{{ admin_name_surname['name'] }} {{ admin_name_surname['surname'] }}"
+            oninput="checkUsername()">
+        <div class="confirm-buttons">
+            <button class="confirm-button" id="confirmSave" onclick="submitForm()" disabled>Сохранить</button>
+            <button class="confirm-button" onclick="hideConfirmation()">Отмена</button>
+        </div>
+    </div>
+    {% endif %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="flashed_messages">
+        {% for message in messages %}
+        <p class="flashed_message">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+</body>
+<script src="{{ url_for('static', filename='scripts/edit_profile.js') }}"></script>
+<script>
 
+    function checkUsername() {
+        const input = document.getElementById("usernameConfirm").value.trim();
+        const username = "{{ admin_name_surname['name'] }} {{ admin_name_surname['surname'] }}";
+        document.getElementById("confirmSave").disabled = input !== username;
+        console.log(input, username)
+    }
 
-        {% endif %}
-        
-        <label name="username"></label>
-    </body>
-    <script>
-        const save_1 = document.querySelector(".save_1");
-        const accept_block = document.getElementById("accept_block");
+</script>
 
-        save_1.addEventListener("click", function(){
-            accept_block.style.display = "block";
-        });
-
-        const accept_input = document.getElementById('accept_input');
-        const accept_final = document.getElementById('accept_final');
-        const username = '{{ admin_name_surname[0] }} {{ admin_name_surname[1] }}';
- 
-        accept_input.addEventListener('input', function() {
-            if (accept_input.value === username) {
-                accept_final.disabled = false;
-            } else {
-                accept_final.disabled = true;
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const imageUpload = document.getElementById('imageUpload');
-            const imagePreview = document.getElementById('imagePreview');
-            const cropCanvas = document.getElementById('cropCanvas');
-            const zoomInBtn = document.getElementById('zoomIn');
-            const zoomOutBtn = document.getElementById('zoomOut');
-            const cropBtn = document.getElementById('cropAvatar'); // Оставляем для совместимости
-            const avatarDataInput = document.getElementById('avatarData');
-            const previewContainer = document.querySelector('.preview-container');
-            const containerSize = 300;
-            let scale = 1;
-            let offsetX = 0;
-            let offsetY = 0;
-            let isDragging = false;
-            let startX, startY;
-            let baseX = 0, baseY = 0;
-            let dragX = 0, dragY = 0;
-
-            imageUpload.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file && file.size > 5 * 1024 * 1024) {
-                    alert('Файл слишком большой. Максимальный размер: 5 МБ.');
-                    return;
-                }
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.classList.remove('hidden');
-                        imagePreview.onload = function() {
-                            centerImage();
-                        };
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            function centerImage() {
-                scale = 1;
-                baseX = (containerSize - imagePreview.width) / 2;
-                baseY = (containerSize - imagePreview.height) / 2;
-                dragX = 0;
-                dragY = 0;
-                updateImagePosition();
-            }
-
-            function updateImagePosition() {
-                offsetX = baseX + dragX;
-                offsetY = baseY + dragY;
-                imagePreview.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-            }
-
-            const MAX_SCALE = 1.5;
-            const MIN_SCALE = 0.5;
-
-            zoomInBtn.addEventListener('click', function() {
-                scale = Math.min(scale * 1.1, MAX_SCALE);
-                updateImagePosition();
-            });
-
-            zoomOutBtn.addEventListener('click', function() {
-                scale = Math.max(scale / 1.1, MIN_SCALE);
-                updateImagePosition();
-            });
-
-            imagePreview.addEventListener('mousedown', function(e) {
-                isDragging = true;
-                startX = e.clientX - dragX;
-                startY = e.clientY - dragY;
-                imagePreview.style.cursor = 'grabbing';
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!isDragging) return;
-                dragX = e.clientX - startX;
-                dragY = e.clientY - startY;
-                updateImagePosition();
-            });
-
-            document.addEventListener('mouseup', function() {
-                isDragging = false;
-                imagePreview.style.cursor = 'grab';
-            });
-
-            imagePreview.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                isDragging = true;
-                startX = e.touches[0].clientX - dragX;
-                startY = e.touches[0].clientY - dragY;
-                imagePreview.style.cursor = 'grabbing';
-            });
-
-            document.addEventListener('touchmove', function(e) {
-                if (!isDragging) return;
-                e.preventDefault();
-                dragX = e.touches[0].clientX - startX;
-                dragY = e.touches[0].clientY - startY;
-                updateImagePosition();
-            });
-
-            document.addEventListener('touchend', function() {
-                isDragging = false;
-                imagePreview.style.cursor = 'grab';
-            });
-
-            document.querySelector('#main-form').addEventListener('submit', function(e) {
-                if (!imagePreview.src) {
-                    alert('Пожалуйста, загрузите изображение сначала');
-                    return;
-                }
-
-                const size = Math.round(previewContainer.clientWidth || containerSize);
-                cropCanvas.width = size;
-                cropCanvas.height = size;
-                const ctx = cropCanvas.getContext('2d');
-                ctx.clearRect(0, 0, size, size);
-
-                const imgRect = imagePreview.getBoundingClientRect();
-                const contRect = previewContainer.getBoundingClientRect();
-                const displayedLeft = imgRect.left - contRect.left;
-                const displayedTop = imgRect.top - contRect.top;
-                const displayedWidth = imgRect.width;
-                const displayedHeight = imgRect.height;
-
-                const interLeft = Math.max(0, displayedLeft);
-                const interTop = Math.max(0, displayedTop);
-                const interRight = Math.min(size, displayedLeft + displayedWidth);
-                const interBottom = Math.min(size, displayedTop + displayedHeight);
-                const interWidth = Math.max(0, interRight - interLeft);
-                const interHeight = Math.max(0, interBottom - interTop);
-
-                const ratioX = imagePreview.naturalWidth / displayedWidth;
-                const ratioY = imagePreview.naturalHeight / displayedHeight;
-
-                const sx = (interLeft - displayedLeft) * ratioX;
-                const sy = (interTop - displayedTop) * ratioY;
-                const sWidth = interWidth * ratioX;
-                const sHeight = interHeight * ratioY;
-
-                if (interWidth > 0 && interHeight > 0) {
-                    ctx.drawImage(
-                        imagePreview,
-                        sx, sy, sWidth, sHeight,
-                        interLeft, interTop, interWidth, interHeight
-                    );
-                }
-
-                cropCanvas.toBlob(function(blob) {
-                    if (!blob) {
-                        alert('Ошибка при создании изображения');
-                        return;
-                    }
-                    const file = new File([blob], 'avatar.png', { type: 'image/png', lastModified: Date.now() });
-                    const dt = new DataTransfer();
-                    dt.items.add(file);
-                    avatarDataInput.files = dt.files;
-                    // Отправляем форму после обрезки
-                    document.querySelector('form').submit();
-                }, 'image/png', 0.9);
-            });
-        });
-        
-        const avatarEditorDiv = document.getElementById('avatar-editor');
-        function changeAvatar() {
-            avatarEditorDiv.style.display = "block";
-        }
-        
-        </script>
-
-            <style>
-        .avatar-editor {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-family: Arial, sans-serif;
-        }
-        .editor-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .preview-container {
-            position: relative;
-            width: 100%;
-            max-width: 300px;
-            aspect-ratio: 1/1;
-            margin: 0 auto;
-            border: 2px dashed #ccc;
-            overflow: hidden;
-        }
-        #imagePreview {
-            position: absolute;
-            max-width: none;
-            cursor: move;
-            transform-origin: top left;
-            touch-action: none;
-            -webkit-user-drag: none;
-            pointer-events: auto;
-        }
-        .crop-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 2px solid #007bff;
-            box-sizing: border-box;
-            pointer-events: none;
-            z-index: 10;
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-        }
-        input[type="file"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .hidden {
-            display: none;
-        }
-        #avatarData {
-            width: 100%;
-            padding: 10px;
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-        .zoom-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .zoom-controls button {
-            padding: 5px 15px;
-            font-size: 18px;
-        }
-    </style>
 </html>

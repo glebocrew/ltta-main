@@ -1,123 +1,122 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='styles/edit_profile.css') }}" rel="stylesheet">
     <title>Profile Page</title>
 </head>
-
 <body>
-    {% if user_data %}
-    <form method="POST" enctype="multipart/form-data" class="main-form" id="main-form">
-        <div class="content">
-            <img src="{{ url_for('static', filename=user_data['avatar']) }}">
-            <div class="avatar-editor" id="avatar-editor" style="display: none;">
-                <div class="editor-container">
-                    <div class="preview-container">
-                        <img id="imagePreview" class="hidden">
-                        <div class="crop-overlay"></div>
-                    </div>
-                    <div class="controls">
-                        <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
-                        <div class="zoom-controls">
-                            <button id="zoomOut" type="button">-</button>
-                            <span>Масштаб</span>
-                            <button id="zoomIn" type="button">+</button>
-                        </div>
-                    </div>
-                    <canvas id="cropCanvas" class="hidden"></canvas>
-                    <input type="file" id="avatarData" name="avatar" style="display: none;">
-                </div>
-            </div>
-            <div class="accept" id="accept_block">
-                <button type="button" onclick="changeAvatar()" class="submit">поменять аву</button>
-            </div>
-            <!-- <input class="username" name="username" value="{{ user_data['username'] }}" required pattern=".*\S+.*">
-            <input class="email" name="email" value="{{ user_data['email'] }}" required pattern=".*\S+.*">
-            <input class="name" name="name" value="{{ user_data['name'] }}" required pattern=".*\S+.*">
-            <input class="surname" name="surname" value="{{ user_data['surname'] }}" required pattern=".*\S+.*"> -->
+{% if user_data %}
+<form method="POST" enctype="multipart/form-data" class="main-form" id="main-form">
+    <div class="content">
 
-            <div id="username" class="input-block">
-                <label for="username" class="label">username</label>
-                <input type="text" name="username" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-
-            <div id="name" class="input-block">
-                <label for="name" class="label">name</label>
-                <input type="text" name="name" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-
-            <div id="surname" class="input-block">
-                <label for="surname" class="label">surname</label>
-                <input type="text" name="surname" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-
-
-            <div id="email" class="input-block">
-                <label for="email" class="label">email</label>
-                <input type="text" name="email" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-
-            <div id="grade" class="input-block">
-                <div class="select" tabindex="1">
-                    <span class="select_value">класс</span>
-                    <ul class="select_dropdown">
-                        <li class="select_option">8</li>
-                        <li class="select_option">9</li>
-                        <li class="select_option">10</li>
-                        <li class="select_option">11</li>
-                    </ul>
-                </div>
-                <input type="hidden" value="" name="grade" required pattern=".*\S+.*" class="dropdown-input"
-                    data-target="input[name='grade']">
-            </div>
-
-
-            <div id="faculty" class="input-block">
-                <div class="select" tabindex="1">
-                    <span class="select_value">факультет</span>
-                    <ul class="select_dropdown">
-                        {% if faculties %}
-                        {% for faculty in faculties %}
-                        <li class="select_option">{{ faculty }}</li>
-                        {% endfor %}
-                        {% endif %}
-                    </ul>
-                </div>
-                <input type="hidden" value="" name="faculty" required pattern=".*\S+.*" class="dropdown-input"
-                    data-target="input[name='faculty']">
-            </div>
-
-            <div id="submit" class="input-block">
-                <button class="save_1" type="button" id="SubmitButton">готово!</button>
-            </div>
-
-            <div class="accept" id="accept_block" style="display: none;">
-                <input id="accept_input">
-                <button type="submit" id="cropAvatar" disabled>Submit</button>
+        <!-- Аватар -->
+        <div class="avatar-container">
+            <img src="{{ url_for('static', filename=user_data['avatar']) }}" class="avatar">
+            <div class="avatar-change-icon" onclick="changeAvatar()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 
+                             7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 
+                             0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
             </div>
         </div>
-    </form>
-    {% if message %}
-    <p>{{ message }}</p>
-    {% endif %}
-    {% endif %}
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <div class="flashed_messages">
-            {% for message in messages %}
-                <p class="flashed_message">{{ message }}</p>
-            {% endfor %}
+
+        <!-- Редактор аватарки -->
+        <div class="avatar-editor" id="avatar-editor" style="display:none;">
+            <div class="editor-container">
+                <div class="close-editor" onclick="closeAvatarEditor()">×</div>
+                <div class="preview-container">
+                    <img id="imagePreview" class="hidden">
+                    <div class="crop-overlay"></div>
+                </div>
+                <div class="controls">
+                    <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
+                    <div class="zoom-controls">
+                        <button id="zoomOut" type="button">-</button>
+                        <span>Масштаб</span>
+                        <button id="zoomIn" type="button">+</button>
+                    </div>
+                </div>
+                <canvas id="cropCanvas" class="hidden"></canvas>
+                <input type="file" id="avatarData" name="avatar" style="display:none;">
+            </div>
         </div>
-        {% endif %}
-    {% endwith %}
+
+        <!-- Остальные поля формы -->
+        <div id="username" class="input-block">
+            <input type="text" value="{{ user_data['username'] }}" name="username" required pattern=".*\S+.*" class="input" autocomplete="off">
+        </div>
+
+        <div id="name" class="input-block">
+            <input type="text" value="{{ user_data['name'] }}" name="name" required pattern=".*\S+.*" class="input" autocomplete="off">
+        </div>
+
+        <div id="surname" class="input-block">
+            <input type="text" value="{{ user_data['surname'] }}" name="surname" required pattern=".*\S+.*" class="input" autocomplete="off">
+        </div>
+
+        <div id="email" class="input-block">
+            <input type="text" value="{{ user_data['email'] }}" name="email" required pattern=".*\S+.*" class="input" autocomplete="off">
+        </div>
+
+        <div id="grade" class="input-block">
+            <div class="select" tabindex="1">
+                <span class="select_value">{{ user_data['grade'] }}</span>
+                <ul class="select_dropdown">
+                    <li class="select_option">8</li>
+                    <li class="select_option">9</li>
+                    <li class="select_option">10</li>
+                    <li class="select_option">11</li>
+                </ul>
+            </div>
+            <input type="hidden" value="{{ user_data['grade'] }}" name="grade" class="dropdown-input">
+        </div>
+
+        <div id="faculty" class="input-block">
+            <div class="select" tabindex="1">
+                <span class="select_value">{{ user_data['faculty'] }}</span>
+                <ul class="select_dropdown">
+                    {% if faculties %}
+                    {% for faculty in faculties %}
+                    <li class="select_option">{{ faculty }}</li>
+                    {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+            <input type="hidden" value="{{ user_data['faculty'] }}" name="faculty" class="dropdown-input">
+        </div>
+
+        <div id="submit" class="input-block">
+            <button class="save_1" type="button" onclick="showConfirmation()">готово!</button>
+        </div>
+    </div>
+
+</form>
+
+<!-- Диалог подтверждения -->
+<div class="overlay" id="overlay"></div>
+<div class="confirm-dialog" id="confirmDialog">
+    <h3>Подтверждение изменений</h3>
+    <p>Введите ваш никнейм для подтверждения:</p>
+    <input type="text" id="usernameConfirm" required pattern=".*\S+.*" autocomplete="off" placeholder="{{ user_data['username'] }}"  oninput="checkUsername()">
+    <div class="confirm-buttons">
+        <button class="confirm-button" id="confirmSave" onclick="submitForm()" disabled>Сохранить</button>
+        <button class="confirm-button" onclick="hideConfirmation()">Отмена</button>
+    </div>
+</div>
+{% endif %}
 </body>
-<script src="{{ url_for('static', filename='scripts/edit_profile.js') }}">
+<script src="{{ url_for('static', filename='scripts/edit_profile.js') }}"></script>
+<script>
+    
+function checkUsername() {
+    const input = document.getElementById("usernameConfirm").value.trim();
+    const username = "{{ user_data['username'] }}";
+    document.getElementById("confirmSave").disabled = input !== username;
+    console.log(input, username)
+}
+
 </script>
-<style>
-
-</style>
-
 </html>
