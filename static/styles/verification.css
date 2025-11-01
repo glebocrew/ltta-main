@@ -1,267 +1,167 @@
+/* Общие стили */
+* {
+    --background-color--: black;
+    --text-color--: white;
+    --golden--: #ebd37c;
+    --lavender--: #6f51c1;
+}
+
+html, body {
+    background-color: var(--background-color--);
+    color: var(--text-color--);
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+mark {
+    background-color: none;
+    text-decoration: none;
+}
+
+#golden{
+    color: var(golden);
+}
+
+.verification-container {
+    border: 3px solid var(--golden--);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+}
+
+.verification-container h1 {
+    font-size: 36pt;
+    color: var(--golden--);
+    margin-bottom: 20px;
+}
+
+.verification-container p {
+    margin-bottom: 30px;
+    color: var(--lavender--);
+}
+
+.code-input-group {
+    margin-bottom: 30px;
+}
+
+.code-inputs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.code-inputs .code-input {
+    width: 50px;
+    height: 60px;
+    border: 2px solid var(--lavender--);
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color--);
+    font-size: 24pt;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.code-inputs .code-input:focus {
+    outline: none;
+    border-color: var(--golden--);
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.verify-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--lavender--);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 24pt;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.verify-btn:hover {
+    background-color: var(--golden--);
+    color: black;
+    transform: scale(1.05);
+}
+
+.message {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.error {
+    background-color: rgba(255, 0, 0, 0.2);
+    border: 2px solid red;
+    color: #ffcccc;
+}
+
+.success {
+    background-color: rgba(0, 255, 0, 0.2);
+    border: 2px solid green;
+    color: #ccffcc;
+}
+
+/* Landscape */
 @media screen and (orientation: landscape) {
     * {
         --font-size--: 20pt;
-
-        --background-color--: black;
-        --text-color--: white;
-
-        --golden--: #ebd37c;
-        --lavender--: #6f51c1;
     }
-
-    }
-
-    #golden{
-        color: var(--golden--);
-        background-color: rgba(0,0,0,0);
-    }
-
-    html,
-    body {
-        background-color: var(--background-color--);
-        color: var(--text-color--);
-
-        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    }
-
-    .code-form {
-        position: relative;
-
-        width: 50%;
-        height: 100%;
-
-        display: flex;
-        flex-direction: column;
-
-        vertical-align: middle;
-        align-items: center;
-        justify-content: center;
-
-        margin-left: auto;
-        margin-right: auto;
-
-        /* margin-top: 10px; */
-
-    }
-
-    .content {
-        position: relative;
-        border: 3px var(--golden--) solid;
-        border-radius: 200% 40% 200% 40%;
-
-        padding: 20%;
-
-        display: block;
-    }
-
-    .label {
-        position: relative;
-
-        font-size: var(--font-size--);
-    }
-
-    .input {
-        position: relative;
-
-        background-color: rgba(0, 0, 0, 0) !important;
-        border-color: rgba(0, 0, 0, 0) !important;
-
-        border-bottom-color: var(--golden--) !important;
-
-        text-align: center !important;
-
-        margin: 0;
-        padding: 0;
-
-        font-size: var(--font-size--);
-        /* color: var(--text-color--); */
-
-        color: var(--lavender--);
-
-
-    }
-
-    .input:focus {
-        /* border: none !important; */
-        outline: none !important;
-
-        /* color: var(--text-color--); */
-        font-size: var(--font-size--);
-
-        text-align: center !important;
-    }
-
-    .header-1 {
-        position: relative;
-
-        width: 100%;
-
-        text-align: center;
-
-        margin: 0;
-        padding: 0;
-
-    }
-
-    .input-block {
-        position: relative;
-
-        margin-left: auto;
-        margin-right: auto;
-
-        text-align: center;
-
-        margin-top: 5px;
-
-        display: flex;
-        flex-direction: column;
-    }
-
-    .submit {
-        position: relative;
-
-        margin-left: auto;
-        margin-right: auto;
-
-        font-size: var(--font-size--);
-
-        width: 25%;
-
-        background-color: rgba(0, 0, 0, 0);
-
-        color: var(--text-color--);
-
-        border: var(--golden--) 3px solid;
-        border-radius: 15px;
-
-        transition: all 1s ease-in-out;
-    }
-
-    .submit:hover {
-        /* background-color: var(--lavender--);
-        border-color: var(--lavender--); */
-        background-color: var(--lavender--);
-        border-radius: 5px;
-
-    }
-
-    .flashed_messages {
-        position: fixed;
-
-        z-index: 1000;
-
-        /* bottom: 15px;
-        right: 15px; */
-
-        bottom: 15px;
-        right: 15px;
-
-        color: var(--text-color--);
-
-        color: 0;
-        bottom: -20%;
-        animation: slide_in_out 5s ease-in-out;
-    }
-
-    .flashed_message {
-        color: var(--text-color--);
-        font-size: var(--font-size--);
-
-        margin: 0;
-        padding: 15px;
-    }
-
-    @keyframes slide_in_out {
-        0% {
-            bottom: -20%;
-            background-color: none;
-            color: none;
-        }
-
-        20% {
-            bottom: 15px;
-            background-color: var(--golden--);
-            color: var(--font-size--);
-        }
-
-        80% {
-            bottom: 15px;
-            background-color: var(--golden--);
-            color: var(--font-size--);
-        }
-
-        100% {
-            background-color: none;
-            bottom: -20%;
-            color: none;
-        }
-    }
-
+    
     .verification-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        width: 40%;
     }
-
-    .verification-title {
-        font-size: 20px;
-        font-weight: 500;
-        margin-bottom: 20px;
-        color: #333;
+    
+    .verification-container p,
+    .code-input-group label {
+        font-size: var(--font-size--);
     }
+}
 
-    .code-inputs {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 30px;
+/* Portrait */
+@media screen and (orientation: portrait) {
+    * {
+        --font-size--: 16pt;
     }
-
-    .code-input {
-        width: 50px;
-        height: 60px;
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
-        text-align: center;
-        font-size: 24px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        outline: none;
+    
+    html, body {
+        padding: 20px;
     }
-
-    .code-input:focus {
-        border-color: #ffcc00;
-        box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.2);
+    
+    .verification-container {
+        width: 90%;
+        padding: 30px;
     }
-
-    .code-input.filled {
-        border-color: #ffcc00;
-        background-color: #fffbf0;
+    
+    .verification-container h1 {
+        font-size: 28pt;
     }
-
-    .submit-button {
-        padding: 12px 32px;
-        background-color: #ffcc00;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
+    
+    .verification-container p,
+    .code-input-group label {
+        font-size: var(--font-size--);
     }
-
-    .submit-button:hover {
-        background-color: #f2c200;
+    
+    .code-inputs .code-input {
+        width: 40px;
+        height: 50px;
+        font-size: 20pt;
     }
-
-    .submit-button:disabled {
-        background-color: #e0e0e0;
-        cursor: not-allowed;
+    
+    .verify-btn {
+        font-size: 20pt;
     }
-
-    .hidden-code {
-        display: none;
+    
+    .verify-btn:hover {
+        transform: scale(1.02);
     }
 }

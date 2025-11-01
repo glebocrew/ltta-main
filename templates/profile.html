@@ -94,7 +94,7 @@
     </div>
     {% if user_events and user_events != -1 %}
     {% for event in user_events %}
-    <div class="user">
+    <div class="event">
         <img src="{{ url_for('static', filename=event['image']) }}">
 
         <p class="type">{{ event["type"] }}</p>

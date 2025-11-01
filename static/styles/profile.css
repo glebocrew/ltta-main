@@ -308,4 +308,108 @@
             color: none;
         }
     }
+
+    /* Стили для списка мероприятий (events) */
+    .event {
+        display: grid;
+        grid-template-columns:
+            80px
+            /* изображение */
+            120px
+            /* тип */
+            150px
+            /* дата и время */
+            minmax(200px, 1fr)
+            /* заголовок */
+            minmax(250px, 2fr)
+            /* содержание */
+            auto;
+        /* кнопка */
+        align-items: start;
+        border: 2px solid var(--golden--);
+        border-radius: 15px;
+        padding: 15px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        gap: 15px;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: rgba(235, 211, 124, 0.05);
+    }
+
+    .event:hover {
+        border-color: var(--lavender--);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(111, 81, 193, 0.4);
+        background-color: rgba(111, 81, 193, 0.05);
+    }
+
+    .event img {
+        width: 70px;
+        height: 70px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid var(--lavender--);
+        grid-row: span 2;
+        align-self: center;
+    }
+
+    .event .type {
+        font-size: calc(var(--font-size--) * 0.5);
+        color: var(--lavender--);
+        font-weight: bold;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        align-self: center;
+    }
+
+    .event .datetime {
+        font-size: calc(var(--font-size--) * 0.4);
+        color: var(--golden--);
+        margin: 0;
+        font-family: 'Courier New', monospace;
+        align-self: center;
+    }
+
+    .event .title {
+        font-size: calc(var(--font-size--) * 0.6);
+        color: var(--text-color--);
+        font-weight: bold;
+        margin: 0;
+        line-height: 1.3;
+        align-self: center;
+    }
+
+    .event .content {
+        font-size: calc(var(--font-size--) * 0.45);
+        color: var(--text-color--);
+        margin: 0;
+        line-height: 1.4;
+        opacity: 0.9;
+        align-self: center;
+    }
+
+    .event button {
+        background-color: rgba(0, 0, 0, 0);
+        border: 2px solid var(--golden--);
+        border-radius: 8px;
+        color: var(--text-color--);
+        font-size: calc(var(--font-size--) * 0.45);
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        height: 40px;
+        box-sizing: border-box;
+        align-self: center;
+        justify-self: end;
+        min-width: 120px;
+    }
+
+    .event button:hover {
+        background-color: var(--golden--);
+        color: var(--background-color--);
+        transform: scale(1.05);
+    }
 }
