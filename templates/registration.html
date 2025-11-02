@@ -1,109 +1,919 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrandMaster Registration</title>
+    <style>
+        /* CSS Variables */
+        :root {
+            --background-color: #0a0a0a;
+            --text-color: #ffffff;
+            --golden: #ebd37c;
+            --lavender: #6f51c1;
+            --dark-lavender: #5a4199;
+            --error-color: #ff4757;
+            --success-color: #2ed573;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='styles/registration.css') }}" rel="stylesheet">
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <title>Registration Page</title>
+        html, body {
+            height: 100%;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            overflow-x: hidden;
+        }
+
+        /* Registration Container */
+        .reg-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .reg-form {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            position: relative;
+            border: 2px solid var(--golden);
+            border-radius: 20px;
+            padding: 30px 20px;
+            background: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(235, 211, 124, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .content:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Header */
+        .header-1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        #golden {
+            background: linear-gradient(45deg, var(--golden), #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #lavender {
+            background: linear-gradient(45deg, var(--lavender), #9d7de0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Input Fields */
+        .input-block {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .input {
+            width: 100%;
+            padding: 14px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(235, 211, 124, 0.3);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--golden);
+            box-shadow: 0 0 0 2px rgba(235, 211, 124, 0.2);
+        }
+
+        .input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Custom Select */
+        .select {
+            width: 100%;
+            border: 1px solid rgba(235, 211, 124, 0.3);
+            border-radius: 8px;
+            outline: none;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .select_value {
+            padding: 14px 15px;
+            display: block;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .select_dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            list-style-type: none;
+            border: 1px solid rgba(235, 211, 124, 0.3);
+            background-color: rgba(15, 15, 15, 0.95);
+            z-index: 10;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .select.open .select_dropdown {
+            max-height: 200px;
+            opacity: 1;
+            transform: translateY(0);
+            overflow-y: auto;
+        }
+
+        .select_dropdown::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .select_dropdown::-webkit-scrollbar-track {
+            background: var(--background-color);
+            border-radius: 0 3px 3px 0;
+        }
+
+        .select_dropdown::-webkit-scrollbar-thumb {
+            background: var(--lavender);
+            border-radius: 4px;
+        }
+
+        .select_dropdown::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-lavender);
+        }
+
+        .select_option {
+            padding: 12px 15px;
+            transition: background-color 0.2s ease;
+            color: var(--text-color);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .select_option:hover {
+            background-color: rgba(111, 81, 193, 0.2);
+        }
+
+        .select_option:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-input {
+            display: none;
+        }
+
+        /* Submit Button */
+        .submit {
+            width: 100%;
+            padding: 16px;
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--golden);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit:hover {
+            background: var(--lavender);
+            border-color: var(--lavender);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(111, 81, 193, 0.4);
+        }
+
+        .submit:active {
+            transform: translateY(0);
+        }
+
+        /* Flashed Messages */
+        .flashed_messages {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+        }
+
+        .flashed_message {
+            background: var(--golden);
+            color: #000;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: slide_in_out 5s ease-in-out forwards;
+        }
+
+        @keyframes slide_in_out {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            10% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            90% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Background Decoration */
+        .bg-decoration {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            background: radial-gradient(circle, rgba(235, 211, 124, 0.1) 0%, rgba(235, 211, 124, 0) 70%);
+        }
+
+        .circle-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            right: -50px;
+            background: radial-gradient(circle, rgba(111, 81, 193, 0.1) 0%, rgba(111, 81, 193, 0) 70%);
+        }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 10px;
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .reg-form {
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            .content {
+                padding: 25px 15px;
+                border-radius: 15px;
+            }
+
+            .header-1 {
+                font-size: 1.6rem;
+                margin-bottom: 20px;
+            }
+
+            .input {
+                padding: 16px 15px;
+            }
+
+            .flashed_messages {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: 100%;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .reg-container {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .header-1 {
+                font-size: 1.4rem;
+            }
+
+            .input-block {
+                margin-bottom: 15px;
+            }
+
+            .submit {
+                padding: 14px;
+                font-size: 1rem;
+            }
+
+            .select_value, .select_option {
+                padding: 12px 15px;
+            }
+        }
+
+        /* Landscape orientation for mobile */
+        @media screen and (max-height: 600px) and (orientation: landscape) {
+            .reg-container {
+                padding: 10px;
+                justify-content: flex-start;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .header-1 {
+                margin-bottom: 15px;
+                font-size: 1.4rem;
+            }
+
+            .input-block {
+                margin-bottom: 12px;
+            }
+
+            .form-section {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
 </head>
 
-
 <body>
-    <form method="POST" class="reg-form">
-        <div class="content">
-            <h1 class="header-1"><mark id="golden">Grand</mark><mark id="lavender">Master</mark> Registration</h1>
-            <div id="username" class="input-block">
-                <label for="username" class="label">никнейм</label>
-                <input type="text" name="username" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-            <br>
-            <div id="name" class="input-block">
-                <label for="name" class="label">имя</label>
-                <input type="text" name="name" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-
-            <div id="surname" class="input-block">
-                <label for="surname" class="label">фамилия</label>
-                <input type="text" name="surname" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-            <br>
-            <div id="email" class="input-block">
-                <label for="email" class="label">email</label>
-                <input type="text" name="email" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-            <br>
-            <div id="grade" class="input-block">
-                <div class="select" tabindex="1">
-                    <span class="select_value">класс</span>
-                    <ul class="select_dropdown">
-                        <li class="select_option">8</li>
-                        <li class="select_option">9</li>
-                        <li class="select_option">10</li>
-                        <li class="select_option">11</li>
-                    </ul>
-                </div>
-                <input type="hidden" value="" name="grade" required pattern=".*\S+.*" class="dropdown-input" data-target="input[name='grade']">
-            </div>
-            <br>
-            <div id="faculty" class="input-block">
-                <!-- <select name="faculty">
-                    <option>МатИнфо</option>
-                    <option>Восток</option>
-                    <option>Гум</option>
-                    <option>Дизайн</option>
-                    <option>ЕН</option>
-                    <option>МатФиз</option>
-                    <option>МатЭк</option>
-                    <option>СоцЭк</option>
-                    <option>Юр</option>
-                    <option>Футуритет</option>
-                </select> -->
-                <div class="select" tabindex="1">
-                    <span class="select_value">факультет</span>
-                    <ul class="select_dropdown">
-                        {% if faculties %}
-                        {% for faculty in faculties %}
-                        <li class="select_option">{{ faculty }}</li>
-                        {% endfor %}
-                        {% endif %}
-                    </ul>
-                </div>
-                <input type="hidden" value="" name="faculty" required pattern=".*\S+.*" class="dropdown-input" data-target="input[name='faculty']">
-            </div>
-
-            <br>
-
-            <div id="password" class="input-block">
-                <label for="password" class="label">пароль</label>
-                <input type="password" name="password" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-
-            <div id="repeat_password" class="input-block">
-                <label for="repeat_password" class="label">повторите пароль</label>
-                <input type="password" name="repeat_password" required pattern=".*\S+.*" class="input" autocomplete="off">
-            </div>
-
-            <div id="submit" class="input-block">
-                <button type="submit" id="SubmitButton" class="submit">готово!</button>
-            </div>
-    </form>
+    <div class="bg-decoration">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
     </div>
 
+    <div class="reg-container">
+        <form method="POST" class="reg-form">
+            <div class="content">
+                <h1 class="header-1"><mark id="golden">Grand</mark><mark id="lavender">Master</mark> Registration</h1>
+                
+                <div class="form-section">
+                    <div id="username" class="input-block">
+                        <label for="username" class="label">Никнейм</label>
+                        <input type="text" name="username" required pattern=".*\S+.*" class="input" autocomplete="off" placeholder="Введите ваш никнейм">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div id="name" class="input-block">
+                        <label for="name" class="label">Имя</label>
+                        <input type="text" name="name" required pattern=".*\S+.*" class="input" autocomplete="off" placeholder="Введите ваше имя">
+                    </div>
+
+                    <div id="surname" class="input-block">
+                        <label for="surname" class="label">Фамилия</label>
+                        <input type="text" name="surname" required pattern=".*\S+.*" class="input" autocomplete="off" placeholder="Введите вашу фамилию">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div id="email" class="input-block">
+                        <label for="email" class="label">Email</label>
+                        <input type="email" name="email" required pattern=".*\S+.*" class="input" autocomplete="off" placeholder="Введите ваш email">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div id="grade" class="input-block">
+                        <div class="select" tabindex="1">
+                            <span class="select_value">Класс</span>
+                            <ul class="select_dropdown">
+                                <li class="select_option">8</li>
+                                <li class="select_option">9</li>
+                                <li class="select_option">10</li>
+                                <li class="select_option">11</li>
+                            </ul>
+                        </div>
+                        <input type="hidden" value="" name="grade" required pattern=".*\S+.*" class="dropdown-input" data-target="input[name='grade']">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div id="faculty" class="input-block">
+                        <div class="select" tabindex="1">
+                            <span class="select_value">Факультет</span>
+                            <ul class="select_dropdown">
+                                {% if faculties %}
+                                {% for faculty in faculties %}
+                                <li class="select_option">{{ faculty }}</li>
+                                {% endfor %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <input type="hidden" value="" name="faculty" required pattern=".*\S+.*" class="dropdown-input" data-target="input[name='faculty']">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div id="password" class="input-block">
+                        <label for="password" class="label">Пароль</label>
+                        <input type="password" name="password" required pattern=".*\S+.*" class="input" autocomplete="off" placeholder="Введите пароль">
+                    </div>
+
+                    <div id="repeat_password" class="input-block">
+                        <label for="repeat_password" class="label">Повторите пароль</label>
+                        <input type="password" name="repeat_password" required pattern=".*\S+.*" class="input" autocomplete="off" placeholder="Повторите пароль">
+                    </div>
+                </div>
+
+                <div id="submit" class="input-block">
+                    <button type="submit" id="SubmitButton" class="submit">Готово!</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Flashed Messages -->
     {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="flashed_messages">
-        {% for message in messages %}
-        <p class="flashed_message">{{ message }}</p>
-        {% endfor %}
-    </div>
-    {% endif %}
+        {% if messages %}
+        <div class="flashed_messages">
+            {% for message in messages %}
+                <p class="flashed_message">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
     {% endwith %}
+
+    <script>
+        // Custom Select Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const selects = document.querySelectorAll('.select');
+            
+            selects.forEach(select => {
+                const value = select.querySelector('.select_value');
+                const options = select.querySelectorAll('.select_option');
+                const hiddenInput = select.nextElementSibling;
+                
+                // Toggle dropdown
+                value.addEventListener('click', function() {
+                    select.classList.toggle('open');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!select.contains(e.target)) {
+                        select.classList.remove('open');
+                    }
+                });
+                
+                // Select option
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        value.textContent = this.textContent;
+                        hiddenInput.value = this.textContent;
+                        select.classList.remove('open');
+                    });
+                });
+            });
+            
+            // Form validation
+            const form = document.querySelector('.reg-form');
+            form.addEventListener('submit', function(e) {
+                const password = document.querySelector('input[name="password"]');
+                const repeatPassword = document.querySelector('input[name="repeat_password"]');
+                
+                if (password.value !== repeatPassword.value) {
+                    e.preventDefault();
+                    alert('Пароли не совпадают!');
+                    return false;
+                }
+                
+                // Check if grade and faculty are selected
+                const gradeInput = document.querySelector('input[name="grade"]');
+                const facultyInput = document.querySelector('input[name="faculty"]');
+                
+                if (!gradeInput.value) {
+                    e.preventDefault();
+                    alert('Пожалуйста, выберите класс');
+                    return false;
+                }
+                
+                if (!facultyInput.value) {
+                    e.preventDefault();
+                    alert('Пожалуйста, выберите факультет');
+                    return false;
+                }
+            });
+        });
+    </script>
 </body>
-<script src="{{ url_for('static', filename='scripts/registration.js') }}"></script>
+<!-- MENU -->
+<style>
+.ltta-sidebar {
+    --font-size--: 20pt;
+    --text-color--: #ebd37c;
+    --golden--: #ebd37c;
+    --lavender--: #6f51c1;
+    --card-bg--: rgba(30, 30, 30, 0.95);
+    --border-radius--: 16px;
+    --transition--: all 0.3s ease;
+    --tennis-orange: #ebd37c;
+    --tennis-blue: #6f51c1;
+    
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translate(-290px, -50%);
+    width: 300px;
+    height: 80vh;
+    background: var(--card-bg--);
+    backdrop-filter: blur(10px);
+    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
+    padding: 25px 20px;
+    border: 1px solid rgba(111, 81, 193, 0.2);
+    border-left: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 10000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: var(--transition--);
+}
 
+.ltta-sidebar:hover,
+.ltta-sidebar:focus-within {
+    transform: translate(0, -50%);
+}
 
+/* Создаем область для наведения */
+.ltta-sidebar-trigger {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 100px;
+    background: transparent;
+    z-index: 9999;
+    cursor: pointer;
+}
 
+.ltta-sidebar-trigger:hover + .ltta-sidebar,
+.ltta-sidebar:hover {
+    transform: translate(0, -50%);
+}
+
+.ltta-sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
+}
+
+.ltta-sidebar-logo {
+    font-size: calc(var(--font-size--) * 1.8);
+    color: var(--tennis-orange);
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.ltta-sidebar-subtitle {
+    font-size: calc(var(--font-size--) * 0.6);
+    color: rgba(235, 211, 124, 0.7);
+}
+
+.ltta-developer-info {
+    font-size: calc(var(--font-size--) * 0.5);
+    color: rgba(235, 211, 124, 0.5);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+.ltta-nav-section {
+    margin-bottom: 25px;
+}
+
+.ltta-nav-title {
+    font-size: calc(var(--font-size--) * 0.7);
+    color: var(--tennis-blue);
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 10px;
+}
+
+.ltta-nav-title::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tennis-orange);
+}
+
+.ltta-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ltta-nav-link {
+    color: var(--text-color--);
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 10px;
+    transition: var(--transition--);
+    font-size: calc(var(--font-size--) * 0.65);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid transparent;
+}
+
+.ltta-nav-link:hover {
+    background: rgba(111, 81, 193, 0.15);
+    border-color: rgba(111, 81, 193, 0.3);
+    transform: translateX(5px);
+}
+
+.ltta-nav-link.active {
+    background: rgba(111, 81, 193, 0.2);
+    border-color: var(--tennis-blue);
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-link::before {
+    content: '▶';
+    font-size: calc(var(--font-size--) * 0.5);
+    color: var(--tennis-blue);
+    transition: var(--transition--);
+}
+
+.ltta-nav-link:hover::before {
+    transform: translateX(3px);
+}
+
+.ltta-nav-link.active::before {
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-badge {
+    background: var(--tennis-blue);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: calc(var(--font-size--) * 0.5);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.ltta-nav-badge.admin {
+    background: var(--tennis-orange);
+    color: #000;
+}
+
+.ltta-sidebar-indicator {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 60px;
+    background: var(--tennis-blue);
+    border-radius: 0 10px 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover .ltta-sidebar-indicator {
+    opacity: 0;
+}
+
+.ltta-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-track {
+    background: rgba(111, 81, 193, 0.1);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb {
+    background: var(--tennis-blue);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--tennis-orange);
+}
+
+@media (max-width: 768px) {
+    .ltta-sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        height: 100vh;
+        top: 0;
+        transform: translateX(-100%);
+    }
+    
+    .ltta-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .ltta-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 10001;
+        background: var(--golden--);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transition: var(--transition--);
+    }
+    
+    .ltta-menu-toggle:hover {
+        background: var(--lavender--);
+        color: #000;
+    }
+    
+    .ltta-sidebar-indicator {
+        display: none;
+    }
+    
+    .ltta-sidebar-trigger {
+        display: none;
+    }
+}
+</style>
+
+<!-- Триггер для наведения -->
+<div class="ltta-sidebar-trigger"></div>
+
+<!-- Mobile Toggle Button -->
+<button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
+
+<!-- Sidebar Navigation -->
+<nav class="ltta-sidebar" id="lttaSidebar">
+    <div class="ltta-sidebar-indicator">☰</div>
+    
+    <div class="ltta-sidebar-header">
+        <div class="ltta-sidebar-logo">LTTA</div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Пользователь</div>
+        <div class="ltta-nav-links">
+            <a href="/login" class="ltta-nav-link">Вход в систему</a>
+            <a href="/registration" class="ltta-nav-link">Регистрация</a>
+            <a href="/profile" class="ltta-nav-link">Личный кабинет</a>
+            <a href="/events" class="ltta-nav-link">События</a>
+            <a href="/ratings" class="ltta-nav-link">Рейтинг</a>
+            <a href="/help" class="ltta-nav-link">Помощь</a>
+            <a href="/logout" class="ltta-nav-link">Выход</a>
+        </div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Администрирование</div>
+        <div class="ltta-nav-links">
+            <a href="/members" class="ltta-nav-link">
+                Участники
+                <span class="ltta-nav-badge admin">админ</span>
+            </a>
+            <a href="/events_list" class="ltta-nav-link">
+                Управление событиями
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+            <a href="/create_event" class="ltta-nav-link">
+                Создание события
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Справка</div>
+        <div class="ltta-nav-links">
+            <a href="/help#admin-scenarios" class="ltta-nav-link">
+                Для администраторов
+            </a>
+            <a href="/help#user-scenarios" class="ltta-nav-link">Руководство пользователя</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('lttaMenuToggle');
+    const sidebar = document.getElementById('lttaSidebar');
+    
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('.ltta-nav-link');
+    
+    links.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+    
+    function checkMobile() {
+        if (window.innerWidth <= 768) {
+            menuToggle.style.display = 'flex';
+            
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('mobile-open');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (sidebar.classList.contains('mobile-open') &&
+                    !sidebar.contains(e.target) && 
+                    e.target !== menuToggle) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+        } else {
+            menuToggle.style.display = 'none';
+        }
+    }
+    
+    checkMobile();
+    
+    window.addEventListener('resize', checkMobile);
+});
+</script>
 </html>

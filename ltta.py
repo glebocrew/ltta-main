@@ -51,6 +51,7 @@ app.static_folder = "static/"
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+login_manager.login_message = 'Пожалуйста, зарегистрируйтесь чтобы перейти на данную страницу'
 
 # flask app conf
 
@@ -240,11 +241,11 @@ def registration():
             )
         except smtplib.SMTPSenderRefused or smtplib.SMTPRecipientsRefused as e:
             logger.log("error", f"Sending code on {email} failed because of its incorrectance! Full error {e}.")
-            return render_template("registration.html", message="Invalid email!")
+            return render_template("registration.html", message="Некорректный email!")
 
         except smtplib.SMTPServerDisconnected as e:
             logger.log("error", f"SMTP server was disconnected! Trying to reconnect! Full error {e}")
-            return render_template("registration.html", message="Invalid email!")
+            return render_template("registration.html", message="Некорректный email!")
 
         server.quit()
         return redirect(url_for("verification", email=email))
@@ -256,13 +257,13 @@ def verification(email):
     if request.method == 'POST':
         temp_user = safe_db_operation(connection.get_temp_profile_by_email, "codes", email)
         if temp_user == -1:
-            flash("Code timeout. Try again!")
+            flash("Время действия кода истекло. Попробуйте снова!")
             return redirect("/registration")
             
         code_time = datetime.strptime(temp_user[2], "%Y-%m-%d %H:%M:%S.%f")
 
         if (datetime.now() - code_time).total_seconds() > 300:
-            flash("Code timeout. Try again!")
+            flash("Время действия кода истекло. Попробуйте снова!")
             return redirect("/registration")
         
 
@@ -274,7 +275,7 @@ def verification(email):
             safe_db_operation(connection.drop_temp_profile_by_email, "codes", email)
             return redirect("/login")
         else:
-            flash("Code is incorrect. Try again!")
+            flash("Код неверный. Попробуйте снова!")
             return redirect(url_for('verification', email=email))
 
     return render_template('verification.html', email=email)
@@ -336,7 +337,7 @@ def edit_profile():
             username = request.form.get("username")
 
             if safe_db_operation(connection.find_user_by_username, "users", username) and username != user_data["username"]:
-                return render_template("edit_profile.html", can_edit=True,user_data=user_data, message="This username is already taken!")
+                return render_template("edit_profile.html", can_edit=True,user_data=user_data, message="Этот никнейм уже занят!")
 
             if username != user_data["username"]:
                 if user_data["avatar"].split("/")[-1] != "default.png":
@@ -447,7 +448,7 @@ def members():
                     )
                                                      
                     if user_role and user_role[0] == "admin":
-                        flash("You can't delete admins")
+                        flash("Вы не можете удалять администраторов")
                         return redirect("members")
                       
                     safe_db_operation(connection.delete_user_by_id, "users", request.form.get("id"))
@@ -476,14 +477,35 @@ def member(user):
         return redirect("/members")
 
 @app.route("/member/<user>/edit_profile", methods=['GET', 'POST'])
+@login_required
 def edit_profile_admin(user):
     try:
         user_data = safe_db_operation(connection.get_user_by_username, "users", user)
-        admin_name_surname = safe_db_operation(connection.get_user_name_surname, "users", current_user.id)
-        logger.log("debug", f"user id: {current_user.id}")
-        logger.log("debug", f"user id: {admin_name_surname}")
+        
+        # Получаем данные текущего администратора
+        admin_data = safe_db_operation(connection.get_user_by_id, "users", current_user.id)
+        if admin_data == -1:
+            flash("Ошибка: администратор не найден")
+            return redirect("/members")
+            
+        # Создаем словарь с именем и фамилией администратора
+        admin_name_surname = {
+            "name": admin_data.get("name", ""),
+            "surname": admin_data.get("surname", "")
+        }
         
         if request.method == 'POST':
+            # Проверяем подтверждение администратора
+            confirmation_name = request.form.get("admin_confirmation", "").strip()
+            expected_confirmation = f"{admin_name_surname['name']} {admin_name_surname['surname']}"
+            
+            # if confirmation_name != expected_confirmation:
+            #     flash("Подтверждение неверно. Введите ваше имя и фамилию для подтверждения изменений.")
+            #     return render_template("admin/edit_profile_admin_view.html", 
+            #                            user_data=user_data, 
+            #                            admin_name_surname=admin_name_surname,
+            #                            faculties=load(open("conf.json"))["faculties"])
+
             if "admin" not in user_data["role"]:
                 avatar = request.files.get("avatar")
                 extention = avatar.filename[-3:] if avatar and avatar.filename else ""
@@ -511,7 +533,11 @@ def edit_profile_admin(user):
                 username = request.form.get("username")
 
                 if safe_db_operation(connection.find_user_by_username, "users", username) and username != user_data["username"]:
-                    return render_template("admin/edit_profile_admin_view.html", user_data=user_data, admin_name_surname=admin_name_surname, message="This username is already taken!")
+                    return render_template("admin/edit_profile_admin_view.html", 
+                                           user_data=user_data, 
+                                           admin_name_surname=admin_name_surname, 
+                                           faculties=load(open("conf.json"))["faculties"],
+                                           message="Этот никнейм уже занят!")
 
                 if username != user_data["username"]:
                     if user_data["avatar"].split("/")[-1] != "default.png":
@@ -541,18 +567,16 @@ def edit_profile_admin(user):
                 if success:
                     return redirect(url_for("member", user=username))
                 else:
-                    flash(f"Ошибка обновления профиля")
+                    flash("Ошибка обновления профиля")
             else:
-                flash("Cannot edit admin!")
+                flash("Нельзя редактировать администратора!")
                 return redirect("/members")
 
-        admin_name_surname = {"name": admin_name_surname[0], "surname": admin_name_surname[1]} if admin_name_surname != -1 else {"name": "", "surname": ""}
-        
         return render_template("admin/edit_profile_admin_view.html", 
                                user_data=user_data, 
                                admin_name_surname=admin_name_surname, 
                                username_len=len(user_data["username"]), 
-                               faculties = load(open("conf.json"))["faculties"])
+                               faculties=load(open("conf.json"))["faculties"])
     except Exception as e:
         logger.log("error", f"Edit profile admin error: {e}")
         flash("Ошибка загрузки страницы")
@@ -655,7 +679,7 @@ def edit_event(event):
         
         matches = safe_db_operation(connection.get_matches_by_id, "matches", safe_db_operation(connection.get_event_id_by_title, "events", event_info['title']))
         
-        event_info["datetime"] = event_info["datetime"].strftime("%Y-%m-%dT%H:%M")
+        # event_info["datetime"] = event_info["datetime"].strftime("%Y-%m-%dT%H:%M")
         admin_info = safe_db_operation(connection.get_user_name_surname, "users", current_user.id)
         admin_info = {"name": admin_info[0], "surname": admin_info[1]} if admin_info != -1 else {"name": "", "surname": ""}
         
@@ -663,6 +687,8 @@ def edit_event(event):
             if request.form.get("action") == "changes":
                 image = request.files.get("image")
                 image_path = event_info["image"]  
+
+                logger.log('d', request.form.get("counter"))
                 
                 
                 if image and image.filename != "":
@@ -791,7 +817,7 @@ def edit_event(event):
                     else:
                         flash("Ошибка завершения события")
     
-                        
+        logger.log("d", f"Event time is: {event_info["datetime"]}")
         return render_template("admin_editor/edit_event.html", event_info=event_info, admin_info=admin_info, matches=matches, counter=len(matches), participants_list=participants_list)
     except Exception as e:
         logger.log("error", f"Edit event error: {e}")
@@ -833,6 +859,8 @@ def event(event):
             event_title = request.form.get("event")
 
             safe_db_operation(connection.append_participant, "events", current_user.id, event_title)
+
+            return redirect(url_for("event", event=event_title))
 
 
         return render_template("event.html", event=event_data, participants=participants, current_user_id=current_user.id)
@@ -948,9 +976,13 @@ def finished_event(event):
         flash("Ошибка загрузки завершенного события")
         return redirect("/events")
 
+@app.route("/help")
+def help_page():
+    return render_template("help.html")
+
 @app.errorhandler(413)
 def request_entity_too_large(error):
-    flash("File is too large")
+    flash("Файл слишком большой")
     return redirect("/edit_profile")
 
 @app.errorhandler(404)

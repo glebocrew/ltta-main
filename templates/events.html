@@ -401,8 +401,8 @@
 </head>
 <body>
     <div class="page-header">
-        <h1>Events Dashboard</h1>
-        <p class="page-subtitle">Discover and explore upcoming events and past activities</p>
+        <h1>События</h1>
+        <p class="page-subtitle">Регистрируйтесь и приходите на наши события!</p>
     </div>
 
     <!-- Flash Messages -->
@@ -418,8 +418,8 @@
 
     <!-- Active Events Section -->
     <div class="section-header">
-        <h2>Upcoming Events</h2>
-        <div class="events-count">{{ events|length if events else 0 }} events</div>
+        <h2>Новые События</h2>
+        <div class="events-count">{{ events|length if events else 0 }} вкладки</div>
     </div>
 
     <div class="events-container">
@@ -438,7 +438,7 @@
                             <form method="POST" class="event-form">
                                 <input name="action" type="hidden" value="view">
                                 <input name="event_title" type="hidden" value="{{ event['title'] }}">
-                                <button type="submit" class="view-event-btn">View Details</button>
+                                <button type="submit" class="view-event-btn">Подробности</button>
                             </form>
                         </div>
                     </div>
@@ -447,7 +447,7 @@
         {% else %}
             <div class="no-events">
                 <div class="no-events-icon">📅</div>
-                <h3>No Upcoming Events</h3>
+                <h3>Новых Событий нет</h3>
                 <p>There are currently no scheduled events. Check back later for updates!</p>
             </div>
         {% endif %}
@@ -455,8 +455,8 @@
 
     <!-- Finished Events Section -->
     <div class="section-header">
-        <h2>Past Events</h2>
-        <div class="events-count">{{ finished_events|length if finished_events else 0 }} events</div>
+        <h2>Завершённые События</h2>
+        <div class="events-count">{{ finished_events|length if finished_events else 0 }} вкладки</div>
     </div>
 
     <div class="events-container">
@@ -475,7 +475,7 @@
                             <form method="POST" class="event-form">
                                 <input name="action" type="hidden" value="view_finished">
                                 <input name="event_title" type="hidden" value="{{ event['title'] }}">
-                                <button type="submit" class="view-event-btn">View Details</button>
+                                <button type="submit" class="view-event-btn">Подробности</button>
                             </form>
                         </div>
                     </div>
@@ -484,10 +484,370 @@
         {% else %}
             <div class="no-events">
                 <div class="no-events-icon">📋</div>
-                <h3>No Past Events</h3>
-                <p>There are no completed events in the archive yet.</p>
+                <h3>Завершённых Событий нет</h3>
+                <p>Пока что в архиве нет завершённых событий</p>
             </div>
         {% endif %}
     </div>
 </body>
+<!-- MENU -->
+<style>
+.ltta-sidebar {
+    --font-size--: 20pt;
+    --text-color--: #ebd37c;
+    --golden--: #ebd37c;
+    --lavender--: #6f51c1;
+    --card-bg--: rgba(30, 30, 30, 0.95);
+    --border-radius--: 16px;
+    --transition--: all 0.3s ease;
+    --tennis-orange: #ebd37c;
+    --tennis-blue: #6f51c1;
+    
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translate(-290px, -50%);
+    width: 300px;
+    height: 80vh;
+    background: var(--card-bg--);
+    backdrop-filter: blur(10px);
+    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
+    padding: 25px 20px;
+    border: 1px solid rgba(111, 81, 193, 0.2);
+    border-left: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 10000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover,
+.ltta-sidebar:focus-within {
+    transform: translate(0, -50%);
+}
+
+/* Создаем область для наведения */
+.ltta-sidebar-trigger {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 100px;
+    background: transparent;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.ltta-sidebar-trigger:hover + .ltta-sidebar,
+.ltta-sidebar:hover {
+    transform: translate(0, -50%);
+}
+
+.ltta-sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
+}
+
+.ltta-sidebar-logo {
+    font-size: calc(var(--font-size--) * 1.8);
+    color: var(--tennis-orange);
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.ltta-sidebar-subtitle {
+    font-size: calc(var(--font-size--) * 0.6);
+    color: rgba(235, 211, 124, 0.7);
+}
+
+.ltta-developer-info {
+    font-size: calc(var(--font-size--) * 0.5);
+    color: rgba(235, 211, 124, 0.5);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+.ltta-nav-section {
+    margin-bottom: 25px;
+}
+
+.ltta-nav-title {
+    font-size: calc(var(--font-size--) * 0.7);
+    color: var(--tennis-blue);
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 10px;
+}
+
+.ltta-nav-title::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tennis-orange);
+}
+
+.ltta-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ltta-nav-link {
+    color: var(--text-color--);
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 10px;
+    transition: var(--transition--);
+    font-size: calc(var(--font-size--) * 0.65);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid transparent;
+}
+
+.ltta-nav-link:hover {
+    background: rgba(111, 81, 193, 0.15);
+    border-color: rgba(111, 81, 193, 0.3);
+    transform: translateX(5px);
+}
+
+.ltta-nav-link.active {
+    background: rgba(111, 81, 193, 0.2);
+    border-color: var(--tennis-blue);
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-link::before {
+    content: '▶';
+    font-size: calc(var(--font-size--) * 0.5);
+    color: var(--tennis-blue);
+    transition: var(--transition--);
+}
+
+.ltta-nav-link:hover::before {
+    transform: translateX(3px);
+}
+
+.ltta-nav-link.active::before {
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-badge {
+    background: var(--tennis-blue);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: calc(var(--font-size--) * 0.5);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.ltta-nav-badge.admin {
+    background: var(--tennis-orange);
+    color: #000;
+}
+
+.ltta-sidebar-indicator {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 60px;
+    background: var(--tennis-blue);
+    border-radius: 0 10px 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover .ltta-sidebar-indicator {
+    opacity: 0;
+}
+
+.ltta-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-track {
+    background: rgba(111, 81, 193, 0.1);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb {
+    background: var(--tennis-blue);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--tennis-orange);
+}
+
+@media (max-width: 768px) {
+    .ltta-sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        height: 100vh;
+        top: 0;
+        transform: translateX(-100%);
+    }
+    
+    .ltta-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .ltta-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 10001;
+        background: var(--golden--);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transition: var(--transition--);
+    }
+    
+    .ltta-menu-toggle:hover {
+        background: var(--lavender--);
+        color: #000;
+    }
+    
+    .ltta-sidebar-indicator {
+        display: none;
+    }
+    
+    .ltta-sidebar-trigger {
+        display: none;
+    }
+}
+</style>
+
+<!-- Триггер для наведения -->
+<div class="ltta-sidebar-trigger"></div>
+
+<!-- Mobile Toggle Button -->
+<button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
+
+<!-- Sidebar Navigation -->
+<nav class="ltta-sidebar" id="lttaSidebar">
+    <div class="ltta-sidebar-indicator">☰</div>
+    
+    <div class="ltta-sidebar-header">
+        <div class="ltta-sidebar-logo">LTTA</div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Пользователь</div>
+        <div class="ltta-nav-links">
+            <a href="/login" class="ltta-nav-link">Вход в систему</a>
+            <a href="/registration" class="ltta-nav-link">Регистрация</a>
+            <a href="/profile" class="ltta-nav-link">Личный кабинет</a>
+            <a href="/events" class="ltta-nav-link">События</a>
+            <a href="/ratings" class="ltta-nav-link">Рейтинг</a>
+            <a href="/help" class="ltta-nav-link">Помощь</a>
+            <a href="/logout" class="ltta-nav-link">Выход</a>
+        </div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Администрирование</div>
+        <div class="ltta-nav-links">
+            <a href="/members" class="ltta-nav-link">
+                Участники
+                <span class="ltta-nav-badge admin">админ</span>
+            </a>
+            <a href="/events_list" class="ltta-nav-link">
+                Управление событиями
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+            <a href="/create_event" class="ltta-nav-link">
+                Создание события
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Справка</div>
+        <div class="ltta-nav-links">
+            <a href="/help#admin-scenarios" class="ltta-nav-link">
+                Для администраторов
+            </a>
+            <a href="/help#user-scenarios" class="ltta-nav-link">Руководство пользователя</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('lttaMenuToggle');
+    const sidebar = document.getElementById('lttaSidebar');
+    
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('.ltta-nav-link');
+    
+    links.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+    
+    function checkMobile() {
+        if (window.innerWidth <= 768) {
+            menuToggle.style.display = 'flex';
+            
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('mobile-open');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (sidebar.classList.contains('mobile-open') &&
+                    !sidebar.contains(e.target) && 
+                    e.target !== menuToggle) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+        } else {
+            menuToggle.style.display = 'none';
+        }
+    }
+    
+    checkMobile();
+    
+    window.addEventListener('resize', checkMobile);
+});
+</script>
 </html>

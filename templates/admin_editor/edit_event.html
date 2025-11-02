@@ -1,278 +1,819 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-
-        <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
-
-        <title>Profile Page</title>
-    </head>
-
-    <body>
-        <h1>Profile Page</h1>
-        {% if event_info %}
-                <h2>Profile</h2>
-
-                <form method="POST" enctype="multipart/form-data" id="main-form">
-
-                    <img src="{{ url_for('static', filename=event_info['image']) }}">
-
-                    <div class="image-editor" id="image-editor" style="display: none;">
-                        <div class="editor-container">
-                            <div class="preview-container">
-                                <img id="imagePreview" class="hidden">
-                                <div class="crop-overlay"></div>
-                            </div>
-                            <div class="controls">
-                                <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
-                                <div class="zoom-controls">
-                                    <button id="zoomOut" type="button">-</button>
-                                    <span>Масштаб</span>
-                                    <button id="zoomIn" type="button">+</button>
-                                </div>
-                            </div>
-                            <canvas id="cropCanvas" class="hidden"></canvas>
-                            <input type="file" id="imageData" name="image" style="display: none;">
-                        </div>
-                    </div>
-                    <button type="button" onclick="changeImage()">Change Image</button>
-
-                    <select name="type">
-                       <option value="соревнование" {% if event_info['type'] == 'соревнование' %}selected{% endif %}>соревнование</option>
-                       <option value="мастер-класс" {% if event_info['type'] == 'мастер-класс' %}selected{% endif %}>мастер-класс</option>
-                       <option value="шоу-игра" {% if event_info['type'] == 'шоу-игра' %}selected{% endif %}>шоу-игра</option>
-                    </select>
-
-                    <input class="datetime" name="datetime" type="datetime-local" id="local" value="{{ event_info['datetime'] }}" required pattern=".*\S+.*">
-                    <input class="timezone" name="timezone" id="timezone" type="hidden">
-
-                    <input class="title" name="title" value="{{ event_info['title'] }}" required pattern=".*\S+.*">
-
-
-                    <input class="content" name="content" value="{{ event_info['content'] }}" required pattern=".*\S+.*">
-
-                    <input class="participants" style="display: none;" name="participants" value="{{ event_info['participants'] }}">
-                    
-
-                    <div class="accept" id="accept_block" style="display: none;"> 
-                        <input id="accept_input">
-                        <button id="accept_final" type="submit" disabled>Submit</button>
-                    </div>
-
-                    {% if event_info['type'] == "соревнование" %}
-                        <input type="hidden" id="counter">
-
-                        <!-- <div id="matches">
-                        {% if matches is defined and matches %}
-                            {% for match in matches %}
-                                <div id="match-{{ matches.index(match) }}">
-                                    <input type="text" name="player1-{{ matches.index(match) }}" required pattern=".*\S+.*" value="{{ match['player1'] }}">
-                                    <input type="text" name="player2-{{ matches.index(match) }}" required pattern=".*\S+.*" value="{{ match['player2'] }}">
-                                    <input type="text" name="winner-{{ matches.index(match) }}" required pattern=".*\S+.*" value="{{ match['winner'] }}">
-                                    <input type="text" name="score-{{ matches.index(match) }}" required pattern=".*\S+.*" value="{{ match['score'] }}">
-                                    <button type="button" onclick="deleteMatch(`match-{{ matches.index(match) }}`);">Delete match</button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                        </div> -->
-
-                        <div id="matches">
-
-                        {% if matches is defined and matches %}
-                            {% for match in matches %}
-                                <div id="match-{{ matches.index(match) }}">
-                                    <select name="player1-{{ matches.index(match) }}" value="{{ match['player1'] }}">
-                                        <option value="">Выберите участника</option>
-                                        {% for participant in participants_list %}
-                                            <option value="{{ participant }}" {% if match['player1'] == participant %} selected {% endif %}>{{ participant }}</option>
-                                        {% endfor %}
-                                    </select>
-                                
-                                    <select name="player2-{{ matches.index(match) }}" value="{{ match['player2'] }}">
-                                        <option value="">Выберите участника</option>
-                                        {% for participant in participants_list %}
-                                            <option value="{{ participant }}" {% if match['player2'] == participant %} selected {% endif %}>{{ participant }}</option>
-                                        {% endfor %}
-                                    </select>
-                                
-                                    <select name="winner-{{ matches.index(match) }}" value="{{ match['winner'] }}">
-                                        <option value="None" {% if match['winner'] == 'None' %} selected {% endif %}>Матч не закончен</option>
-                                        {% for participant in participants_list %}
-                                            <option value="{{ participant }}" {% if match['winner'] == participant %} selected {% endif %}>{{ participant }}</option>
-                                        {% endfor %}
-                                    </select>
-                                
-                                    <input type="text" name="score-{{ matches.index(match) }}" value="{{ match['score'] }}" placeholder="Score" required>
-
-                                    <button type="button" onclick="deleteMatch(`match-{{ matches.index(match) }}`);">Delete</button> 
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    
-                    </div>
-
-                        <button type="button" onclick="createMatch()">Create Match</button>
-                        <input type="hidden" name="counter" id="counter">
-                    {% endif %}
-                    
-                    <input type="hidden" value="changes" name="action">
-                    <button class="save_1" type="button" >Save Changes</button>
-
-                </form>
-
-                {% if event_info['type'] == 'соревнование' %}
-
-                <form method="POST">
-                    <input type="hidden" value="finish" name="action">
-                    <button type="button" onclick="finishChampionship();">Finish Event</button>
-                    <div id="winners">
-
-                    </div>
-                    <button type="submit" style="display: none" id="submit">Finish Event (sure)</button>
-                </form>
-
-                {% else %}
-
-                <form method="POST">
-                    <input type="hidden" value="finish" name="action">
-                    <button type="button" onclick="finishEvent();">Finish Event</button>
-                    <button type="submit" style="display: none" id="submit">Sure?</button>
-                </form>
-                
-                {% endif %}
-
-        {% endif %}
-    </body>
-    <script>
-        const save_1 = document.querySelector(".save_1");
-        const accept_block = document.getElementById("accept_block");
-
-        save_1.addEventListener("click", function(){
-            accept_block.style.display = "block";
-        });
-
-        const accept_input = document.getElementById('accept_input');
-        const accept_final = document.getElementById('accept_final');
-        const username = '{{ admin_info["name"] }} {{ admin_info["surname"] }}';
-
-        accept_input.addEventListener('input', function() {
-            if (accept_input.value === username) {
-                accept_final.disabled = false;
-            } else {
-                accept_final.disabled = true;
-            }
-        });
-
-        let submitButton = document.getElementById("submit");
-        let timezoneInput = document.getElementById("timezone");
-
-        if (submitButton && timezoneInput) {
-
-            function getTimezone() {
-                try {
-                    // Пытаемся получить точную временную зону
-                    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-                } catch (error) {
-                    // Фолбэк: вычисляем UTC смещение
-                    const offsetMinutes = new Date().getTimezoneOffset();
-                    const offsetHours = Math.abs(offsetMinutes) / 60;
-                    const sign = offsetMinutes <= 0 ? '+' : '-';
-
-                    return `UTC${sign}${String(offsetHours).padStart(2, '0')}:00`;
-                }
-            }
-
-            const timezone = getTimezone();
-            timezoneInput.value = timezone;
-
-        } else {
-            console.error("Не найдены необходимые элементы DOM");
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+    <title>Edit Event</title>
+    <style>
+        /* CSS Variables */
+        :root {
+            --background-color: #0a0a0a;
+            --text-color: #ffffff;
+            --golden: #ebd37c;
+            --lavender: #6f51c1;
+            --dark-lavender: #5a4199;
+            --error-color: #ff4757;
+            --success-color: #2ed573;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        {% if counter %}
-            let counter = {{ counter }}
 
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100%;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 20px 0;
+            background: linear-gradient(45deg, var(--golden), #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding: 0 20px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin: 20px 0;
+            color: var(--lavender);
+        }
+
+        /* Main Container */
+        .event-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 20px;
+        }
+
+        /* Event Form */
+        #main-form {
+            background: rgba(15, 15, 15, 0.9);
+            border: 2px solid var(--golden);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(235, 211, 124, 0.1);
+        }
+
+        /* Event Image */
+        .event-image {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .event-image img {
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            object-fit: cover;
+            border: 3px solid var(--lavender);
+            margin-bottom: 15px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--golden);
+            font-weight: 600;
+        }
+
+        select, input[type="datetime-local"], input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(235, 211, 124, 0.3);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        /* Белый календарик для datetime-local */
+        input[type="datetime-local"] {
+            color-scheme: dark;
+        }
+
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--golden);
+            box-shadow: 0 0 0 2px rgba(235, 211, 124, 0.2);
+        }
+
+        /* Стили для выпадающих списков - черный фон, белый текст */
+        select option {
+            background: black !important;
+            color: white !important;
+        }
+
+        /* Для Webkit браузеров (Chrome, Safari, Edge) */
+        select {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+        }
+
+        select option {
+            background: #000000 !important;
+            color: #ffffff !important;
+        }
+
+        /* Для Firefox */
+        @-moz-document url-prefix() {
+            select {
+                background: rgba(255, 255, 255, 0.05);
+                color: var(--text-color);
+            }
+            
+            select option {
+                background: #000000 !important;
+                color: #ffffff !important;
+            }
+        }
+
+        /* Buttons */
+        .btn {
+            background: transparent;
+            border: 2px solid var(--golden);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: var(--lavender);
+            border-color: var(--lavender);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .btn-danger:hover {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .btn-success {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background: var(--success-color);
+            color: white;
+        }
+
+        /* Image Editor */
+        .image-editor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .editor-container {
+            background: var(--background-color);
+            border: 2px solid var(--golden);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+
+        .close-editor {
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: var(--golden);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .preview-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            margin: 0 auto 20px;
+            border: 2px dashed var(--golden);
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        #imagePreview {
+            position: absolute;
+            max-width: none;
+            cursor: move;
+            transform-origin: top left;
+            touch-action: none;
+            pointer-events: auto;
+        }
+
+        .crop-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--lavender);
+            box-sizing: border-box;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .zoom-controls button {
+            padding: 8px 15px;
+            font-size: 1.2rem;
+        }
+
+        /* Matches Section */
+        .matches-section {
+            margin: 25px 0;
+            padding: 20px;
+            border: 1px solid var(--golden);
+            border-radius: 10px;
+            background: rgba(235, 211, 124, 0.05);
+        }
+
+        .match {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--lavender);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .score-input {
+            width: 100%;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+
+        /* Winners Section */
+        .winners-section {
+            margin: 15px 0;
+        }
+
+        .winners-section input {
+            width: 100%;
+            margin: 5px 0;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(235, 211, 124, 0.3);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        /* Confirmation Dialog */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        .confirm-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--background-color);
+            border: 2px solid var(--golden);
+            border-radius: 15px;
+            padding: 30px;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: none;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .confirm-dialog h3 {
+            color: var(--text-color);
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+
+        .confirm-dialog p {
+            color: var(--text-color);
+            margin-bottom: 20px;
+            text-align: center;
+            opacity: 0.9;
+        }
+
+        .confirm-dialog input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--golden);
+            border-radius: 8px;
+            color: var(--text-color);
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .confirm-button {
+            padding: 10px 20px;
+            border: 2px solid var(--golden);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .confirm-button:hover {
+            background: var(--lavender);
+            border-color: var(--lavender);
+        }
+
+        .confirm-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .confirm-button:disabled:hover {
+            background: transparent;
+            border-color: var(--golden);
+        }
+
+        /* Hidden Elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Background Decoration */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            background: radial-gradient(circle, rgba(235, 211, 124, 0.1) 0%, rgba(235, 211, 124, 0) 70%);
+        }
+
+        .circle-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            right: -50px;
+            background: radial-gradient(circle, rgba(111, 81, 193, 0.1) 0%, rgba(111, 81, 193, 0) 70%);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .event-container {
+                padding: 0 15px 15px;
+            }
+
+            #main-form {
+                padding: 20px;
+            }
+
+            .event-image img {
+                width: 150px;
+                height: 150px;
+            }
+
+            .match {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .confirm-dialog {
+                padding: 25px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 1.7rem;
+                padding: 0 15px;
+            }
+
+            .event-container {
+                padding: 0 10px 10px;
+            }
+
+            #main-form {
+                padding: 15px;
+            }
+
+            .event-image img {
+                width: 120px;
+                height: 120px;
+            }
+
+            .editor-container {
+                padding: 20px;
+            }
+
+            .preview-container {
+                height: 250px;
+            }
+
+            .confirm-dialog {
+                padding: 20px;
+            }
+
+            .confirm-button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-decoration">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
+    </div>
+
+    <h1>Управление Событиями</h1>
+    
+    {% if event_info %}
+    <div class="event-container">
+        <h2>Изменение События</h2>
+
+        <form method="POST" enctype="multipart/form-data" id="main-form">
+            <!-- Event Image -->
+            <div class="event-image">
+                <img src="{{ url_for('static', filename=event_info['image']) }}" alt="{{ event_info['title'] }}" id="eventImagePreview">
+                <button type="button" class="btn" onclick="changeImage()">Изменить</button>
+            </div>
+
+            <!-- Image Editor -->
+            <div class="image-editor" id="image-editor">
+                <div class="editor-container">
+                    <div class="close-editor" onclick="closeImageEditor()">×</div>
+                    <div class="preview-container">
+                        <img id="imagePreview" class="hidden">
+                        <div class="crop-overlay"></div>
+                    </div>
+                    <div class="controls">
+                        <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
+                        <div class="zoom-controls">
+                            <button type="button" class="btn" id="zoomOut">-</button>
+                            <span>Zoom</span>
+                            <button type="button" class="btn" id="zoomIn">+</button>
+                        </div>
+                        <button type="button" class="btn btn-success" id="cropButton" onclick="cropAndSave()">Сохранить Изображение</button>
+                    </div>
+                    <canvas id="cropCanvas" class="hidden"></canvas>
+                    <!-- Исправлено: используем file input вместо hidden -->
+                    <input type="file" id="imageData" name="image" class="hidden" accept=".jpg,.jpeg,.png,.gif">
+                </div>
+            </div>
+            
+            <input class="participants" type="hidden" name="participants" value="{{ event_info['participants'] }}" class="hidden">
+
+            <!-- Event Details -->
+            <div class="form-group">
+                <label>Тип События</label>
+                <select name="type">
+                   <option value="соревнование" {% if event_info['type'] == 'соревнование' %}selected{% endif %}>соревнование</option>
+                   <option value="мастер-класс" {% if event_info['type'] == 'мастер-класс' %}selected{% endif %}>мастер-класс</option>
+                   <option value="шоу-игра" {% if event_info['type'] == 'шоу-игра' %}selected{% endif %}>шоу-игра</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Дата & Время</label>
+                <input class="datetime" name="datetime" type="datetime-local" id="local" value="{{ event_info['datetime'] }}" required>
+                <input class="timezone" name="timezone" id="timezone" type="hidden">
+            </div>
+
+            <div class="form-group">
+                <label>Заголовок</label>
+                <input type="text" class="title" name="title" value="{{ event_info['title'] }}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Информация</label>
+                <input type="text" class="content" name="content" value="{{ event_info['content'] }}" required>
+            </div>
+
+            <!-- Competition Matches -->
+            {% if event_info['type'] == "соревнование" %}
+            <div class="matches-section">
+                <h3>Матчи</h3>
+                <div id="matches">
+                {% if matches is defined and matches %}
+                    {% for match in matches %}
+                        <div class="match" id="match-{{ matches.index(match) }}">
+                            <select name="player1-{{ matches.index(match) }}" required onchange="validateSelect(this)">
+                                <option value="">Выбрать</option>
+                                {% for participant in participants_list %}
+                                    <option value="{{ participant }}" {% if match['player1'] == participant %}selected{% endif %}>{{ participant }}</option>
+                                {% endfor %}
+                            </select>
+                        
+                            <select name="player2-{{ matches.index(match) }}" required onchange="validateSelect(this)">
+                                <option value="">Выбрать</option>
+                                {% for participant in participants_list %}
+                                    <option value="{{ participant }}" {% if match['player2'] == participant %}selected{% endif %}>{{ participant }}</option>
+                                {% endfor %}
+                            </select>
+                        
+                            <select name="winner-{{ matches.index(match) }}" onchange="validateSelect(this)">
+                                <option value="None" {% if match['winner'] == 'None' %}selected{% endif %}>Не Завершён</option>
+                                {% for participant in participants_list %}
+                                    <option value="{{ participant }}" {% if match['winner'] == participant %}selected{% endif %}>{{ participant }}</option>
+                                {% endfor %}
+                            </select>
+                        
+                            <input type="text" name="score-{{ matches.index(match) }}" value="{{ match['score'] }}" placeholder="0:0" class="score-input" required pattern="[0-9]{1,2}:[0-9]{1,2}" title="Format: [0-10]:[0-10]">
+                            <button type="button" class="btn btn-danger" onclick="deleteMatch('match-{{ matches.index(match) }}')">Удалить</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                </div>
+
+                <button type="button" class="btn btn-success" onclick="createMatch()">Создать</button>
+            </div>
+            {% endif %}
+            <input type="hidden" name="counter" id="counter" value="{{ counter|default(0) }}">
+
+            <input type="hidden" value="changes" name="action">
+            <button type="button" class="btn save_1" onclick="showConfirmation()">Сохранить</button>
+        </form>
+
+        <!-- Finish Event Forms -->
+        {% if event_info['type'] == 'соревнование' %}
+        <form method="POST" class="finish-form">
+            <input type="hidden" value="finish" name="action">
+            <button type="button" class="btn btn-danger" onclick="finishChampionship()">Завершить</button>
+            <div id="winners" class="winners-section"></div>
+            <button type="submit" class="btn btn-danger hidden" id="submitChampionship">Точно?</button>
+        </form>
+        {% else %}
+        <form method="POST" class="finish-form">
+            <input type="hidden" value="finish" name="action">
+            <button type="button" class="btn btn-danger" onclick="finishEvent()">Завершить</button>
+            <button type="submit" class="btn btn-danger hidden" id="submitEvent">Точно?</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Confirmation Dialog -->
+    <div class="overlay" id="overlay"></div>
+    <div class="confirm-dialog" id="confirmDialog">
+        <h3>Confirm Changes</h3>
+        <p>Enter your name and surname to confirm:</p>
+        <input type="text" id="nameConfirm" placeholder="{{ admin_info['name'] }}" required>
+        <input type="text" id="surnameConfirm" placeholder="{{ admin_info['surname'] }}" required>
+        <div class="confirm-buttons">
+            <button class="confirm-button" id="confirmSave" onclick="submitForm()" disabled>Сохранить</button>
+            <button class="confirm-button" onclick="hideConfirmation()">Отменить</button>
+        </div>
+    </div>
+    
+    <script>
+        // Confirmation Logic
+        function showConfirmation() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('confirmDialog').style.display = 'block';
+        }
+
+        function hideConfirmation() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('confirmDialog').style.display = 'none';
+        }
+
+        function checkConfirmation() {
+            const nameInput = document.getElementById("nameConfirm").value.trim();
+            const surnameInput = document.getElementById("surnameConfirm").value.trim();
+            const name = "{{ admin_info['name'] }}";
+            const surname = "{{ admin_info['surname'] }}";
+            document.getElementById("confirmSave").disabled = !(nameInput === name && surnameInput === surname);
+        }
+
+        document.getElementById('nameConfirm').addEventListener('input', checkConfirmation);
+        document.getElementById('surnameConfirm').addEventListener('input', checkConfirmation);
+
+        function submitForm() {
+            document.getElementById('main-form').submit();
+        }
+
+        // Timezone
+        const timezoneInput = document.getElementById("timezone");
+        function getTimezone() {
+            try {
+                return Intl.DateTimeFormat().resolvedOptions().timeZone;
+            } catch (error) {
+                const offsetMinutes = new Date().getTimezoneOffset();
+                const offsetHours = Math.abs(offsetMinutes) / 60;
+                const sign = offsetMinutes <= 0 ? '+' : '-';
+                return `UTC${sign}${String(offsetHours).padStart(2, '0')}:00`;
+            }
+        }
+        timezoneInput.value = getTimezone();
+
+        // Matches Management
+        {% if counter %}
+            let counter = {{ counter }};
         {% else %}
             let counter = 0;
-
         {% endif %}
 
-        let counterObj = document.getElementById("counter");
-        let matches = document.getElementById("matches");
-        counterObj.value = counter;
-        counterObj.name = "counter";
+        const counterObj = document.getElementById("counter");
+        const matchesContainer = document.getElementById("matches");
 
-        function createMatch(){
-            let match = document.createElement("div");
+        function validateSelect(select) {
+            if (select.value === "") {
+                select.setCustomValidity("Please select a participant");
+            } else {
+                select.setCustomValidity("");
+            }
+        }
 
+        function validateScore(input) {
+            const pattern = /^([0-9]|10):([0-9]|10)$/;
+            if (!pattern.test(input.value)) {
+                input.setCustomValidity("Please enter score in format 0:0 to 10:10");
+            } else {
+                input.setCustomValidity("");
+            }
+        }
+
+        function createMatch() {
+            const match = document.createElement("div");
+            match.className = "match";
             match.id = `match-${counter}`;
 
             match.innerHTML = `
-                <select name="player1-${counter}">
-                    <option value="">Выберите участника</option>
+                <select name="player1-${counter}" required onchange="validateSelect(this)">
+                    <option value="">Select Participant</option>
                     {% for participant in participants_list %}
                         <option value="{{ participant }}">{{ participant }}</option>
                     {% endfor %}
                 </select>
-
-                <select name="player2-${counter}">
-                    <option value="">Выберите участника</option>
+                <select name="player2-${counter}" required onchange="validateSelect(this)">
+                    <option value="">Select Participant</option>
                     {% for participant in participants_list %}
                         <option value="{{ participant }}">{{ participant }}</option>
                     {% endfor %}
                 </select>
-
-                <select name="winner-${counter}">
-                    <option value="">Выберите участника</option>
-                    <option value="None">Матч не закончен</option>
+                <select name="winner-${counter}" onchange="validateSelect(this)">
+                    <option value="None">Match not finished</option>
                     {% for participant in participants_list %}
                         <option value="{{ participant }}">{{ participant }}</option>
                     {% endfor %}
                 </select>
+                <input type="text" name="score-${counter}" placeholder="0:0" class="score-input" required pattern="([0-9]|10):([0-9]|10)" title="Format: 0:0 to 10:10" oninput="validateScore(this)">
+                <button type="button" class="btn btn-danger" onclick="deleteMatch('match-${counter}')">Delete</button>
+            `;
 
-                <input type="text" name="score-${counter}" placeholder="Score" required pattern=".*\\S+.*">
-                <button type="button" onclick="deleteMatch('match-${counter}')">Delete</button>
-
-            `
-
-            // match.innerHTML = `
-            //     <input type="text" name="player1-${counter}" placeholder="Player 1" required pattern=".*\\S+.*">
-            //     <input type="text" name="player2-${counter}" placeholder="Player 2" required pattern=".*\\S+.*">
-            //     <input type="text" name="winner-${counter}" placeholder="Winner" required pattern=".*\\S+.*">
-            //     <input type="text" name="score-${counter}" placeholder="Score" required pattern=".*\\S+.*">
-            //     <button type="button" onclick="deleteMatch('match-${counter}')">Delete</button>
-            // `;
-
-
-            matches.appendChild(match);
-
+            matchesContainer.appendChild(match);
             counter++;
             counterObj.value = counter;
         }
 
-        function deleteMatch(id){
-            document.getElementById(id).remove()
+        function deleteMatch(id) {
+            document.getElementById(id).remove();
         }
-        
-        function finishEvent(){
-            let finishButton = document.getElementById("submit");
-            finishButton.style.display = "block";
-        }
-            
-        function finishChampionship(){
-            const finishButton = document.getElementById("submit");
-            const winners_div = document.getElementById("winners");
 
-            winners_div.innerHTML = `
-            <input name="winner1">
-            <input name="winner2">
-            <input name="winner3">
+        // Finish Event Logic
+        function finishEvent() {
+            document.getElementById("submitEvent").classList.remove("hidden");
+        }
+
+        function finishChampionship() {
+            const winnersDiv = document.getElementById("winners");
+            winnersDiv.innerHTML = `
+                <input name="winner1" placeholder="Winner 1" required>
+                <input name="winner2" placeholder="Winner 2">
+                <input name="winner3" placeholder="Winner 3">
             `;
-            
-
-            finishButton.style.display = "block";
+            document.getElementById("submitChampionship").classList.remove("hidden");
         }
 
+        // Image Editor Logic
+        const imageEditor = document.getElementById('image-editor');
+        const eventImagePreview = document.getElementById('eventImagePreview');
+        
+        function changeImage() {
+            imageEditor.style.display = "flex";
+        }
+
+        function closeImageEditor() {
+            imageEditor.style.display = "none";
+        }
+
+        // Close image editor when clicking outside
+        imageEditor.addEventListener('click', function(e) {
+            if (e.target === imageEditor) {
+                closeImageEditor();
+            }
+        });
+
+        // Image Editor Functionality
         document.addEventListener('DOMContentLoaded', function() {
             const imageUpload = document.getElementById('imageUpload');
             const imagePreview = document.getElementById('imagePreview');
@@ -282,20 +823,20 @@
             const imageDataInput = document.getElementById('imageData');
             const previewContainer = document.querySelector('.preview-container');
 
-            const containerWidth = 1000;
-            const containerHeight = 500;
+            const containerWidth = 400;
+            const containerHeight = 300;
             let scale = 1;
-            let offsetX = 0;
-            let offsetY = 0;
+            let offsetX = 0, offsetY = 0;
             let isDragging = false;
             let startX, startY;
             let baseX = 0, baseY = 0;
             let dragX = 0, dragY = 0;
+            let currentImage = null;
 
             imageUpload.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file && file.size > 5 * 1024 * 1024) {
-                    alert('Файл слишком большой. Максимальный размер: 5 МБ.');
+                    alert('Слишком Большой Файл! Максимальный размер: 5 MB.');
                     return;
                 }
                 if (file) {
@@ -304,6 +845,7 @@
                         imagePreview.src = e.target.result;
                         imagePreview.classList.remove('hidden');
                         imagePreview.onload = function() {
+                            currentImage = this;
                             centerImage();
                         };
                     };
@@ -312,9 +854,21 @@
             });
 
             function centerImage() {
-                scale = 1;
-                baseX = (containerWidth - imagePreview.width) / 2;
-                baseY = (containerHeight - imagePreview.height) / 2;
+                if (!currentImage) return;
+                
+                const imgAspect = currentImage.width / currentImage.height;
+                const containerAspect = containerWidth / containerHeight;
+                
+                if (imgAspect > containerAspect) {
+                    // Image is wider than container
+                    scale = containerWidth / currentImage.width;
+                } else {
+                    // Image is taller than container
+                    scale = containerHeight / currentImage.height;
+                }
+                
+                baseX = (containerWidth - currentImage.width * scale) / 2;
+                baseY = (containerHeight - currentImage.height * scale) / 2;
                 dragX = 0;
                 dragY = 0;
                 updateImagePosition();
@@ -326,200 +880,474 @@
                 imagePreview.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
             }
 
-            const MAX_SCALE = 1.5;
-            const MIN_SCALE = 0.5;
+            const MAX_SCALE = 3;
+            const MIN_SCALE = 0.3;
 
             zoomInBtn.addEventListener('click', function() {
-                scale = Math.min(scale * 1.1, MAX_SCALE);
+                scale = Math.min(scale * 1.2, MAX_SCALE);
                 updateImagePosition();
             });
 
             zoomOutBtn.addEventListener('click', function() {
-                scale = Math.max(scale / 1.1, MIN_SCALE);
+                scale = Math.max(scale / 1.2, MIN_SCALE);
                 updateImagePosition();
             });
 
-            imagePreview.addEventListener('mousedown', function(e) {
+            // Drag functionality
+            imagePreview.addEventListener('mousedown', startDrag);
+            imagePreview.addEventListener('touchstart', startDrag);
+
+            function startDrag(e) {
                 isDragging = true;
-                startX = e.clientX - dragX;
-                startY = e.clientY - dragY;
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                startX = clientX - dragX;
+                startY = clientY - dragY;
                 imagePreview.style.cursor = 'grabbing';
-            });
+                e.preventDefault();
+            }
 
-            document.addEventListener('mousemove', function(e) {
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag);
+
+            function drag(e) {
                 if (!isDragging) return;
-                dragX = e.clientX - startX;
-                dragY = e.clientY - startY;
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+                dragX = clientX - startX;
+                dragY = clientY - startY;
                 updateImagePosition();
-            });
+                e.preventDefault();
+            }
 
-            document.addEventListener('mouseup', function() {
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+
+            function stopDrag() {
                 isDragging = false;
                 imagePreview.style.cursor = 'grab';
-            });
+            }
 
-            imagePreview.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                isDragging = true;
-                startX = e.touches[0].clientX - dragX;
-                startY = e.touches[0].clientY - dragY;
-                imagePreview.style.cursor = 'grabbing';
-            });
-
-            document.addEventListener('touchmove', function(e) {
-                if (!isDragging) return;
-                e.preventDefault();
-                dragX = e.touches[0].clientX - startX;
-                dragY = e.touches[0].clientY - startY;
-                updateImagePosition();
-            });
-
-            document.addEventListener('touchend', function() {
-                isDragging = false;
-                imagePreview.style.cursor = 'grab';
-            });
-
-            document.querySelector('#main-form').addEventListener('submit', function(e) {
-                if (!imagePreview.src) {
-                    // alert('Пожалуйста, загрузите изображение сначала');
+            // Crop and save functionality
+            window.cropAndSave = function() {
+                if (!currentImage) {
+                    alert('Пожалуйста, выберите изображение!');
                     return;
                 }
 
-                const width = Math.round(previewContainer.clientWidth || containerWidth);
-                const height = Math.round(previewContainer.clientHeight || containerHeight);
-                cropCanvas.width = width;
-                cropCanvas.height = height;
-                const ctx = cropCanvas.getContext('2d');
-                ctx.clearRect(0, 0, width, height);
-
-                const imgRect = imagePreview.getBoundingClientRect();
-                const contRect = previewContainer.getBoundingClientRect();
-                const displayedLeft = imgRect.left - contRect.left;
-                const displayedTop = imgRect.top - contRect.top;
-                const displayedWidth = imgRect.width;
-                const displayedHeight = imgRect.height;
-
-                const interLeft = Math.max(0, displayedLeft);
-                const interTop = Math.max(0, displayedTop);
-                const interRight = Math.min(width, displayedLeft + displayedWidth);
-                const interBottom = Math.min(height, displayedTop + displayedHeight);
-                const interWidth = Math.max(0, interRight - interLeft);
-                const interHeight = Math.max(0, interBottom - interTop);
-
-                const ratioX = imagePreview.naturalWidth / displayedWidth;
-                const ratioY = imagePreview.naturalHeight / displayedHeight;
-
-                const sx = (interLeft - displayedLeft) * ratioX;
-                const sy = (interTop - displayedTop) * ratioY;
-                const sWidth = interWidth * ratioX;
-                const sHeight = interHeight * ratioY;
-
-                if (interWidth > 0 && interHeight > 0) {
-                    ctx.drawImage(
-                        imagePreview,
-                        sx, sy, sWidth, sHeight,
-                        interLeft, interTop, interWidth, interHeight
-                    );
-                }
-
-                cropCanvas.toBlob(function(blob) {
-                    if (!blob) {
-                        alert('Ошибка при создании изображения');
-                        return;
-                    }
-                    const file = new File([blob], 'image.png', { type: 'image/png', lastModified: Date.now() });
-                    const dt = new DataTransfer();
-                    dt.items.add(file);
-                    imageDataInput.files = dt.files;
-                    // Отправляем форму после обрезки
-                    document.querySelector('#main-form').submit();
-                }, 'image/png', 0.9);
-            });
-
+                // Create canvas for cropping
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Set canvas size to match the preview container size
+                canvas.width = containerWidth;
+                canvas.height = containerHeight;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Calculate the actual image position and size
+                const imgX = offsetX;
+                const imgY = offsetY;
+                const imgWidth = currentImage.width * scale;
+                const imgHeight = currentImage.height * scale;
+                
+                // Draw the image portion that's visible in the crop area
+                ctx.drawImage(
+                    currentImage,
+                    -imgX / scale, // source x
+                    -imgY / scale, // source y
+                    containerWidth / scale, // source width
+                    containerHeight / scale, // source height
+                    0, // destination x
+                    0, // destination y
+                    containerWidth, // destination width
+                    containerHeight // destination height
+                );
+                
+                // Convert canvas to blob and create File object
+                canvas.toBlob(function(blob) {
+                    // Create a File object from the blob
+                    const file = new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' });
+                    
+                    // Create a DataTransfer object to set files
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    
+                    // Set the files to the file input
+                    imageDataInput.files = dataTransfer.files;
+                    
+                    // Update preview
+                    eventImagePreview.src = URL.createObjectURL(blob);
+                    
+                    // Close the editor
+                    closeImageEditor();
+                    
+                    // alert('Image cropped and saved successfully!');
+                }, 'image/jpeg', 0.8);
+            };
         });
-        
-        const imageEditorDiv = document.getElementById('image-editor');
-        function changeImage() {
-            imageEditorDiv.style.display = "block";
-        }
     </script>
+</body>
+<!-- MENU -->
+<style>
+.ltta-sidebar {
+    --font-size--: 20pt;
+    --text-color--: #ebd37c;
+    --golden--: #ebd37c;
+    --lavender--: #6f51c1;
+    --card-bg--: rgba(30, 30, 30, 0.95);
+    --border-radius--: 16px;
+    --transition--: all 0.3s ease;
+    --tennis-orange: #ebd37c;
+    --tennis-blue: #6f51c1;
+    
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translate(-290px, -50%);
+    width: 300px;
+    height: 80vh;
+    background: var(--card-bg--);
+    backdrop-filter: blur(10px);
+    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
+    padding: 25px 20px;
+    border: 1px solid rgba(111, 81, 193, 0.2);
+    border-left: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 10000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: var(--transition--);
+}
 
+.ltta-sidebar:hover,
+.ltta-sidebar:focus-within {
+    transform: translate(0, -50%);
+}
 
-    <style>
-        .image-editor {
-            max-width: 1000px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-family: Arial, sans-serif;
-        }
-        .editor-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .preview-container {
-            position: relative;
-            width: 100%;
-            max-width: 1000px;
-            height: 500px; 
-            margin: 0 auto;
-            border: 2px dashed #ccc;
-            overflow: hidden;
-        }
-        
-        #imagePreview {
-            position: absolute;
-            max-width: none;
-            cursor: move;
-            transform-origin: top left;
-            touch-action: none;
-            -webkit-user-drag: none;
-            pointer-events: auto;
-        }
+/* Создаем область для наведения */
+.ltta-sidebar-trigger {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 100px;
+    background: transparent;
+    z-index: 9999;
+    cursor: pointer;
+}
 
-        .crop-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 2px solid #007bff;
-            box-sizing: border-box;
-            pointer-events: none;
-            z-index: 10;
+.ltta-sidebar-trigger:hover + .ltta-sidebar,
+.ltta-sidebar:hover {
+    transform: translate(0, -50%);
+}
+
+.ltta-sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
+}
+
+.ltta-sidebar-logo {
+    font-size: calc(var(--font-size--) * 1.8);
+    color: var(--tennis-orange);
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.ltta-sidebar-subtitle {
+    font-size: calc(var(--font-size--) * 0.6);
+    color: rgba(235, 211, 124, 0.7);
+}
+
+.ltta-developer-info {
+    font-size: calc(var(--font-size--) * 0.5);
+    color: rgba(235, 211, 124, 0.5);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+.ltta-nav-section {
+    margin-bottom: 25px;
+}
+
+.ltta-nav-title {
+    font-size: calc(var(--font-size--) * 0.7);
+    color: var(--tennis-blue);
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 10px;
+}
+
+.ltta-nav-title::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tennis-orange);
+}
+
+.ltta-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ltta-nav-link {
+    color: var(--text-color--);
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 10px;
+    transition: var(--transition--);
+    font-size: calc(var(--font-size--) * 0.65);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid transparent;
+}
+
+.ltta-nav-link:hover {
+    background: rgba(111, 81, 193, 0.15);
+    border-color: rgba(111, 81, 193, 0.3);
+    transform: translateX(5px);
+}
+
+.ltta-nav-link.active {
+    background: rgba(111, 81, 193, 0.2);
+    border-color: var(--tennis-blue);
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-link::before {
+    content: '▶';
+    font-size: calc(var(--font-size--) * 0.5);
+    color: var(--tennis-blue);
+    transition: var(--transition--);
+}
+
+.ltta-nav-link:hover::before {
+    transform: translateX(3px);
+}
+
+.ltta-nav-link.active::before {
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-badge {
+    background: var(--tennis-blue);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: calc(var(--font-size--) * 0.5);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.ltta-nav-badge.admin {
+    background: var(--tennis-orange);
+    color: #000;
+}
+
+.ltta-sidebar-indicator {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 60px;
+    background: var(--tennis-blue);
+    border-radius: 0 10px 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover .ltta-sidebar-indicator {
+    opacity: 0;
+}
+
+.ltta-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-track {
+    background: rgba(111, 81, 193, 0.1);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb {
+    background: var(--tennis-blue);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--tennis-orange);
+}
+
+@media (max-width: 768px) {
+    .ltta-sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        height: 100vh;
+        top: 0;
+        transform: translateX(-100%);
+    }
+    
+    .ltta-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .ltta-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 10001;
+        background: var(--golden--);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transition: var(--transition--);
+    }
+    
+    .ltta-menu-toggle:hover {
+        background: var(--lavender--);
+        color: #000;
+    }
+    
+    .ltta-sidebar-indicator {
+        display: none;
+    }
+    
+    .ltta-sidebar-trigger {
+        display: none;
+    }
+}
+
+</style>
+
+<!-- Триггер для наведения -->
+<div class="ltta-sidebar-trigger"></div>
+
+<!-- Mobile Toggle Button -->
+<button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
+
+<!-- Sidebar Navigation -->
+<nav class="ltta-sidebar" id="lttaSidebar">
+    <div class="ltta-sidebar-indicator">☰</div>
+    
+    <div class="ltta-sidebar-header">
+        <div class="ltta-sidebar-logo">LTTA</div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Пользователь</div>
+        <div class="ltta-nav-links">
+            <a href="/login" class="ltta-nav-link">Вход в систему</a>
+            <a href="/registration" class="ltta-nav-link">Регистрация</a>
+            <a href="/profile" class="ltta-nav-link">Личный кабинет</a>
+            <a href="/events" class="ltta-nav-link">События</a>
+            <a href="/ratings" class="ltta-nav-link">Рейтинг</a>
+            <a href="/help" class="ltta-nav-link">Помощь</a>
+            <a href="/logout" class="ltta-nav-link">Выход</a>
+        </div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Администрирование</div>
+        <div class="ltta-nav-links">
+            <a href="/members" class="ltta-nav-link">
+                Участники
+                <span class="ltta-nav-badge admin">админ</span>
+            </a>
+            <a href="/events_list" class="ltta-nav-link">
+                Управление событиями
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+            <a href="/create_event" class="ltta-nav-link">
+                Создание события
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Справка</div>
+        <div class="ltta-nav-links">
+            <a href="/help#admin-scenarios" class="ltta-nav-link">
+                Для администраторов
+            </a>
+            <a href="/help#user-scenarios" class="ltta-nav-link">Руководство пользователя</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('lttaMenuToggle');
+    const sidebar = document.getElementById('lttaSidebar');
+    
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('.ltta-nav-link');
+    
+    links.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
         }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
+    });
+    
+    function checkMobile() {
+        if (window.innerWidth <= 768) {
+            menuToggle.style.display = 'flex';
+            
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('mobile-open');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (sidebar.classList.contains('mobile-open') &&
+                    !sidebar.contains(e.target) && 
+                    e.target !== menuToggle) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+        } else {
+            menuToggle.style.display = 'none';
         }
-        input[type="file"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .hidden {
-            display: none;
-        }
-        #imageData {
-            width: 100%;
-            padding: 10px;
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-        .zoom-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .zoom-controls button {
-            padding: 5px 15px;
-            font-size: 18px;
-        }
-    </style>
+    }
+    
+    checkMobile();
+    
+    window.addEventListener('resize', checkMobile);
+});
+</script>
 </html>

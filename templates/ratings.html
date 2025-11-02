@@ -1,189 +1,1002 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>Ratings Page</title>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ratings Page</title>
+    <style>
+        /* CSS Variables */
+        :root {
+            --background-color: #0a0a0a;
+            --text-color: #ffffff;
+            --golden: #ebd37c;
+            --lavender: #6f51c1;
+            --dark-lavender: #5a4199;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        <link href="{{ url_for('static', filename='styles/ratings.css') }}" rel="stylesheet">
-    </head>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <body>
-        <h1>Ratings Page</h1>
+        .filter-controls select option {
+            background-color: black;
+            color: white;
+        }
 
-        <div class="filters">
-            <div class="filter-controls">
-                <input type="text" id="searchInput" placeholder="Search by name, surname or username..." oninput="filterUsers()">
-                
-                <select id="facultyFilter" onchange="filterUsers()">
-                    <option value="">All Faculties</option>
-                </select>
-                
-                <select id="roleFilter" onchange="filterUsers()">
-                    <option value="">All Roles</option>
-                </select>
-                
-                <select id="sortFilter" onchange="filterUsers()">
-                    <option value="rating_desc">Rating (High to Low)</option>
-                    <option value="rating_asc">Rating (Low to High)</option>
-                    <option value="name_asc">Name (A-Z)</option>
-                    <option value="name_desc">Name (Z-A)</option>
-                </select>
-                
-                <button type="button" onclick="clearFilters()">Clear Filters</button>
-            </div>
-        </div>
-        
-        <div id="usersContainer">
-            {% if ratings %}
-                {% for rating in ratings %}
-                    <div class="user"
-                         data-username="{{ rating['username'] }}"
-                         data-name="{{ rating['name'] }}"
-                         data-surname="{{ rating['surname'] }}"
-                         data-faculty="{{ rating['faculty'] }}"
-                         data-role="{{ rating['role'] }}"
-                         data-rating="{{ rating['rating'] }}">
-                         
-                        <img src="{{ url_for('static', filename=rating['avatar']) }}">
+        .filter-controls select option:hover{
+            background-color: var(--dark-lavender);
+        }
 
-                        <p class="username">{{ rating["username"] }}</p>
-                        <p class="name">{{ rating["name"] }}</p>
-                        <p class="surname">{{ rating["surname"] }}</p>
-                        <p class="gradeNfaculty">{{ rating["grade"] }} {{ rating["faculty"] }}</p>
-                        <p class="rating">{{ rating["rating"] }}</p>
-                        <p class="role">{{ rating["role"] }}</p>
+        html, body {
+            min-height: 100%;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            overflow-x: hidden;
+        }
 
-                        <form method="POST">
-                            <input name="username" type="hidden" value="{{ rating['username'] }}">
-                            <button type="submit">View User</button>
-                        </form>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
+        /* Header */
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 20px 0;
+            background: linear-gradient(45deg, var(--golden), #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding: 0 20px;
+        }
 
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="flashed_messages">
-                    {% for message in messages %}
-                        <p class="flashed_message">{{ message }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+        /* Filters */
+        .filters {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            padding: 0 20px;
+        }
 
-        <script>
-            let allUsers = [];
+        .filter-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-controls input,
+        .filter-controls select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--golden);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            padding: 10px 15px;
+            outline: none;
+            height: 45px;
+            flex: 1 1 auto;
+            min-width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-controls input:focus,
+        .filter-controls select:focus {
+            border-color: var(--lavender);
+            box-shadow: 0 0 0 2px rgba(111, 81, 193, 0.2);
+        }
+
+        .filter-controls input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .filter-controls button {
+            background: transparent;
+            border: 2px solid var(--golden);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 45px;
+            white-space: nowrap;
+        }
+
+        .filter-controls button:hover {
+            background: var(--lavender);
+            border-color: var(--lavender);
+            transform: translateY(-2px);
+        }
+
+        /* Users Container */
+        #usersContainer {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* User Card */
+        .user {
+            background: rgba(15, 15, 15, 0.9);
+            border: 2px solid var(--golden);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .user:hover {
+            border-color: var(--lavender);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(111, 81, 193, 0.3);
+        }
+
+        .user.hidden {
+            display: none;
+        }
+
+        .user img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--lavender);
+        }
+
+        .username {
+            font-size: 1.3rem;
+            color: var(--lavender);
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .name,
+        .surname {
+            font-size: 1.1rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .gradeNfaculty {
+            font-size: 1rem;
+            margin: 0;
+            color: var(--golden);
+            opacity: 0.8;
+        }
+
+        .rating {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--golden);
+            margin: 0;
+            text-shadow: 0 0 10px rgba(235, 211, 124, 0.5);
+        }
+
+        .role {
+            font-size: 0.9rem;
+            background: var(--golden);
+            color: var(--background-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .user form {
+            margin: 10px 0 0 0;
+            width: 100%;
+        }
+
+        .user button {
+            width: 100%;
+            background: transparent;
+            border: 2px solid var(--golden);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user button:hover {
+            background: var(--golden);
+            color: var(--background-color);
+        }
+
+        /* No Results */
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--golden);
+            padding: 40px;
+            border: 2px dashed var(--golden);
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        /* Flashed Messages */
+        .flashed_messages {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .flashed_message {
+            background: var(--golden);
+            color: var(--background-color);
+            font-size: 1rem;
+            margin: 0 0 10px 0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slide_in_out 5s ease-in-out forwards;
+        }
+
+        @keyframes slide_in_out {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            10% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            90% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Background Decoration */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            background: radial-gradient(circle, rgba(235, 211, 124, 0.1) 0%, rgba(235, 211, 124, 0) 70%);
+        }
+
+        .circle-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            right: -50px;
+            background: radial-gradient(circle, rgba(111, 81, 193, 0.1) 0%, rgba(111, 81, 193, 0) 70%);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+                margin: 15px 0;
+            }
+
+            .filters {
+                padding: 0 15px;
+            }
+
+            .filter-controls {
+                gap: 10px;
+            }
+
+            .filter-controls input,
+            .filter-controls select {
+                min-width: 120px;
+                font-size: 0.9rem;
+                padding: 8px 12px;
+                height: 40px;
+            }
+
+            .filter-controls button {
+                font-size: 0.9rem;
+                padding: 8px 16px;
+                height: 40px;
+            }
+
+            #usersContainer {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 15px;
+                padding: 0 15px 15px;
+            }
+
+            .user {
+                padding: 15px;
+                gap: 10px;
+            }
+
+            .user img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .username {
+                font-size: 1.2rem;
+            }
+
+            .name,
+            .surname {
+                font-size: 1rem;
+            }
+
+            .rating {
+                font-size: 1.3rem;
+            }
+
+            .flashed_messages {
+                bottom: 15px;
+                right: 15px;
+                left: 15px;
+                max-width: none;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 1.7rem;
+                padding: 0 15px;
+            }
+
+            .filters {
+                padding: 0 10px;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .filter-controls input,
+            .filter-controls select,
+            .filter-controls button {
+                width: 100%;
+                min-width: auto;
+            }
+
+            #usersContainer {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                padding: 0 10px 10px;
+            }
+
+            .user {
+                padding: 12px;
+            }
+
+            .user img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .username {
+                font-size: 1.1rem;
+            }
+
+            .name,
+            .surname {
+                font-size: 0.9rem;
+            }
+
+            .rating {
+                font-size: 1.2rem;
+            }
+
+            .role {
+                font-size: 0.8rem;
+                padding: 5px 10px;
+            }
+
+            .flashed_message {
+                font-size: 0.9rem;
+                padding: 12px 16px;
+            }
+        }
+
+        /* Landscape orientation for mobile */
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            h1 {
+                font-size: 1.5rem;
+                margin: 10px 0;
+            }
+
+            .filters {
+                margin-bottom: 15px;
+            }
+
+            #usersContainer {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 10px;
+            }
+
+            .user {
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .user img {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-decoration">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
+    </div>
+
+    <h1>Таблица Рейтингов</h1>
+
+    <div class="filters">
+        <div class="filter-controls">
+            <input type="text" id="searchInput" placeholder="Искать по имени, фамили, направлению" oninput="filterUsers()">
             
-            document.addEventListener('DOMContentLoaded', function() {
-                const userElements = document.querySelectorAll('.user');
-                allUsers = Array.from(userElements);
-                populateFilterOptions();
+            <select id="facultyFilter" onchange="filterUsers()">
+                <option value="">Все направления</option>
+            </select>
+            
+            <select id="roleFilter" onchange="filterUsers()">
+                <option value="">Все роли</option>
+            </select>
+            
+            <select id="sortFilter" onchange="filterUsers()">
+                <option value="rating_desc">Рейтинг (по убыванию)</option>
+                <option value="rating_asc">Рейтинг (по возрастанию)</option>
+                <option value="name_asc">Имя (А-Я)</option>
+                <option value="name_desc">Имя (Я-А)</option>
+            </select>
+            
+            <button type="button" onclick="clearFilters()">Сбросить Фильтры</button>
+        </div>
+    </div>
+    
+    <div id="usersContainer">
+        {% if ratings %}
+            {% for rating in ratings %}
+                <div class="user"
+                     data-username="{{ rating['username'] }}"
+                     data-name="{{ rating['name'] }}"
+                     data-surname="{{ rating['surname'] }}"
+                     data-faculty="{{ rating['faculty'] }}"
+                     data-role="{{ rating['role'] }}"
+                     data-rating="{{ rating['rating'] }}">
+                     
+                    <img src="{{ url_for('static', filename=rating['avatar']) }}" alt="{{ rating['username'] }}">
+
+                    <p class="username">{{ rating["username"] }}</p>
+                    <p class="name">{{ rating["name"] }}</p>
+                    <p class="surname">{{ rating["surname"] }}</p>
+                    <p class="gradeNfaculty">{{ rating["grade"] }} {{ rating["faculty"] }}</p>
+                    <p class="rating">{{ rating["rating"] }}</p>
+                    <p class="role">{{ rating["role"] }}</p>
+
+                    <form method="POST">
+                        <input name="username" type="hidden" value="{{ rating['username'] }}">
+                        <button type="submit">Перейти</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flashed_messages">
+                {% for message in messages %}
+                    <p class="flashed_message">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <script>
+        let allUsers = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const userElements = document.querySelectorAll('.user');
+            allUsers = Array.from(userElements);
+            populateFilterOptions();
+        });
+        
+        function populateFilterOptions() {
+            const faculties = new Set();
+            const roles = new Set();
+            
+            allUsers.forEach(user => {
+                const faculty = user.dataset.faculty;
+                const role = user.dataset.role;
+                if (faculty) faculties.add(faculty);
+                if (role) roles.add(role);
             });
             
-            function populateFilterOptions() {
-                const faculties = new Set();
-                const roles = new Set();
-                
-                allUsers.forEach(user => {
-                    const faculty = user.dataset.faculty;
-                    const role = user.dataset.role;
-                    if (faculty) faculties.add(faculty);
-                    if (role) roles.add(role);
-                });
-                
-                const facultySelect = document.getElementById('facultyFilter');
-                Array.from(faculties).sort().forEach(faculty => {
-                    const option = document.createElement('option');
-                    option.value = faculty;
-                    option.textContent = faculty;
-                    facultySelect.appendChild(option);
-                });
-                
-                const roleSelect = document.getElementById('roleFilter');
-                Array.from(roles).sort().forEach(role => {
-                    const option = document.createElement('option');
-                    option.value = role;
-                    option.textContent = role;
-                    roleSelect.appendChild(option);
-                });
-            }
+            const facultySelect = document.getElementById('facultyFilter');
+            Array.from(faculties).sort().forEach(faculty => {
+                const option = document.createElement('option');
+                option.value = faculty;
+                option.textContent = faculty;
+                facultySelect.appendChild(option);
+            });
             
-            function filterUsers() {
-                const searchText = document.getElementById('searchInput').value.toLowerCase();
-                const faculty = document.getElementById('facultyFilter').value;
-                const role = document.getElementById('roleFilter').value;
-                const sortBy = document.getElementById('sortFilter').value;
-                
-                let visibleUsers = [];
-                
-                allUsers.forEach(user => {
-                    let showUser = true;
-                    
-                    if (searchText) {
-                        const username = user.dataset.username.toLowerCase();
-                        const name = user.dataset.name.toLowerCase();
-                        const surname = user.dataset.surname.toLowerCase();
-                        if (!username.includes(searchText) &&
-                            !name.includes(searchText) &&
-                            !surname.includes(searchText)) {
-                            showUser = false;
-                        }
-                    }
-                    
-                    if (faculty && user.dataset.faculty !== faculty) showUser = false;
-                    if (role && user.dataset.role !== role) showUser = false;
-                    
-                    if (showUser) {
-                        user.classList.remove('hidden');
-                        visibleUsers.push(user);
-                    } else {
-                        user.classList.add('hidden');
-                    }
-                });
-                
-                sortUsers(visibleUsers, sortBy);
-                showNoResultsMessage(visibleUsers.length === 0);
-            }
+            const roleSelect = document.getElementById('roleFilter');
+            Array.from(roles).sort().forEach(role => {
+                const option = document.createElement('option');
+                option.value = role;
+                option.textContent = role;
+                roleSelect.appendChild(option);
+            });
+        }
+        
+        function filterUsers() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const faculty = document.getElementById('facultyFilter').value;
+            const role = document.getElementById('roleFilter').value;
+            const sortBy = document.getElementById('sortFilter').value;
             
-            function sortUsers(users, sortBy) {
-                const container = document.getElementById('usersContainer');
-                users.sort((a, b) => {
-                    switch (sortBy) {
-                        case 'rating_desc':
-                            return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
-                        case 'rating_asc':
-                            return parseFloat(a.dataset.rating) - parseFloat(b.dataset.rating);
-                        case 'name_asc':
-                            return (a.dataset.name + a.dataset.surname).localeCompare(b.dataset.name + b.dataset.surname);
-                        case 'name_desc':
-                            return (b.dataset.name + b.dataset.surname).localeCompare(a.dataset.name + a.dataset.surname);
-                        default:
-                            return 0;
-                    }
-                });
-                users.forEach(user => container.appendChild(user));
-            }
+            let visibleUsers = [];
             
-            function showNoResultsMessage(show) {
-                let message = document.querySelector('.no-results');
-                if (show && !message) {
-                    message = document.createElement('div');
-                    message.className = 'no-results';
-                    message.textContent = 'No users found matching your criteria.';
-                    document.getElementById('usersContainer').appendChild(message);
-                } else if (!show && message) {
-                    message.remove();
+            allUsers.forEach(user => {
+                let showUser = true;
+                
+                if (searchText) {
+                    const username = user.dataset.username.toLowerCase();
+                    const name = user.dataset.name.toLowerCase();
+                    const surname = user.dataset.surname.toLowerCase();
+                    if (!username.includes(searchText) &&
+                        !name.includes(searchText) &&
+                        !surname.includes(searchText)) {
+                        showUser = false;
+                    }
                 }
-            }
+                
+                if (faculty && user.dataset.faculty !== faculty) showUser = false;
+                if (role && user.dataset.role !== role) showUser = false;
+                
+                if (showUser) {
+                    user.classList.remove('hidden');
+                    visibleUsers.push(user);
+                } else {
+                    user.classList.add('hidden');
+                }
+            });
             
-            function clearFilters() {
-                document.getElementById('searchInput').value = '';
-                document.getElementById('facultyFilter').value = '';
-                document.getElementById('roleFilter').value = '';
-                document.getElementById('sortFilter').value = 'rating_desc';
-                filterUsers();
+            sortUsers(visibleUsers, sortBy);
+            showNoResultsMessage(visibleUsers.length === 0);
+        }
+        
+        function sortUsers(users, sortBy) {
+            const container = document.getElementById('usersContainer');
+            users.sort((a, b) => {
+                switch (sortBy) {
+                    case 'rating_desc':
+                        return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+                    case 'rating_asc':
+                        return parseFloat(a.dataset.rating) - parseFloat(b.dataset.rating);
+                    case 'name_asc':
+                        return (a.dataset.name + a.dataset.surname).localeCompare(b.dataset.name + b.dataset.surname);
+                    case 'name_desc':
+                        return (b.dataset.name + b.dataset.surname).localeCompare(a.dataset.name + a.dataset.surname);
+                    default:
+                        return 0;
+                }
+            });
+            users.forEach(user => container.appendChild(user));
+        }
+        
+        function showNoResultsMessage(show) {
+            let message = document.querySelector('.no-results');
+            if (show && !message) {
+                message = document.createElement('div');
+                message.className = 'no-results';
+                message.textContent = 'No users found matching your criteria.';
+                document.getElementById('usersContainer').appendChild(message);
+            } else if (!show && message) {
+                message.remove();
             }
-        </script>
-    </body>
+        }
+        
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('facultyFilter').value = '';
+            document.getElementById('roleFilter').value = '';
+            document.getElementById('sortFilter').value = 'rating_desc';
+            filterUsers();
+        }
+    </script>
+</body>
+<!-- MENU -->
+<style>
+.ltta-sidebar {
+    --font-size--: 20pt;
+    --text-color--: #ebd37c;
+    --golden--: #ebd37c;
+    --lavender--: #6f51c1;
+    --card-bg--: rgba(30, 30, 30, 0.95);
+    --border-radius--: 16px;
+    --transition--: all 0.3s ease;
+    --tennis-orange: #ebd37c;
+    --tennis-blue: #6f51c1;
+    
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translate(-290px, -50%);
+    width: 300px;
+    height: 80vh;
+    background: var(--card-bg--);
+    backdrop-filter: blur(10px);
+    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
+    padding: 25px 20px;
+    border: 1px solid rgba(111, 81, 193, 0.2);
+    border-left: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 10000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover,
+.ltta-sidebar:focus-within {
+    transform: translate(0, -50%);
+}
+
+/* Создаем область для наведения */
+.ltta-sidebar-trigger {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 100px;
+    background: transparent;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.ltta-sidebar-trigger:hover + .ltta-sidebar,
+.ltta-sidebar:hover {
+    transform: translate(0, -50%);
+}
+
+.ltta-sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
+}
+
+.ltta-sidebar-logo {
+    font-size: calc(var(--font-size--) * 1.8);
+    color: var(--tennis-orange);
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.ltta-sidebar-subtitle {
+    font-size: calc(var(--font-size--) * 0.6);
+    color: rgba(235, 211, 124, 0.7);
+}
+
+.ltta-developer-info {
+    font-size: calc(var(--font-size--) * 0.5);
+    color: rgba(235, 211, 124, 0.5);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+.ltta-nav-section {
+    margin-bottom: 25px;
+}
+
+.ltta-nav-title {
+    font-size: calc(var(--font-size--) * 0.7);
+    color: var(--tennis-blue);
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 10px;
+}
+
+.ltta-nav-title::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tennis-orange);
+}
+
+.ltta-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ltta-nav-link {
+    color: var(--text-color--);
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 10px;
+    transition: var(--transition--);
+    font-size: calc(var(--font-size--) * 0.65);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid transparent;
+}
+
+.ltta-nav-link:hover {
+    background: rgba(111, 81, 193, 0.15);
+    border-color: rgba(111, 81, 193, 0.3);
+    transform: translateX(5px);
+}
+
+.ltta-nav-link.active {
+    background: rgba(111, 81, 193, 0.2);
+    border-color: var(--tennis-blue);
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-link::before {
+    content: '▶';
+    font-size: calc(var(--font-size--) * 0.5);
+    color: var(--tennis-blue);
+    transition: var(--transition--);
+}
+
+.ltta-nav-link:hover::before {
+    transform: translateX(3px);
+}
+
+.ltta-nav-link.active::before {
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-badge {
+    background: var(--tennis-blue);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: calc(var(--font-size--) * 0.5);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.ltta-nav-badge.admin {
+    background: var(--tennis-orange);
+    color: #000;
+}
+
+.ltta-sidebar-indicator {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 60px;
+    background: var(--tennis-blue);
+    border-radius: 0 10px 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover .ltta-sidebar-indicator {
+    opacity: 0;
+}
+
+.ltta-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-track {
+    background: rgba(111, 81, 193, 0.1);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb {
+    background: var(--tennis-blue);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--tennis-orange);
+}
+
+@media (max-width: 768px) {
+    .ltta-sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        height: 100vh;
+        top: 0;
+        transform: translateX(-100%);
+    }
+    
+    .ltta-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .ltta-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 10001;
+        background: var(--golden--);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transition: var(--transition--);
+    }
+    
+    .ltta-menu-toggle:hover {
+        background: var(--lavender--);
+        color: #000;
+    }
+    
+    .ltta-sidebar-indicator {
+        display: none;
+    }
+    
+    .ltta-sidebar-trigger {
+        display: none;
+    }
+}
+</style>
+
+<!-- Триггер для наведения -->
+<div class="ltta-sidebar-trigger"></div>
+
+<!-- Mobile Toggle Button -->
+<button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
+
+<!-- Sidebar Navigation -->
+<nav class="ltta-sidebar" id="lttaSidebar">
+    <div class="ltta-sidebar-indicator">☰</div>
+    
+    <div class="ltta-sidebar-header">
+        <div class="ltta-sidebar-logo">LTTA</div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Пользователь</div>
+        <div class="ltta-nav-links">
+            <a href="/login" class="ltta-nav-link">Вход в систему</a>
+            <a href="/registration" class="ltta-nav-link">Регистрация</a>
+            <a href="/profile" class="ltta-nav-link">Личный кабинет</a>
+            <a href="/events" class="ltta-nav-link">События</a>
+            <a href="/ratings" class="ltta-nav-link">Рейтинг</a>
+            <a href="/help" class="ltta-nav-link">Помощь</a>
+            <a href="/logout" class="ltta-nav-link">Выход</a>
+        </div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Администрирование</div>
+        <div class="ltta-nav-links">
+            <a href="/members" class="ltta-nav-link">
+                Участники
+                <span class="ltta-nav-badge admin">админ</span>
+            </a>
+            <a href="/events_list" class="ltta-nav-link">
+                Управление событиями
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+            <a href="/create_event" class="ltta-nav-link">
+                Создание события
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Справка</div>
+        <div class="ltta-nav-links">
+            <a href="/help#admin-scenarios" class="ltta-nav-link">
+                Для администраторов
+            </a>
+            <a href="/help#user-scenarios" class="ltta-nav-link">Руководство пользователя</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('lttaMenuToggle');
+    const sidebar = document.getElementById('lttaSidebar');
+    
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('.ltta-nav-link');
+    
+    links.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+    
+    function checkMobile() {
+        if (window.innerWidth <= 768) {
+            menuToggle.style.display = 'flex';
+            
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('mobile-open');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (sidebar.classList.contains('mobile-open') &&
+                    !sidebar.contains(e.target) && 
+                    e.target !== menuToggle) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+        } else {
+            menuToggle.style.display = 'none';
+        }
+    }
+    
+    checkMobile();
+    
+    window.addEventListener('resize', checkMobile);
+});
+</script>
 </html>

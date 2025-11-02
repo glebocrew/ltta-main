@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Помощь - LTTA</title>
+    <style>
+        /* CSS Variables */
+        :root {
+            --font-size--: 20pt;
+            --background-color--: #0a0a0a;
+            --text-color--: #ebd37c; /* Желтый цвет для текста */
+            --golden--: #ebd37c;
+            --lavender--: #6f51c1;
+            --dark-bg--: #1a1a1a;
+            --card-bg--: rgba(30, 30, 30, 0.7);
+            --border-radius--: 16px;
+            --transition--: all 0.3s ease;
+            --tennis-orange: #ebd37c; /* Изменен на желтый */
+            --tennis-blue: #6f51c1; /* Изменен на фиолетовый */
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background: linear-gradient(135deg, var(--background-color--) 0%, #1a1a1a 100%);
+            color: var(--text-color--);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(111, 81, 193, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(235, 211, 124, 0.1) 0%, transparent 20%);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Header Styles */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        h1 {
+            font-size: calc(var(--font-size--) * 2.5);
+            color: var(--tennis-orange);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            font-weight: 700;
+            position: relative;
+            display: inline-block;
+            padding: 0 20px;
+            text-shadow: 0 0 10px rgba(235, 211, 124, 0.5);
+        }
+
+        h1::before, h1::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--tennis-blue), transparent);
+        }
+
+        h1::before {
+            right: 100%;
+        }
+
+        h1::after {
+            left: 100%;
+        }
+
+        .page-subtitle {
+            color: var(--text-color--);
+            font-size: calc(var(--font-size--) * 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        .help-nav {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 40px;
+            background: var(--card-bg--);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius--);
+            padding: 20px;
+            border: 1px solid rgba(111, 81, 193, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-title {
+            font-size: calc(var(--font-size--) * 0.9);
+            color: var(--tennis-blue);
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-title::before {
+            content: '📋';
+            font-size: calc(var(--font-size--) * 0.8);
+        }
+
+        .nav-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .nav-link {
+            color: var(--text-color--);
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: var(--transition--);
+            font-size: calc(var(--font-size--) * 0.6);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(111, 81, 193, 0.2);
+        }
+
+        .nav-link:hover {
+            background: rgba(111, 81, 193, 0.2);
+            border-color: var(--tennis-blue);
+            transform: translateY(-2px);
+        }
+
+        .nav-link::before {
+            content: '▶';
+            font-size: calc(var(--font-size--) * 0.5);
+            color: var(--tennis-blue);
+        }
+
+        /* FAQ Sections */
+        .faq-section {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: calc(var(--font-size--) * 1.3);
+            color: var(--tennis-blue);
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: var(--tennis-orange);
+        }
+
+        .section-title::before {
+            font-size: calc(var(--font-size--) * 0.9);
+        }
+
+        .user-section .section-title::before {
+            content: '👤';
+        }
+
+        .admin-section .section-title::before {
+            content: '⚙️';
+        }
+
+        .faq-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .faq-item {
+            background: var(--card-bg--);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius--);
+            padding: 25px;
+            transition: var(--transition--);
+            border: 1px solid rgba(111, 81, 193, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .faq-item:hover {
+            border-color: rgba(111, 81, 193, 0.5);
+            box-shadow: 0 15px 35px rgba(111, 81, 193, 0.2);
+        }
+
+        .faq-question {
+            font-size: calc(var(--font-size--) * 0.8);
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--tennis-orange);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .faq-question::before {
+            content: 'Q:';
+            color: var(--tennis-blue);
+            font-weight: 700;
+            font-size: calc(var(--font-size--) * 0.8);
+            min-width: 30px;
+        }
+
+        .faq-answer {
+            font-size: calc(var(--font-size--) * 0.65);
+            color: var(--text-color--);
+            line-height: 1.6;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .faq-answer::before {
+            content: 'A:';
+            color: var(--tennis-blue);
+            font-weight: 700;
+            font-size: calc(var(--font-size--) * 0.65);
+            min-width: 30px;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            width: 100%;
+            max-width: 1200px;
+            background: linear-gradient(135deg, var(--tennis-blue), #8b7ac9);
+            border-radius: var(--border-radius--);
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .contact-title {
+            font-size: calc(var(--font-size--) * 1.5);
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .contact-text {
+            font-size: calc(var(--font-size--) * 0.8);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .contact-button {
+            background: var(--tennis-orange);
+            color: #000;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: calc(var(--font-size--) * 0.8);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition--);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(235, 211, 124, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-button:hover {
+            background: #f0d780;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(235, 211, 124, 0.6);
+        }
+
+        .contact-button::before {
+            content: '✉️';
+        }
+
+        /* Footer */
+        .footer {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+        }
+
+        .footer-text {
+            font-size: calc(var(--font-size--) * 0.6);
+            color: rgba(235, 211, 124, 0.6);
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--tennis-blue);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: var(--transition--);
+            box-shadow: 0 5px 15px rgba(111, 81, 193, 0.4);
+            z-index: 100;
+            border: none;
+        }
+
+        .back-to-top:hover {
+            background: var(--tennis-orange);
+            color: #000;
+            transform: translateY(-5px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: calc(var(--font-size--) * 1.8);
+            }
+            
+            .faq-item {
+                padding: 20px;
+            }
+            
+            .contact-section {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .faq-question, .faq-answer {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .faq-question::before, .faq-answer::before {
+                min-width: auto;
+            }
+            
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .faq-item {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .faq-item:nth-child(odd) {
+            animation-delay: 0.1s;
+        }
+
+        .faq-item:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1>Помощь</h1>
+        <p class="page-subtitle">Найдите ответы на часто задаваемые вопросы по использованию LTTA</p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="help-nav">
+        <h3 class="nav-title">Навигация по разделам помощи</h3>
+        <div class="nav-links">
+            <a href="#user-scenarios" class="nav-link">Пользовательские сценарии</a>
+            <a href="#registration" class="nav-link">Регистрация и профиль</a>
+            <a href="#events" class="nav-link">События и турниры</a>
+            <a href="#rating" class="nav-link">Рейтинг и статистика</a>
+            <a href="#admin-scenarios" class="nav-link">Администраторские сценарии</a>
+            <a href="#contact" class="nav-link">Связаться с поддержкой</a>
+        </div>
+    </div>
+
+    <!-- User Scenarios Section -->
+    <div class="faq-section user-section" id="user-scenarios">
+        <h2 class="section-title">Пользовательские сценарии</h2>
+        <div class="faq-container">
+            <!-- Сценарий 1 -->
+            <div class="faq-item" id="registration">
+                <div class="faq-question">Регистрация пользователя / Изменение профиля</div>
+                <div class="faq-answer">
+                    1. Нажмите кнопку "Регистрация" на главной странице.<br>
+                    2. Заполните форму: Никнейм, Email, направление и параллель обучения, пароль (дважды).<br>
+                    3. Если почта уже зарегистрирована, система предложит ввести другую.<br>
+                    4. Пароли должны совпадать, иначе потребуется ввести их заново.<br>
+                    5. После успешной регистрации проверьте почту для подтверждения.<br>
+                    6. После подтверждения войдите в систему и перейдите в "Личный кабинет" для изменения данных.
+                </div>
+            </div>
+            
+            <!-- Сценарий 2 -->
+            <div class="faq-item" id="events">
+                <div class="faq-question">Участие в соревновании</div>
+                <div class="faq-answer">
+                    1. Авторизуйтесь в приложении.<br>
+                    2. Перейдите в раздел "События".<br>
+                    3. Выберите нужное событие и нажмите "Я приду!".<br>
+                    4. Подтвердите участие, введя свои данные.<br>
+                    5. Событие появится в вашем личном кабинете.
+                </div>
+            </div>
+            
+            <!-- Сценарий 3 -->
+            <div class="faq-item">
+                <div class="faq-question">Просмотр турнира / Скачивание таблицы участников</div>
+                <div class="faq-answer">
+                    1. Авторизуйтесь и перейдите в раздел "События".<br>
+                    2. Выберите текущее событие для просмотра.<br>
+                    3. Откроется список участников с их рейтингами.<br>
+                    4. Нажмите кнопку "Скачать участников" для получения таблицы.
+                </div>
+            </div>
+            
+            <!-- Сценарий 5 -->
+            <div class="faq-item" id="rating">
+                <div class="faq-question">Просмотр своего рейтинга</div>
+                <div class="faq-answer">
+                    1. Перейдите в раздел "Личный кабинет".<br>
+                    2. Откройте подраздел "Статистика" для просмотра рейтинга.<br>
+                    3. Для поиска себя в общей таблице перейдите в раздел "Рейтинг".<br>
+                    4. Введите свой никнейм в поисковую строку и нажмите "Поиск".
+                </div>
+            </div>
+            
+            <!-- Сценарий 6 -->
+            <div class="faq-item">
+                <div class="faq-question">Поиск игрока</div>
+                <div class="faq-answer">
+                    1. Перейдите в раздел "Рейтинг".<br>
+                    2. Используйте фильтры по группе, зданию или параллели.<br>
+                    3. Просматривайте рейтинг или используйте поисковую строку.<br>
+                    4. Введите имя игрока и нажмите "Поиск" для быстрого нахождения.
+                </div>
+            </div>
+            
+            <!-- Сценарий 7 -->
+            <div class="faq-item">
+                <div class="faq-question">Скачивание хроник соревнований</div>
+                <div class="faq-answer">
+                    1. Перейдите в завершившееся соревнование.<br>
+                    2. Если соревнование завершено, нажмите "Скачать Соревнование".<br>
+                    3. Дождитесь обработки данных.<br>
+                    4. Скачайте файл со статистикой по всем сетам.
+                </div>
+            </div>
+            
+            <!-- Сценарий 8 -->
+            <div class="faq-item">
+                <div class="faq-question">Скачивание профиля</div>
+                <div class="faq-answer">
+                    Для чужого профиля:<br>
+                    1. Перейдите в раздел "Рейтинг".<br>
+                    2. Откройте интересующий профиль.<br>
+                    3. Нажмите "Скачать Профиль".<br><br>
+                    Для своего профиля:<br>
+                    1. Перейдите в "Личный кабинет".<br>
+                    2. Откройте подраздел "Статистика".<br>
+                    3. Нажмите "Скачать мою статистику".
+                </div>
+            </div>
+            
+            <!-- Сценарий 9 -->
+            <div class="faq-item">
+                <div class="faq-question">Календарь событий</div>
+                <div class="faq-answer">
+                    1. Перейдите в раздел "Личный кабинет".<br>
+                    2. Откройте календарь событий.<br>
+                    3. Найдите интересующее событие и нажмите на него.<br>
+                    4. Просмотрите подробную информацию о событии.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Scenarios Section -->
+    <div class="faq-section admin-section" id="admin-scenarios">
+        <h2 class="section-title">Администраторские сценарии</h2>
+        <div class="faq-container">
+            <!-- Сценарий 11 -->
+            <div class="faq-item">
+                <div class="faq-question">Добавление/удаление нового администратора/редактора</div>
+                <div class="faq-answer">
+                    1. Перейдите в раздел "Участники".<br>
+                    2. Выберите участника и нажмите "Изменить права".<br>
+                    3. Выберите уровень прав:<br>
+                    - Администратор: полный доступ<br>
+                    - Редактор: все действия кроме добавления администраторов<br>
+                    4. Нажмите "Сохранить изменения".<br>
+                    5. Для удаления прав повторите шаги 1-2 и установите обычные права.
+                </div>
+            </div>
+            
+            <!-- Сценарий 12 -->
+            <div class="faq-item">
+                <div class="faq-question">Создание соревнования/события</div>
+                <div class="faq-answer">
+                    1. Перейдите в раздел "События".<br>
+                    2. Нажмите "Создать событие".<br>
+                    3. Выберите тип события "Соревнование".<br>
+                    4. Заполните данные: время, фото, описание, заголовок.<br>
+                    5. Выберите участников с помощью поиска и кликов.<br>
+                    6. Нажмите "Опубликовать соревнование".
+                </div>
+            </div>
+            
+            <!-- Сценарий 13 -->
+            <div class="faq-item">
+                <div class="faq-question">Изменение/завершение события</div>
+                <div class="faq-answer">
+                    1. Перейдите в раздел "События".<br>
+                    2. Выберите нужное событие.<br>
+                    3. Измените данные: время, фото, описание, заголовок.<br>
+                    4. Для соревнований доступно изменение положения игроков.<br>
+                    5. Нажмите "Применить изменения".<br>
+                    6. Для завершения события нажмите "Завершить событие".
+                </div>
+            </div>
+            
+            <!-- Сценарий 15 -->
+            <div class="faq-item">
+                <div class="faq-question">Изменение рейтинга игрока</div>
+                <div class="faq-answer">
+                    Автоматически: при завершении соревнования.<br><br>
+                    Вручную:<br>
+                    1. Найдите спортсмена в системе.<br>
+                    2. Нажмите "Изменить данные".<br>
+                    3. Измените рейтинг игрока.<br>
+                    4. Нажмите "Сохранить изменения".
+                </div>
+            </div>
+            
+            <!-- Сценарий 16 -->
+            <div class="faq-item">
+                <div class="faq-question">Изменение учётной записи игрока</div>
+                <div class="faq-answer">
+                    1. Перейдите в раздел "Участники".<br>
+                    2. Выберите участника и нажмите "Изменить".<br>
+                    3. Измените необходимые данные.<br>
+                    4. Нажмите "Сохранить изменения".<br>
+                    5. Примечание: нельзя изменить права редакторов и администраторов.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="contact-section" id="contact">
+        <h2 class="contact-title">Нужна дополнительная помощь?</h2>
+        <p class="contact-text">Если вы не нашли ответ на свой вопрос в этом руководстве, свяжитесь с нашей службой поддержки. Мы ответим вам в кратчайшие сроки.</p>
+        <button class="contact-button" onclick="window.location.href = 'https://t.me/glebocrew'">Написать в поддержку</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p class="footer-text">© "Золотой Мяч" -- Лицей НИУ ВШЭ</p>
+    </div>
+    <!-- Back to Top Button -->
+    <button class="back-to-top">↑</button>
+
+    <script>
+        // Back to top functionality
+        document.querySelector('.back-to-top').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Show/hide back to top button based on scroll position
+        window.addEventListener('scroll', function() {
+            const backToTopButton = document.querySelector('.back-to-top');
+            if (window.pageYOffset > 300) {
+                backToTopButton.style.display = 'flex';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+<!-- MENU -->
+<style>
+.ltta-sidebar {
+    --font-size--: 20pt;
+    --text-color--: #ebd37c;
+    --golden--: #ebd37c;
+    --lavender--: #6f51c1;
+    --card-bg--: rgba(30, 30, 30, 0.95);
+    --border-radius--: 16px;
+    --transition--: all 0.3s ease;
+    --tennis-orange: #ebd37c;
+    --tennis-blue: #6f51c1;
+    
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translate(-290px, -50%);
+    width: 300px;
+    height: 80vh;
+    background: var(--card-bg--);
+    backdrop-filter: blur(10px);
+    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
+    padding: 25px 20px;
+    border: 1px solid rgba(111, 81, 193, 0.2);
+    border-left: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 10000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover,
+.ltta-sidebar:focus-within {
+    transform: translate(0, -50%);
+}
+
+/* Создаем область для наведения */
+.ltta-sidebar-trigger {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 100px;
+    background: transparent;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.ltta-sidebar-trigger:hover + .ltta-sidebar,
+.ltta-sidebar:hover {
+    transform: translate(0, -50%);
+}
+
+.ltta-sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
+}
+
+.ltta-sidebar-logo {
+    font-size: calc(var(--font-size--) * 1.8);
+    color: var(--tennis-orange);
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.ltta-sidebar-subtitle {
+    font-size: calc(var(--font-size--) * 0.6);
+    color: rgba(235, 211, 124, 0.7);
+}
+
+.ltta-developer-info {
+    font-size: calc(var(--font-size--) * 0.5);
+    color: rgba(235, 211, 124, 0.5);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+.ltta-nav-section {
+    margin-bottom: 25px;
+}
+
+.ltta-nav-title {
+    font-size: calc(var(--font-size--) * 0.7);
+    color: var(--tennis-blue);
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 10px;
+}
+
+.ltta-nav-title::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tennis-orange);
+}
+
+.ltta-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ltta-nav-link {
+    color: var(--text-color--);
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 10px;
+    transition: var(--transition--);
+    font-size: calc(var(--font-size--) * 0.65);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid transparent;
+}
+
+.ltta-nav-link:hover {
+    background: rgba(111, 81, 193, 0.15);
+    border-color: rgba(111, 81, 193, 0.3);
+    transform: translateX(5px);
+}
+
+.ltta-nav-link.active {
+    background: rgba(111, 81, 193, 0.2);
+    border-color: var(--tennis-blue);
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-link::before {
+    content: '▶';
+    font-size: calc(var(--font-size--) * 0.5);
+    color: var(--tennis-blue);
+    transition: var(--transition--);
+}
+
+.ltta-nav-link:hover::before {
+    transform: translateX(3px);
+}
+
+.ltta-nav-link.active::before {
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-badge {
+    background: var(--tennis-blue);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: calc(var(--font-size--) * 0.5);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.ltta-nav-badge.admin {
+    background: var(--tennis-orange);
+    color: #000;
+}
+
+.ltta-sidebar-indicator {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 60px;
+    background: var(--tennis-blue);
+    border-radius: 0 10px 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover .ltta-sidebar-indicator {
+    opacity: 0;
+}
+
+.ltta-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-track {
+    background: rgba(111, 81, 193, 0.1);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb {
+    background: var(--tennis-blue);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--tennis-orange);
+}
+
+@media (max-width: 768px) {
+    .ltta-sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        height: 100vh;
+        top: 0;
+        transform: translateX(-100%);
+    }
+    
+    .ltta-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .ltta-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 10001;
+        background: var(--golden--);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transition: var(--transition--);
+    }
+    
+    .ltta-menu-toggle:hover {
+        background: var(--lavender--);
+        color: #000;
+    }
+    
+    .ltta-sidebar-indicator {
+        display: none;
+    }
+    
+    .ltta-sidebar-trigger {
+        display: none;
+    }
+}
+</style>
+
+<!-- Триггер для наведения -->
+<div class="ltta-sidebar-trigger"></div>
+
+<!-- Mobile Toggle Button -->
+<button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
+
+<!-- Sidebar Navigation -->
+<nav class="ltta-sidebar" id="lttaSidebar">
+    <div class="ltta-sidebar-indicator">☰</div>
+    
+    <div class="ltta-sidebar-header">
+        <div class="ltta-sidebar-logo">LTTA</div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Пользователь</div>
+        <div class="ltta-nav-links">
+            <a href="/login" class="ltta-nav-link">Вход в систему</a>
+            <a href="/registration" class="ltta-nav-link">Регистрация</a>
+            <a href="/profile" class="ltta-nav-link">Личный кабинет</a>
+            <a href="/events" class="ltta-nav-link">События</a>
+            <a href="/ratings" class="ltta-nav-link">Рейтинг</a>
+            <a href="/help" class="ltta-nav-link">Помощь</a>
+            <a href="/logout" class="ltta-nav-link">Выход</a>
+        </div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Администрирование</div>
+        <div class="ltta-nav-links">
+            <a href="/members" class="ltta-nav-link">
+                Участники
+                <span class="ltta-nav-badge admin">админ</span>
+            </a>
+            <a href="/events_list" class="ltta-nav-link">
+                Управление событиями
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+            <a href="/create_event" class="ltta-nav-link">
+                Создание события
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Справка</div>
+        <div class="ltta-nav-links">
+            <a href="/help#admin-scenarios" class="ltta-nav-link">
+                Для администраторов
+            </a>
+            <a href="/help#user-scenarios" class="ltta-nav-link">Руководство пользователя</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('lttaMenuToggle');
+    const sidebar = document.getElementById('lttaSidebar');
+    
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('.ltta-nav-link');
+    
+    links.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+    
+    function checkMobile() {
+        if (window.innerWidth <= 768) {
+            menuToggle.style.display = 'flex';
+            
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('mobile-open');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (sidebar.classList.contains('mobile-open') &&
+                    !sidebar.contains(e.target) && 
+                    e.target !== menuToggle) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+        } else {
+            menuToggle.style.display = 'none';
+        }
+    }
+    
+    checkMobile();
+    
+    window.addEventListener('resize', checkMobile);
+});
+</script>
+</html>

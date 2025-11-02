@@ -1,18 +1,314 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='styles/verification.css') }}" rel="stylesheet">
+    <!-- <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles/verification.css') }}" rel="stylesheet"> -->
     <title>Verification Page</title>
+    <style>
+        /* CSS Variables */
+        :root {
+            --background-color: #0a0a0a;
+            --text-color: #ffffff;
+            --golden: #ebd37c;
+            --lavender: #6f51c1;
+            --dark-lavender: #5a4199;
+            --error-color: #ff4757;
+            --success-color: #2ed573;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100%;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            overflow-x: hidden;
+        }
+
+        /* Verification Container */
+        .verification-container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .code-form {
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid var(--golden);
+            border-radius: 20px;
+            padding: 40px 30px;
+            background: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(235, 211, 124, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .code-form:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Header */
+        .header-1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--golden), #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .code-form > p {
+            font-size: 1.1rem;
+            color: var(--lavender);
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        /* Code Inputs */
+        .code-input-group {
+            margin-bottom: 30px;
+        }
+
+        .code-inputs {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .code-input {
+            width: 55px;
+            height: 65px;
+            border: 2px solid var(--lavender);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: var(--golden);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 2px rgba(235, 211, 124, 0.2);
+        }
+
+        .code-input.filled {
+            border-color: var(--golden);
+            background: rgba(235, 211, 124, 0.1);
+        }
+
+        .hidden-code {
+            display: none;
+        }
+
+        /* Verify Button */
+        .verify-btn {
+            width: 100%;
+            padding: 16px;
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--golden);
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .verify-btn:hover:not(:disabled) {
+            background: var(--lavender);
+            border-color: var(--lavender);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(111, 81, 193, 0.4);
+        }
+
+        .verify-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Messages */
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .error {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--error-color);
+            color: #ffcccc;
+        }
+
+        .success {
+            background: rgba(46, 213, 115, 0.1);
+            border: 1px solid var(--success-color);
+            color: #ccffcc;
+        }
+
+        /* Background Decoration */
+        .bg-decoration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: -100px;
+            background: radial-gradient(circle, rgba(235, 211, 124, 0.1) 0%, rgba(235, 211, 124, 0) 70%);
+        }
+
+        .circle-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            right: -50px;
+            background: radial-gradient(circle, rgba(111, 81, 193, 0.1) 0%, rgba(111, 81, 193, 0) 70%);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .verification-container {
+                padding: 15px;
+            }
+
+            .code-form {
+                padding: 30px 20px;
+                border-radius: 15px;
+            }
+
+            .header-1 {
+                font-size: 2rem;
+            }
+
+            .code-form > p {
+                font-size: 1rem;
+            }
+
+            .code-input {
+                width: 50px;
+                height: 60px;
+                font-size: 1.6rem;
+            }
+
+            .verify-btn {
+                padding: 14px;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .verification-container {
+                padding: 10px;
+            }
+
+            .code-form {
+                padding: 25px 15px;
+            }
+
+            .header-1 {
+                font-size: 1.7rem;
+            }
+
+            .code-inputs {
+                gap: 8px;
+            }
+
+            .code-input {
+                width: 45px;
+                height: 55px;
+                font-size: 1.4rem;
+            }
+
+            .verify-btn {
+                padding: 12px;
+                font-size: 1rem;
+            }
+
+            .message {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Landscape orientation for mobile */
+        @media screen and (max-height: 500px) and (orientation: landscape) {
+            .verification-container {
+                padding: 10px;
+            }
+
+            .code-form {
+                padding: 20px 15px;
+            }
+
+            .header-1 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .code-form > p {
+                margin-bottom: 20px;
+                font-size: 0.9rem;
+            }
+
+            .code-input {
+                width: 40px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+
+            .code-input-group {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <div class="bg-decoration">
+        <div class="bg-circle circle-1"></div>
+        <div class="bg-circle circle-2"></div>
+    </div>
+
     <div class="verification-container">
-        <form method="POST" class="code-form">
+        <form method="POST" class="code-form" id="verificationForm">
             <h1 class="header-1">Red Dragon Verification</h1>
-            <p>Do not close this page!</p>
+            <p>Пожалуйста, не закрывайте эту страницу!</p>
             
             <div class="code-input-group">
                 <div class="code-inputs">
@@ -26,7 +322,7 @@
             </div>
 
             <input type="hidden" id="verificationCode" name="code" class="hidden-code">
-            <button type="submit" class="verify-btn">Submit</button>
+            <button type="submit" class="verify-btn" id="submitButton">Подтвердить</button>
             
             {% if message %}
                 <div class="message {% if 'error' in message|lower %}error{% else %}success{% endif %}">
@@ -46,6 +342,463 @@
         </form>
     </div>
 
-    <script src="{{ url_for('static', filename='scripts/verification.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll('.code-input');
+            const submitButton = document.getElementById('submitButton');
+            const verificationCodeInput = document.getElementById('verificationCode');
+            const form = document.getElementById('verificationForm');
+
+            // Фокус на первый инпут при загрузке
+            inputs[0].focus();
+
+            inputs.forEach((input, index) => {
+                // Обработка ввода
+                input.addEventListener('input', function (e) {
+                    const value = e.target.value;
+
+                    // Если введена цифра - переходим к следующему полю
+                    if (value.match(/[0-9]/)) {
+                        e.target.classList.add('filled');
+
+                        if (index < inputs.length - 1) {
+                            inputs[index + 1].focus();
+                        }
+
+                        updateVerificationCode();
+                        checkAllFilled();
+                    } else {
+                        e.target.value = '';
+                    }
+                });
+
+                // Обработка удаления
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                        inputs[index - 1].focus();
+                        inputs[index - 1].value = '';
+                        inputs[index - 1].classList.remove('filled');
+                        updateVerificationCode();
+                        checkAllFilled();
+                    } else if (e.key === 'Backspace' && e.target.value) {
+                        e.target.value = '';
+                        e.target.classList.remove('filled');
+                        updateVerificationCode();
+                        checkAllFilled();
+                    }
+                });
+
+                // Обработка вставки
+                input.addEventListener('paste', function (e) {
+                    e.preventDefault();
+                    const pastedData = e.clipboardData.getData('text');
+
+                    if (pastedData.match(/^[0-9]{6}$/)) {
+                        // Заполняем все поля из буфера обмена
+                        pastedData.split('').forEach((char, i) => {
+                            if (inputs[i]) {
+                                inputs[i].value = char;
+                                inputs[i].classList.add('filled');
+                            }
+                        });
+
+                        if (inputs[pastedData.length - 1]) {
+                            inputs[pastedData.length - 1].focus();
+                        }
+
+                        updateVerificationCode();
+                        checkAllFilled();
+                    }
+                });
+            });
+
+            function updateVerificationCode() {
+                const code = Array.from(inputs).map(input => input.value).join('');
+                verificationCodeInput.value = code;
+            }
+
+            function checkAllFilled() {
+                const allFilled = Array.from(inputs).every(input => input.value !== '');
+                submitButton.disabled = !allFilled;
+            }
+
+            // Обработка отправки формы
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Обновляем код перед отправкой (на всякий случай)
+                updateVerificationCode();
+
+                const code = verificationCodeInput.value;
+                console.log('Отправка кода:', code);
+
+                // Отправляем форму
+                form.submit();
+            });
+
+            // Инициализация проверки заполненности
+            checkAllFilled();
+        });
+    </script>
 </body>
+<!-- MENU -->
+<style>
+.ltta-sidebar {
+    --font-size--: 20pt;
+    --text-color--: #ebd37c;
+    --golden--: #ebd37c;
+    --lavender--: #6f51c1;
+    --card-bg--: rgba(30, 30, 30, 0.95);
+    --border-radius--: 16px;
+    --transition--: all 0.3s ease;
+    --tennis-orange: #ebd37c;
+    --tennis-blue: #6f51c1;
+    
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translate(-290px, -50%);
+    width: 300px;
+    height: 80vh;
+    background: var(--card-bg--);
+    backdrop-filter: blur(10px);
+    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
+    padding: 25px 20px;
+    border: 1px solid rgba(111, 81, 193, 0.2);
+    border-left: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 10000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover,
+.ltta-sidebar:focus-within {
+    transform: translate(0, -50%);
+}
+
+/* Создаем область для наведения */
+.ltta-sidebar-trigger {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 100px;
+    background: transparent;
+    z-index: 9999;
+    cursor: pointer;
+}
+
+.ltta-sidebar-trigger:hover + .ltta-sidebar,
+.ltta-sidebar:hover {
+    transform: translate(0, -50%);
+}
+
+.ltta-sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
+}
+
+.ltta-sidebar-logo {
+    font-size: calc(var(--font-size--) * 1.8);
+    color: var(--tennis-orange);
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.ltta-sidebar-subtitle {
+    font-size: calc(var(--font-size--) * 0.6);
+    color: rgba(235, 211, 124, 0.7);
+}
+
+.ltta-developer-info {
+    font-size: calc(var(--font-size--) * 0.5);
+    color: rgba(235, 211, 124, 0.5);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+.ltta-nav-section {
+    margin-bottom: 25px;
+}
+
+.ltta-nav-title {
+    font-size: calc(var(--font-size--) * 0.7);
+    color: var(--tennis-blue);
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 10px;
+}
+
+.ltta-nav-title::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tennis-orange);
+}
+
+.ltta-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ltta-nav-link {
+    color: var(--text-color--);
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 10px;
+    transition: var(--transition--);
+    font-size: calc(var(--font-size--) * 0.65);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid transparent;
+}
+
+.ltta-nav-link:hover {
+    background: rgba(111, 81, 193, 0.15);
+    border-color: rgba(111, 81, 193, 0.3);
+    transform: translateX(5px);
+}
+
+.ltta-nav-link.active {
+    background: rgba(111, 81, 193, 0.2);
+    border-color: var(--tennis-blue);
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-link::before {
+    content: '▶';
+    font-size: calc(var(--font-size--) * 0.5);
+    color: var(--tennis-blue);
+    transition: var(--transition--);
+}
+
+.ltta-nav-link:hover::before {
+    transform: translateX(3px);
+}
+
+.ltta-nav-link.active::before {
+    color: var(--tennis-orange);
+}
+
+.ltta-nav-badge {
+    background: var(--tennis-blue);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: calc(var(--font-size--) * 0.5);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.ltta-nav-badge.admin {
+    background: var(--tennis-orange);
+    color: #000;
+}
+
+.ltta-sidebar-indicator {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 60px;
+    background: var(--tennis-blue);
+    border-radius: 0 10px 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition--);
+}
+
+.ltta-sidebar:hover .ltta-sidebar-indicator {
+    opacity: 0;
+}
+
+.ltta-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-track {
+    background: rgba(111, 81, 193, 0.1);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb {
+    background: var(--tennis-blue);
+    border-radius: 3px;
+}
+
+.ltta-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--tennis-orange);
+}
+
+@media (max-width: 768px) {
+    .ltta-sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        height: 100vh;
+        top: 0;
+        transform: translateX(-100%);
+    }
+    
+    .ltta-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .ltta-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 10001;
+        background: var(--golden--);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transition: var(--transition--);
+    }
+    
+    .ltta-menu-toggle:hover {
+        background: var(--lavender--);
+        color: #000;
+    }
+    
+    .ltta-sidebar-indicator {
+        display: none;
+    }
+    
+    .ltta-sidebar-trigger {
+        display: none;
+    }
+}
+</style>
+
+<!-- Триггер для наведения -->
+<div class="ltta-sidebar-trigger"></div>
+
+<!-- Mobile Toggle Button -->
+<button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
+
+<!-- Sidebar Navigation -->
+<nav class="ltta-sidebar" id="lttaSidebar">
+    <div class="ltta-sidebar-indicator">☰</div>
+    
+    <div class="ltta-sidebar-header">
+        <div class="ltta-sidebar-logo">LTTA</div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Пользователь</div>
+        <div class="ltta-nav-links">
+            <a href="/login" class="ltta-nav-link">Вход в систему</a>
+            <a href="/registration" class="ltta-nav-link">Регистрация</a>
+            <a href="/profile" class="ltta-nav-link">Личный кабинет</a>
+            <a href="/events" class="ltta-nav-link">События</a>
+            <a href="/ratings" class="ltta-nav-link">Рейтинг</a>
+            <a href="/help" class="ltta-nav-link">Помощь</a>
+            <a href="/logout" class="ltta-nav-link">Выход</a>
+        </div>
+    </div>
+
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Администрирование</div>
+        <div class="ltta-nav-links">
+            <a href="/members" class="ltta-nav-link">
+                Участники
+                <span class="ltta-nav-badge admin">админ</span>
+            </a>
+            <a href="/events_list" class="ltta-nav-link">
+                Управление событиями
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+            <a href="/create_event" class="ltta-nav-link">
+                Создание события
+                <span class="ltta-nav-badge">админ+</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="ltta-nav-section">
+        <div class="ltta-nav-title">Справка</div>
+        <div class="ltta-nav-links">
+            <a href="/help#admin-scenarios" class="ltta-nav-link">
+                Для администраторов
+            </a>
+            <a href="/help#user-scenarios" class="ltta-nav-link">Руководство пользователя</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('lttaMenuToggle');
+    const sidebar = document.getElementById('lttaSidebar');
+    
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll('.ltta-nav-link');
+    
+    links.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+    
+    function checkMobile() {
+        if (window.innerWidth <= 768) {
+            menuToggle.style.display = 'flex';
+            
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('mobile-open');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (sidebar.classList.contains('mobile-open') &&
+                    !sidebar.contains(e.target) && 
+                    e.target !== menuToggle) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+        } else {
+            menuToggle.style.display = 'none';
+        }
+    }
+    
+    checkMobile();
+    
+    window.addEventListener('resize', checkMobile);
+});
+</script>
 </html>

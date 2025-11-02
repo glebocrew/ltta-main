@@ -65,3 +65,37 @@ html{
         color: none;
     }
 }
+
+@media (max-width: 768px) {
+    .ltta-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Более плавная анимация */
+        -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+    }
+    
+    /* Улучшение производительности */
+    * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+    }
+}
+
+/* Улучшение производительности на мобильных */
+@media (max-width: 768px) {
+    .ltta-sidebar {
+        will-change: transform; /* Подсказка браузеру для оптимизации */
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: translateZ(0); /* Аппаратное ускорение */
+    }
+    
+    /* Упрощаем анимации для мобильных */
+    .ltta-nav-link {
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    
+    /* Убираем сложные эффекты на мобильных */
+    .bg-decoration {
+        display: none;
+    }
+}
