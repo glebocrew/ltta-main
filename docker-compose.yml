@@ -1,0 +1,25 @@
+name: ltta
+services:
+  web:
+    image: ghcr.io/OWNER/REPO:ltta-${GITHUB_SHA:-latest}
+    container_name: ltta_web
+    restart: always
+    # тома
+    volumes:
+      # Сокет для связи с Nginx
+      - /var/www/ltta/run:/run/gunicorn
+      # Логи приложения
+      - /var/www/ltta/logs:/app/logs
+      # Статика на хост (чтобы Nginx мог её отдавать напрямую)
+      - /var/www/ltta/static:/app/static:ro
+      # (опционально) если нужно выносить генерируемые файлы наружу:
+      # - /var/www/ltta/event_cards:/app/event_cards
+      # - /var/www/ltta/user_cards:/app/user_cards
+    environment:
+      - FLASK_ENV=production
+      # Пример строки подключения к MariaDB (замените на вашу)
+      - DATABASE_URL=mariadb://ltta:strong_ltta_password@127.0.0.1:3306/ltta
+      # Если используете конфиги/секреты из файлов — лучше смонтировать их как volume
+      # и читать путём из кода (например, /run/secrets/passwords.json и /run/config/conf.json)
+    # ports:
+    #   - "8000:8000" # только если переключитесь на TCP-биндинг в CMD

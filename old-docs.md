@@ -135,17 +135,3 @@ TEXT  |     TEXT    |     TEXT    |     TEXT   | TEXT  |
 ```sql
 CREATE TABLE matches (id TEXT, player1 TEXT, player2 TEXT, winner TEXT, score TEXT);
 ```
-
-### Rating Changes
-
-```sql
-CREATE TABLE rating_changes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    event_id VARCHAR(36) NOT NULL,
-    participant_id VARCHAR(36) NOT NULL,
-    rating_change INT NOT NULL,
-    change_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (event_id) REFERENCES finished_events(id),
-    FOREIGN KEY (participant_id) REFERENCES users(id)
-);
-```
