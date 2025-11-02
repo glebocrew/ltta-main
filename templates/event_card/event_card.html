@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <title>Карточка события</title>
@@ -131,12 +132,14 @@
             padding-bottom: 8px;
         }
 
-        .participants-list, .winners-list {
+        .participants-list,
+        .winners-list {
             font-size: 12pt;
             line-height: 1.4;
         }
 
-        .participant-item, .winner-item {
+        .participant-item,
+        .winner-item {
             margin: 8px 0;
             padding: 8px 12px;
             background: rgba(255, 255, 255, 0.05);
@@ -153,12 +156,13 @@
             padding-top: 15px;
         }
 
-        /* Убираем лишние отступы для PDF */
+
         .page-break {
             page-break-before: always;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -177,24 +181,25 @@
             <strong>Описание события:</strong><br>
             EVENT_CONTENT
         </div>
-        
+
         <div class="winners">
             <div class="section-title">🏆 Победители</div>
             <div class="winners-list">
                 WINNERS_LIST
             </div>
         </div>
-        
+
         <div class="participants">
             <div class="section-title">👥 Участники</div>
             <div class="participants-list">
                 PARTICIPANTS_LIST
             </div>
         </div>
-        
+
         <div class="footer">
             Карточка завершенного события сгенерирована автоматически
         </div>
     </div>
 </body>
+
 </html>

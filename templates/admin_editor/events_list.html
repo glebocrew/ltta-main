@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
     <title>Events List Page</title>
     <style>
-        /* CSS Variables */
         :root {
             --background-color: #0a0a0a;
             --text-color: #ffffff;
@@ -18,14 +18,15 @@
             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Base Styles */
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             min-height: 100%;
             background-color: var(--background-color);
             color: var(--text-color);
@@ -33,7 +34,7 @@
             overflow-x: hidden;
         }
 
-        /* Header */
+
         h1 {
             text-align: center;
             font-size: 2.5rem;
@@ -45,7 +46,7 @@
             padding: 0 20px;
         }
 
-        /* Events Container */
+
         .events-container {
             width: 100%;
             max-width: 1200px;
@@ -53,7 +54,7 @@
             padding: 0 20px 20px;
         }
 
-        /* Event Card */
+
         .event {
             background: rgba(15, 15, 15, 0.9);
             border: 2px solid var(--golden);
@@ -121,7 +122,7 @@
             margin-bottom: 20px;
         }
 
-        /* Event Actions */
+
         .event-actions {
             display: flex;
             gap: 15px;
@@ -165,7 +166,7 @@
             border-color: #ff6b81 !important;
         }
 
-        /* Messages */
+
         .flashed_messages {
             position: fixed;
             bottom: 20px;
@@ -190,21 +191,24 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             10% {
                 transform: translateX(0);
                 opacity: 1;
             }
+
             90% {
                 transform: translateX(0);
                 opacity: 1;
             }
+
             100% {
                 transform: translateX(100%);
                 opacity: 0;
             }
         }
 
-        /* Background Decoration */
+
         .bg-decoration {
             position: fixed;
             top: 0;
@@ -236,7 +240,7 @@
             background: radial-gradient(circle, rgba(111, 81, 193, 0.1) 0%, rgba(111, 81, 193, 0) 70%);
         }
 
-        /* No Events Message */
+
         .no-events {
             text-align: center;
             font-size: 1.2rem;
@@ -247,7 +251,7 @@
             margin: 50px 0;
         }
 
-        /* Responsive Design */
+
         @media screen and (max-width: 768px) {
             h1 {
                 font-size: 2rem;
@@ -349,7 +353,7 @@
             }
         }
 
-        /* Landscape orientation for mobile */
+
         @media screen and (max-height: 500px) and (orientation: landscape) {
             h1 {
                 font-size: 1.5rem;
@@ -380,61 +384,61 @@
     </div>
 
     <h1>Управление Событиями</h1>
-    
+
     <div class="events-container">
         {% if events %}
-            {% for event in events %}
-                <div class="event">
-                    <div class="event-header">
-                        <img src="{{ url_for('static', filename=event['image']) }}" alt="{{ event['title'] }}">
-                        <div class="event-info">
-                            <p class="type">{{ event["type"] }}</p>
-                            <p class="datetime">{{ event["datetime"] }}</p>
-                            <p class="title">{{ event["title"] }}</p>
-                        </div>
-                    </div>
-                    
-                    <p class="content">{{ event["content"] }}</p>
-
-                    <div class="event-actions">
-                        <form method="POST">
-                            <input name="event_title" type="hidden" value="{{ event['title'] }}">
-                            <input type="hidden" name="action" value="edit">
-                            <button type="submit">Изменить</button>
-                        </form>
-
-                        <form method="POST" class="delete-form">
-                            <input name="event_title" type="hidden" value="{{ event['title'] }}">
-                            <input type="hidden" name="action" value="delete">
-                            <button type="button" onclick="showButton('{{ event['title'] }}')">Удалить</button>
-                            <button type="submit" id="submit-{{ event['title'] }}" class="confirm-delete">Точно?</button>
-                        </form>
-                    </div>
+        {% for event in events %}
+        <div class="event">
+            <div class="event-header">
+                <img src="{{ url_for('static', filename=event['image']) }}" alt="{{ event['title'] }}">
+                <div class="event-info">
+                    <p class="type">{{ event["type"] }}</p>
+                    <p class="datetime">{{ event["datetime"] }}</p>
+                    <p class="title">{{ event["title"] }}</p>
                 </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-events">
-                No events found
             </div>
+
+            <p class="content">{{ event["content"] }}</p>
+
+            <div class="event-actions">
+                <form method="POST">
+                    <input name="event_title" type="hidden" value="{{ event['title'] }}">
+                    <input type="hidden" name="action" value="edit">
+                    <button type="submit">Изменить</button>
+                </form>
+
+                <form method="POST" class="delete-form">
+                    <input name="event_title" type="hidden" value="{{ event['title'] }}">
+                    <input type="hidden" name="action" value="delete">
+                    <button type="button" onclick="showButton('{{ event['title'] }}')">Удалить</button>
+                    <button type="submit" id="submit-{{ event['title'] }}" class="confirm-delete">Точно?</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="no-events">
+            No events found
+        </div>
         {% endif %}
     </div>
 
     {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="flashed_messages">
-                {% for message in messages %}
-                    <p class="flashed_message">{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endif %}
+    {% if messages %}
+    <div class="flashed_messages">
+        {% for message in messages %}
+        <p class="flashed_message">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
     {% endwith %}
 
     <script>
         function showButton(eventTitle) {
             const submitButton = document.getElementById(`submit-${eventTitle}`);
             submitButton.style.display = "block";
-            
-            // Скрываем кнопку через 5 секунд, если не нажали
+
+
             setTimeout(() => {
                 if (submitButton.style.display === "block") {
                     submitButton.style.display = "none";
@@ -443,274 +447,293 @@
         }
     </script>
 </body>
-<!-- MENU -->
+
 <style>
-.ltta-sidebar {
-    --font-size--: 20pt;
-    --text-color--: #ebd37c;
-    --golden--: #ebd37c;
-    --lavender--: #6f51c1;
-    --card-bg--: rgba(30, 30, 30, 0.95);
-    --border-radius--: 16px;
-    --transition--: all 0.3s ease;
-    --tennis-orange: #ebd37c;
-    --tennis-blue: #6f51c1;
-    
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translate(-290px, -50%);
-    width: 300px;
-    height: 80vh;
-    background: var(--card-bg--);
-    backdrop-filter: blur(10px);
-    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
-    padding: 25px 20px;
-    border: 1px solid rgba(111, 81, 193, 0.2);
-    border-left: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    z-index: 10000;
-    overflow-y: auto;
-    overflow-x: hidden;
-    transition: var(--transition--);
-}
-
-.ltta-sidebar:hover,
-.ltta-sidebar:focus-within {
-    transform: translate(0, -50%);
-}
-
-/* Создаем область для наведения */
-.ltta-sidebar-trigger {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 100px;
-    background: transparent;
-    z-index: 9999;
-    cursor: pointer;
-}
-
-.ltta-sidebar-trigger:hover + .ltta-sidebar,
-.ltta-sidebar:hover {
-    transform: translate(0, -50%);
-}
-
-.ltta-sidebar-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
-}
-
-.ltta-sidebar-logo {
-    font-size: calc(var(--font-size--) * 1.8);
-    color: var(--tennis-orange);
-    font-weight: 700;
-    letter-spacing: 3px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-
-.ltta-sidebar-subtitle {
-    font-size: calc(var(--font-size--) * 0.6);
-    color: rgba(235, 211, 124, 0.7);
-}
-
-.ltta-developer-info {
-    font-size: calc(var(--font-size--) * 0.5);
-    color: rgba(235, 211, 124, 0.5);
-    text-align: center;
-    margin-top: 10px;
-    line-height: 1.4;
-}
-
-.ltta-nav-section {
-    margin-bottom: 25px;
-}
-
-.ltta-nav-title {
-    font-size: calc(var(--font-size--) * 0.7);
-    color: var(--tennis-blue);
-    margin-bottom: 15px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding-left: 10px;
-}
-
-.ltta-nav-title::before {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--tennis-orange);
-}
-
-.ltta-nav-links {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.ltta-nav-link {
-    color: var(--text-color--);
-    text-decoration: none;
-    padding: 12px 15px;
-    border-radius: 10px;
-    transition: var(--transition--);
-    font-size: calc(var(--font-size--) * 0.65);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border: 1px solid transparent;
-}
-
-.ltta-nav-link:hover {
-    background: rgba(111, 81, 193, 0.15);
-    border-color: rgba(111, 81, 193, 0.3);
-    transform: translateX(5px);
-}
-
-.ltta-nav-link.active {
-    background: rgba(111, 81, 193, 0.2);
-    border-color: var(--tennis-blue);
-    color: var(--tennis-orange);
-}
-
-.ltta-nav-link::before {
-    content: '▶';
-    font-size: calc(var(--font-size--) * 0.5);
-    color: var(--tennis-blue);
-    transition: var(--transition--);
-}
-
-.ltta-nav-link:hover::before {
-    transform: translateX(3px);
-}
-
-.ltta-nav-link.active::before {
-    color: var(--tennis-orange);
-}
-
-.ltta-nav-badge {
-    background: var(--tennis-blue);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: calc(var(--font-size--) * 0.5);
-    margin-left: auto;
-    white-space: nowrap;
-}
-
-.ltta-nav-badge.admin {
-    background: var(--tennis-orange);
-    color: #000;
-}
-
-.ltta-sidebar-indicator {
-    position: absolute;
-    right: -20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 60px;
-    background: var(--tennis-blue);
-    border-radius: 0 10px 10px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 12px;
-    cursor: pointer;
-    transition: var(--transition--);
-}
-
-.ltta-sidebar:hover .ltta-sidebar-indicator {
-    opacity: 0;
-}
-
-.ltta-sidebar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-track {
-    background: rgba(111, 81, 193, 0.1);
-    border-radius: 3px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-thumb {
-    background: var(--tennis-blue);
-    border-radius: 3px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-thumb:hover {
-    background: var(--tennis-orange);
-}
-
-@media (max-width: 768px) {
     .ltta-sidebar {
-        transform: translateX(-100%);
-        width: 280px;
-        height: 100vh;
-        top: 0;
-        transform: translateX(-100%);
+        --font-size--: 20pt;
+        --text-color--: #ebd37c;
+        --golden--: #ebd37c;
+        --lavender--: #6f51c1;
+        --card-bg--: rgba(30, 30, 30, 0.95);
+        --border-radius--: 16px;
+        --transition--: all 0.3s ease;
+        --tennis-orange: #ebd37c;
+        --tennis-blue: #6f51c1;
+
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translate(-290px, -50%);
+        width: 300px;
+        height: 80vh;
+        background: var(--card-bg--);
+        backdrop-filter: blur(10px);
+        border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
+        padding: 25px 20px;
+        border: 1px solid rgba(111, 81, 193, 0.2);
+        border-left: none;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        z-index: 10000;
+        overflow-y: auto;
+        overflow-x: hidden;
+        transition: var(--transition--);
     }
-    
-    .ltta-sidebar.mobile-open {
-        transform: translateX(0);
+
+    .ltta-sidebar:hover,
+    .ltta-sidebar:focus-within {
+        transform: translate(0, -50%);
     }
-    
-    .ltta-menu-toggle {
+
+
+    .ltta-sidebar-trigger {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 100px;
+        background: transparent;
+        z-index: 9999;
+        cursor: pointer;
+    }
+
+    .ltta-sidebar-trigger:hover+.ltta-sidebar,
+    .ltta-sidebar:hover {
+        transform: translate(0, -50%);
+    }
+
+    .ltta-sidebar-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid rgba(111, 81, 193, 0.3);
+    }
+
+    .ltta-sidebar-logo {
+        font-size: calc(var(--font-size--) * 1.8);
+        color: var(--tennis-orange);
+        font-weight: 700;
+        letter-spacing: 3px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .ltta-sidebar-subtitle {
+        font-size: calc(var(--font-size--) * 0.6);
+        color: rgba(235, 211, 124, 0.7);
+    }
+
+    .ltta-developer-info {
+        font-size: calc(var(--font-size--) * 0.5);
+        color: rgba(235, 211, 124, 0.5);
+        text-align: center;
+        margin-top: 10px;
+        line-height: 1.4;
+    }
+
+    .ltta-nav-section {
+        margin-bottom: 25px;
+    }
+
+    .ltta-nav-title {
+        font-size: calc(var(--font-size--) * 0.7);
+        color: var(--tennis-blue);
+        margin-bottom: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 10px;
+    }
+
+    .ltta-nav-title::before {
+        content: '';
+        display: block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--tennis-orange);
+    }
+
+    .ltta-nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .ltta-nav-link {
+        color: var(--text-color--);
+        text-decoration: none;
+        padding: 12px 15px;
+        border-radius: 10px;
+        transition: var(--transition--);
+        font-size: calc(var(--font-size--) * 0.65);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid transparent;
+    }
+
+    .ltta-nav-link:hover {
+        background: rgba(111, 81, 193, 0.15);
+        border-color: rgba(111, 81, 193, 0.3);
+        transform: translateX(5px);
+    }
+
+    .ltta-nav-link.active {
+        background: rgba(111, 81, 193, 0.2);
+        border-color: var(--tennis-blue);
+        color: var(--tennis-orange);
+    }
+
+    .ltta-nav-link::before {
+        content: '▶';
+        font-size: calc(var(--font-size--) * 0.5);
+        color: var(--tennis-blue);
+        transition: var(--transition--);
+    }
+
+    .ltta-nav-link:hover::before {
+        transform: translateX(3px);
+    }
+
+    .ltta-nav-link.active::before {
+        color: var(--tennis-orange);
+    }
+
+    .ltta-nav-badge {
+        background: var(--tennis-blue);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: calc(var(--font-size--) * 0.5);
+        margin-left: auto;
+        white-space: nowrap;
+    }
+
+    .ltta-nav-badge.admin {
+        background: var(--tennis-orange);
+        color: #000;
+    }
+
+    .ltta-sidebar-indicator {
+        position: absolute;
+        right: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 60px;
+        background: var(--tennis-blue);
+        border-radius: 0 10px 10px 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 10001;
-        background: var(--golden--);
         color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: none;
-        font-size: 20px;
+        font-size: 12px;
         cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         transition: var(--transition--);
     }
-    
-    .ltta-menu-toggle:hover {
-        background: var(--lavender--);
-        color: #000;
+
+    .ltta-sidebar:hover .ltta-sidebar-indicator {
+        opacity: 0;
     }
-    
-    .ltta-sidebar-indicator {
-        display: none;
+
+    .ltta-sidebar::-webkit-scrollbar {
+        width: 6px;
     }
-    
-    .ltta-sidebar-trigger {
-        display: none;
+
+    .ltta-sidebar::-webkit-scrollbar-track {
+        background: rgba(111, 81, 193, 0.1);
+        border-radius: 3px;
     }
-}
+
+    .ltta-sidebar::-webkit-scrollbar-thumb {
+        background: var(--tennis-blue);
+        border-radius: 3px;
+    }
+
+    .ltta-sidebar::-webkit-scrollbar-thumb:hover {
+        background: var(--tennis-orange);
+    }
+
+    @media (max-width: 768px) {
+        .ltta-sidebar {
+            transform: translateX(-100%);
+            width: 280px;
+            height: 100vh;
+            top: 0;
+            transform: translateX(-100%);
+        }
+
+        .ltta-sidebar.mobile-open {
+            transform: translateX(0);
+        }
+
+        .ltta-menu-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10001;
+            background: var(--golden--);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: var(--transition--);
+        }
+
+        .ltta-menu-toggle:hover {
+            background: var(--lavender--);
+            color: #000;
+        }
+
+        .ltta-sidebar-indicator {
+            display: none;
+        }
+
+        .ltta-sidebar-trigger {
+            display: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        .ltta-sidebar:hover,
+        .ltta-sidebar:focus-within,
+        .ltta-sidebar-trigger:hover+.ltta-sidebar {
+            transform: translateX(-100%) !important;
+        }
+
+        .ltta-nav-link:hover {
+            background: transparent !important;
+            border-color: transparent !important;
+            transform: none !important;
+        }
+
+        .ltta-nav-link:hover::before {
+            transform: none !important;
+        }
+    }
 </style>
 
-<!-- Триггер для наведения -->
+
 <div class="ltta-sidebar-trigger"></div>
 
-<!-- Mobile Toggle Button -->
+
 <button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
 
-<!-- Sidebar Navigation -->
+
 <nav class="ltta-sidebar" id="lttaSidebar">
     <div class="ltta-sidebar-indicator">☰</div>
-    
+
     <div class="ltta-sidebar-header">
         <div class="ltta-sidebar-logo">LTTA</div>
     </div>
@@ -745,7 +768,7 @@
             </a>
         </div>
     </div>
-    
+
     <div class="ltta-nav-section">
         <div class="ltta-nav-title">Справка</div>
         <div class="ltta-nav-links">
@@ -758,49 +781,50 @@
 </nav>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.getElementById('lttaMenuToggle');
-    const sidebar = document.getElementById('lttaSidebar');
-    
-    const currentPath = window.location.pathname;
-    const links = document.querySelectorAll('.ltta-nav-link');
-    
-    links.forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-            link.classList.add('active');
+    document.addEventListener('DOMContentLoaded', function () {
+        const menuToggle = document.getElementById('lttaMenuToggle');
+        const sidebar = document.getElementById('lttaSidebar');
+
+
+        function checkMobile() {
+            if (window.innerWidth <= 768) {
+                menuToggle.style.display = 'flex';
+            } else {
+                menuToggle.style.display = 'none';
+                sidebar.classList.remove('mobile-open');
+            }
         }
+
+
+        menuToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            sidebar.classList.toggle('mobile-open');
+        });
+
+
+        document.addEventListener('click', function (e) {
+            if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+
+        document.querySelectorAll('.ltta-nav-link').forEach(link => {
+            link.addEventListener('click', function () {
+                sidebar.classList.remove('mobile-open');
+            });
+        });
+
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                sidebar.classvList.remove('mobile-open');
+            }
+        });
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
     });
-    
-    function checkMobile() {
-        if (window.innerWidth <= 768) {
-            menuToggle.style.display = 'flex';
-            
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                sidebar.classList.toggle('mobile-open');
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (sidebar.classList.contains('mobile-open') &&
-                    !sidebar.contains(e.target) && 
-                    e.target !== menuToggle) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-            
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-        } else {
-            menuToggle.style.display = 'none';
-        }
-    }
-    
-    checkMobile();
-    
-    window.addEventListener('resize', checkMobile);
-});
 </script>
+
 </html>

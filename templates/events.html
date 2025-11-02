@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,6 @@
     <link href="{{ url_for('static', filename='styles/events.css') }}" rel="stylesheet">
     <title>Events List Page</title>
     <style>
-        /* CSS Variables */
         :root {
             --font-size--: 20pt;
             --background-color--: #0a0a0a;
@@ -20,14 +20,15 @@
             --transition--: all 0.3s ease;
         }
 
-        /* Base Styles */
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             background: linear-gradient(135deg, var(--background-color--) 0%, #1a1a1a 100%);
             color: var(--text-color--);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -37,7 +38,7 @@
         }
 
         body {
-            background-image: 
+            background-image:
                 radial-gradient(circle at 10% 20%, rgba(111, 81, 193, 0.1) 0%, transparent 20%),
                 radial-gradient(circle at 90% 80%, rgba(235, 211, 124, 0.1) 0%, transparent 20%);
             padding: 20px;
@@ -46,7 +47,7 @@
             align-items: center;
         }
 
-        /* Header Styles */
+
         .page-header {
             text-align: center;
             margin-bottom: 40px;
@@ -66,7 +67,8 @@
             padding: 0 20px;
         }
 
-        h1::before, h1::after {
+        h1::before,
+        h1::after {
             content: '';
             position: absolute;
             top: 50%;
@@ -90,7 +92,7 @@
             margin: 0 auto;
         }
 
-        /* Section Headers */
+
         .section-header {
             display: flex;
             align-items: center;
@@ -129,7 +131,7 @@
             font-weight: 600;
         }
 
-        /* Events Container */
+
         .events-container {
             width: 100%;
             max-width: 1200px;
@@ -139,7 +141,7 @@
             margin-bottom: 40px;
         }
 
-        /* Event Card */
+
         .event-card {
             background: var(--card-bg--);
             backdrop-filter: blur(10px);
@@ -170,7 +172,7 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
-        /* Event Image */
+
         .event-image {
             width: 100%;
             height: 180px;
@@ -178,7 +180,7 @@
             border-bottom: 1px solid rgba(111, 81, 193, 0.2);
         }
 
-        /* Event Content */
+
         .event-content {
             padding: 20px;
             flex-grow: 1;
@@ -278,7 +280,7 @@
             box-shadow: 0 5px 15px rgba(102, 102, 102, 0.4);
         }
 
-        /* No Events Message */
+
         .no-events {
             grid-column: 1 / -1;
             text-align: center;
@@ -307,7 +309,7 @@
             margin: 0 auto;
         }
 
-        /* Flash Messages */
+
         .flash-messages {
             width: 100%;
             max-width: 1200px;
@@ -332,23 +334,23 @@
             font-size: calc(var(--font-size--) * 0.8);
         }
 
-        /* Responsive Design */
+
         @media (max-width: 768px) {
             .events-container {
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-            
+
             .section-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
-            
+
             h1 {
                 font-size: calc(var(--font-size--) * 1.5);
             }
-            
+
             .event-image {
                 height: 160px;
             }
@@ -358,28 +360,29 @@
             body {
                 padding: 15px;
             }
-            
+
             .event-content {
                 padding: 15px;
             }
-            
+
             .event-header {
                 flex-direction: column;
                 gap: 10px;
             }
-            
+
             .event-datetime {
                 text-align: left;
                 max-width: none;
             }
         }
 
-        /* Animation */
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -399,24 +402,25 @@
         }
     </style>
 </head>
+
 <body>
     <div class="page-header">
         <h1>События</h1>
         <p class="page-subtitle">Регистрируйтесь и приходите на наши события!</p>
     </div>
 
-    <!-- Flash Messages -->
+
     <div class="flash-messages">
         {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="flash-message">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="flash-message">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
 
-    <!-- Active Events Section -->
+
     <div class="section-header">
         <h2>Новые События</h2>
         <div class="events-count">{{ events|length if events else 0 }} вкладки</div>
@@ -424,36 +428,36 @@
 
     <div class="events-container">
         {% if events %}
-            {% for event in events %}
-                <div class="event-card">
-                    <img src="{{ url_for('static', filename=event['image']) }}" alt="{{ event['title'] }}" class="event-image">
-                    <div class="event-content">
-                        <div class="event-header">
-                            <span class="event-type">{{ event["type"] }}</span>
-                            <div class="event-datetime">{{ event["datetime"] }}</div>
-                        </div>
-                        <h3 class="event-title">{{ event["title"] }}</h3>
-                        <p class="event-description">{{ event["content"] }}</p>
-                        <div class="event-actions">
-                            <form method="POST" class="event-form">
-                                <input name="action" type="hidden" value="view">
-                                <input name="event_title" type="hidden" value="{{ event['title'] }}">
-                                <button type="submit" class="view-event-btn">Подробности</button>
-                            </form>
-                        </div>
-                    </div>
+        {% for event in events %}
+        <div class="event-card">
+            <img src="{{ url_for('static', filename=event['image']) }}" alt="{{ event['title'] }}" class="event-image">
+            <div class="event-content">
+                <div class="event-header">
+                    <span class="event-type">{{ event["type"] }}</span>
+                    <div class="event-datetime">{{ event["datetime"] }}</div>
                 </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-events">
-                <div class="no-events-icon">📅</div>
-                <h3>Новых Событий нет</h3>
-                <p>There are currently no scheduled events. Check back later for updates!</p>
+                <h3 class="event-title">{{ event["title"] }}</h3>
+                <p class="event-description">{{ event["content"] }}</p>
+                <div class="event-actions">
+                    <form method="POST" class="event-form">
+                        <input name="action" type="hidden" value="view">
+                        <input name="event_title" type="hidden" value="{{ event['title'] }}">
+                        <button type="submit" class="view-event-btn">Подробности</button>
+                    </form>
+                </div>
             </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="no-events">
+            <div class="no-events-icon">📅</div>
+            <h3>Новых Событий нет</h3>
+            <p>There are currently no scheduled events. Check back later for updates!</p>
+        </div>
         {% endif %}
     </div>
 
-    <!-- Finished Events Section -->
+
     <div class="section-header">
         <h2>Завершённые События</h2>
         <div class="events-count">{{ finished_events|length if finished_events else 0 }} вкладки</div>
@@ -461,303 +465,322 @@
 
     <div class="events-container">
         {% if finished_events %}
-            {% for event in finished_events %}
-                <div class="event-card finished">
-                    <img src="{{ url_for('static', filename=event['image']) }}" alt="{{ event['title'] }}" class="event-image">
-                    <div class="event-content">
-                        <div class="event-header">
-                            <span class="event-type">{{ event["type"] }}</span>
-                            <div class="event-datetime">{{ event["datetime"] }}</div>
-                        </div>
-                        <h3 class="event-title">{{ event["title"] }}</h3>
-                        <p class="event-description">{{ event["content"] }}</p>
-                        <div class="event-actions">
-                            <form method="POST" class="event-form">
-                                <input name="action" type="hidden" value="view_finished">
-                                <input name="event_title" type="hidden" value="{{ event['title'] }}">
-                                <button type="submit" class="view-event-btn">Подробности</button>
-                            </form>
-                        </div>
-                    </div>
+        {% for event in finished_events %}
+        <div class="event-card finished">
+            <img src="{{ url_for('static', filename=event['image']) }}" alt="{{ event['title'] }}" class="event-image">
+            <div class="event-content">
+                <div class="event-header">
+                    <span class="event-type">{{ event["type"] }}</span>
+                    <div class="event-datetime">{{ event["datetime"] }}</div>
                 </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-events">
-                <div class="no-events-icon">📋</div>
-                <h3>Завершённых Событий нет</h3>
-                <p>Пока что в архиве нет завершённых событий</p>
+                <h3 class="event-title">{{ event["title"] }}</h3>
+                <p class="event-description">{{ event["content"] }}</p>
+                <div class="event-actions">
+                    <form method="POST" class="event-form">
+                        <input name="action" type="hidden" value="view_finished">
+                        <input name="event_title" type="hidden" value="{{ event['title'] }}">
+                        <button type="submit" class="view-event-btn">Подробности</button>
+                    </form>
+                </div>
             </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="no-events">
+            <div class="no-events-icon">📋</div>
+            <h3>Завершённых Событий нет</h3>
+            <p>Пока что в архиве нет завершённых событий</p>
+        </div>
         {% endif %}
     </div>
 </body>
-<!-- MENU -->
+
 <style>
-.ltta-sidebar {
-    --font-size--: 20pt;
-    --text-color--: #ebd37c;
-    --golden--: #ebd37c;
-    --lavender--: #6f51c1;
-    --card-bg--: rgba(30, 30, 30, 0.95);
-    --border-radius--: 16px;
-    --transition--: all 0.3s ease;
-    --tennis-orange: #ebd37c;
-    --tennis-blue: #6f51c1;
-    
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translate(-290px, -50%);
-    width: 300px;
-    height: 80vh;
-    background: var(--card-bg--);
-    backdrop-filter: blur(10px);
-    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
-    padding: 25px 20px;
-    border: 1px solid rgba(111, 81, 193, 0.2);
-    border-left: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    z-index: 10000;
-    overflow-y: auto;
-    overflow-x: hidden;
-    transition: var(--transition--);
-}
-
-.ltta-sidebar:hover,
-.ltta-sidebar:focus-within {
-    transform: translate(0, -50%);
-}
-
-/* Создаем область для наведения */
-.ltta-sidebar-trigger {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 100px;
-    background: transparent;
-    z-index: 9999;
-    cursor: pointer;
-}
-
-.ltta-sidebar-trigger:hover + .ltta-sidebar,
-.ltta-sidebar:hover {
-    transform: translate(0, -50%);
-}
-
-.ltta-sidebar-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
-}
-
-.ltta-sidebar-logo {
-    font-size: calc(var(--font-size--) * 1.8);
-    color: var(--tennis-orange);
-    font-weight: 700;
-    letter-spacing: 3px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-
-.ltta-sidebar-subtitle {
-    font-size: calc(var(--font-size--) * 0.6);
-    color: rgba(235, 211, 124, 0.7);
-}
-
-.ltta-developer-info {
-    font-size: calc(var(--font-size--) * 0.5);
-    color: rgba(235, 211, 124, 0.5);
-    text-align: center;
-    margin-top: 10px;
-    line-height: 1.4;
-}
-
-.ltta-nav-section {
-    margin-bottom: 25px;
-}
-
-.ltta-nav-title {
-    font-size: calc(var(--font-size--) * 0.7);
-    color: var(--tennis-blue);
-    margin-bottom: 15px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding-left: 10px;
-}
-
-.ltta-nav-title::before {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--tennis-orange);
-}
-
-.ltta-nav-links {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.ltta-nav-link {
-    color: var(--text-color--);
-    text-decoration: none;
-    padding: 12px 15px;
-    border-radius: 10px;
-    transition: var(--transition--);
-    font-size: calc(var(--font-size--) * 0.65);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border: 1px solid transparent;
-}
-
-.ltta-nav-link:hover {
-    background: rgba(111, 81, 193, 0.15);
-    border-color: rgba(111, 81, 193, 0.3);
-    transform: translateX(5px);
-}
-
-.ltta-nav-link.active {
-    background: rgba(111, 81, 193, 0.2);
-    border-color: var(--tennis-blue);
-    color: var(--tennis-orange);
-}
-
-.ltta-nav-link::before {
-    content: '▶';
-    font-size: calc(var(--font-size--) * 0.5);
-    color: var(--tennis-blue);
-    transition: var(--transition--);
-}
-
-.ltta-nav-link:hover::before {
-    transform: translateX(3px);
-}
-
-.ltta-nav-link.active::before {
-    color: var(--tennis-orange);
-}
-
-.ltta-nav-badge {
-    background: var(--tennis-blue);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: calc(var(--font-size--) * 0.5);
-    margin-left: auto;
-    white-space: nowrap;
-}
-
-.ltta-nav-badge.admin {
-    background: var(--tennis-orange);
-    color: #000;
-}
-
-.ltta-sidebar-indicator {
-    position: absolute;
-    right: -20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 60px;
-    background: var(--tennis-blue);
-    border-radius: 0 10px 10px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 12px;
-    cursor: pointer;
-    transition: var(--transition--);
-}
-
-.ltta-sidebar:hover .ltta-sidebar-indicator {
-    opacity: 0;
-}
-
-.ltta-sidebar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-track {
-    background: rgba(111, 81, 193, 0.1);
-    border-radius: 3px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-thumb {
-    background: var(--tennis-blue);
-    border-radius: 3px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-thumb:hover {
-    background: var(--tennis-orange);
-}
-
-@media (max-width: 768px) {
     .ltta-sidebar {
-        transform: translateX(-100%);
-        width: 280px;
-        height: 100vh;
-        top: 0;
-        transform: translateX(-100%);
+        --font-size--: 20pt;
+        --text-color--: #ebd37c;
+        --golden--: #ebd37c;
+        --lavender--: #6f51c1;
+        --card-bg--: rgba(30, 30, 30, 0.95);
+        --border-radius--: 16px;
+        --transition--: all 0.3s ease;
+        --tennis-orange: #ebd37c;
+        --tennis-blue: #6f51c1;
+
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translate(-290px, -50%);
+        width: 300px;
+        height: 80vh;
+        background: var(--card-bg--);
+        backdrop-filter: blur(10px);
+        border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
+        padding: 25px 20px;
+        border: 1px solid rgba(111, 81, 193, 0.2);
+        border-left: none;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        z-index: 10000;
+        overflow-y: auto;
+        overflow-x: hidden;
+        transition: var(--transition--);
     }
-    
-    .ltta-sidebar.mobile-open {
-        transform: translateX(0);
+
+    .ltta-sidebar:hover,
+    .ltta-sidebar:focus-within {
+        transform: translate(0, -50%);
     }
-    
-    .ltta-menu-toggle {
+
+
+    .ltta-sidebar-trigger {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 100px;
+        background: transparent;
+        z-index: 9999;
+        cursor: pointer;
+    }
+
+    .ltta-sidebar-trigger:hover+.ltta-sidebar,
+    .ltta-sidebar:hover {
+        transform: translate(0, -50%);
+    }
+
+    .ltta-sidebar-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid rgba(111, 81, 193, 0.3);
+    }
+
+    .ltta-sidebar-logo {
+        font-size: calc(var(--font-size--) * 1.8);
+        color: var(--tennis-orange);
+        font-weight: 700;
+        letter-spacing: 3px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .ltta-sidebar-subtitle {
+        font-size: calc(var(--font-size--) * 0.6);
+        color: rgba(235, 211, 124, 0.7);
+    }
+
+    .ltta-developer-info {
+        font-size: calc(var(--font-size--) * 0.5);
+        color: rgba(235, 211, 124, 0.5);
+        text-align: center;
+        margin-top: 10px;
+        line-height: 1.4;
+    }
+
+    .ltta-nav-section {
+        margin-bottom: 25px;
+    }
+
+    .ltta-nav-title {
+        font-size: calc(var(--font-size--) * 0.7);
+        color: var(--tennis-blue);
+        margin-bottom: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 10px;
+    }
+
+    .ltta-nav-title::before {
+        content: '';
+        display: block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--tennis-orange);
+    }
+
+    .ltta-nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .ltta-nav-link {
+        color: var(--text-color--);
+        text-decoration: none;
+        padding: 12px 15px;
+        border-radius: 10px;
+        transition: var(--transition--);
+        font-size: calc(var(--font-size--) * 0.65);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid transparent;
+    }
+
+    .ltta-nav-link:hover {
+        background: rgba(111, 81, 193, 0.15);
+        border-color: rgba(111, 81, 193, 0.3);
+        transform: translateX(5px);
+    }
+
+    .ltta-nav-link.active {
+        background: rgba(111, 81, 193, 0.2);
+        border-color: var(--tennis-blue);
+        color: var(--tennis-orange);
+    }
+
+    .ltta-nav-link::before {
+        content: '▶';
+        font-size: calc(var(--font-size--) * 0.5);
+        color: var(--tennis-blue);
+        transition: var(--transition--);
+    }
+
+    .ltta-nav-link:hover::before {
+        transform: translateX(3px);
+    }
+
+    .ltta-nav-link.active::before {
+        color: var(--tennis-orange);
+    }
+
+    .ltta-nav-badge {
+        background: var(--tennis-blue);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: calc(var(--font-size--) * 0.5);
+        margin-left: auto;
+        white-space: nowrap;
+    }
+
+    .ltta-nav-badge.admin {
+        background: var(--tennis-orange);
+        color: #000;
+    }
+
+    .ltta-sidebar-indicator {
+        position: absolute;
+        right: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 60px;
+        background: var(--tennis-blue);
+        border-radius: 0 10px 10px 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 10001;
-        background: var(--golden--);
         color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: none;
-        font-size: 20px;
+        font-size: 12px;
         cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         transition: var(--transition--);
     }
-    
-    .ltta-menu-toggle:hover {
-        background: var(--lavender--);
-        color: #000;
+
+    .ltta-sidebar:hover .ltta-sidebar-indicator {
+        opacity: 0;
     }
-    
-    .ltta-sidebar-indicator {
-        display: none;
+
+    .ltta-sidebar::-webkit-scrollbar {
+        width: 6px;
     }
-    
-    .ltta-sidebar-trigger {
-        display: none;
+
+    .ltta-sidebar::-webkit-scrollbar-track {
+        background: rgba(111, 81, 193, 0.1);
+        border-radius: 3px;
     }
-}
+
+    .ltta-sidebar::-webkit-scrollbar-thumb {
+        background: var(--tennis-blue);
+        border-radius: 3px;
+    }
+
+    .ltta-sidebar::-webkit-scrollbar-thumb:hover {
+        background: var(--tennis-orange);
+    }
+
+    @media (max-width: 768px) {
+        .ltta-sidebar {
+            transform: translateX(-100%);
+            width: 280px;
+            height: 100vh;
+            top: 0;
+            transform: translateX(-100%);
+        }
+
+        .ltta-sidebar.mobile-open {
+            transform: translateX(0);
+        }
+
+        .ltta-menu-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10001;
+            background: var(--golden--);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: var(--transition--);
+        }
+
+        .ltta-menu-toggle:hover {
+            background: var(--lavender--);
+            color: #000;
+        }
+
+        .ltta-sidebar-indicator {
+            display: none;
+        }
+
+        .ltta-sidebar-trigger {
+            display: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        .ltta-sidebar:hover,
+        .ltta-sidebar:focus-within,
+        .ltta-sidebar-trigger:hover+.ltta-sidebar {
+            transform: translateX(-100%) !important;
+        }
+
+        .ltta-nav-link:hover {
+            background: transparent !important;
+            border-color: transparent !important;
+            transform: none !important;
+        }
+
+        .ltta-nav-link:hover::before {
+            transform: none !important;
+        }
+    }
 </style>
 
-<!-- Триггер для наведения -->
+
 <div class="ltta-sidebar-trigger"></div>
 
-<!-- Mobile Toggle Button -->
+
 <button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
 
-<!-- Sidebar Navigation -->
+
 <nav class="ltta-sidebar" id="lttaSidebar">
     <div class="ltta-sidebar-indicator">☰</div>
-    
+
     <div class="ltta-sidebar-header">
         <div class="ltta-sidebar-logo">LTTA</div>
     </div>
@@ -792,7 +815,7 @@
             </a>
         </div>
     </div>
-    
+
     <div class="ltta-nav-section">
         <div class="ltta-nav-title">Справка</div>
         <div class="ltta-nav-links">
@@ -805,49 +828,50 @@
 </nav>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.getElementById('lttaMenuToggle');
-    const sidebar = document.getElementById('lttaSidebar');
-    
-    const currentPath = window.location.pathname;
-    const links = document.querySelectorAll('.ltta-nav-link');
-    
-    links.forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-            link.classList.add('active');
+    document.addEventListener('DOMContentLoaded', function () {
+        const menuToggle = document.getElementById('lttaMenuToggle');
+        const sidebar = document.getElementById('lttaSidebar');
+
+
+        function checkMobile() {
+            if (window.innerWidth <= 768) {
+                menuToggle.style.display = 'flex';
+            } else {
+                menuToggle.style.display = 'none';
+                sidebar.classList.remove('mobile-open');
+            }
         }
+
+
+        menuToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            sidebar.classList.toggle('mobile-open');
+        });
+
+
+        document.addEventListener('click', function (e) {
+            if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+
+        document.querySelectorAll('.ltta-nav-link').forEach(link => {
+            link.addEventListener('click', function () {
+                sidebar.classList.remove('mobile-open');
+            });
+        });
+
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
     });
-    
-    function checkMobile() {
-        if (window.innerWidth <= 768) {
-            menuToggle.style.display = 'flex';
-            
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                sidebar.classList.toggle('mobile-open');
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (sidebar.classList.contains('mobile-open') &&
-                    !sidebar.contains(e.target) && 
-                    e.target !== menuToggle) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-            
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-        } else {
-            menuToggle.style.display = 'none';
-        }
-    }
-    
-    checkMobile();
-    
-    window.addEventListener('resize', checkMobile);
-});
 </script>
+
 </html>

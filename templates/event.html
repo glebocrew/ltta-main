@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Page</title>
     <style>
-        /* CSS Variables */
         :root {
             --font-size--: 20pt;
             --background-color--: black;
@@ -14,14 +14,15 @@
             --lavender--: #6f51c1;
         }
 
-        /* Base Styles */
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             background: linear-gradient(135deg, var(--background-color--) 0%, #1a1a1a 100%);
             color: var(--text-color--);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -30,7 +31,7 @@
         }
 
         body {
-            background-image: 
+            background-image:
                 radial-gradient(circle at 10% 20%, rgba(111, 81, 193, 0.1) 0%, transparent 20%),
                 radial-gradient(circle at 90% 80%, rgba(235, 211, 124, 0.1) 0%, transparent 20%);
             padding: 20px;
@@ -71,7 +72,7 @@
             border: 1px solid rgba(235, 211, 124, 0.3);
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 
+            box-shadow:
                 0 10px 25px rgba(0, 0, 0, 0.5),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
@@ -180,7 +181,7 @@
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
-            box-shadow: 
+            box-shadow:
                 0 4px 15px rgba(111, 81, 193, 0.5),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
             position: relative;
@@ -205,7 +206,7 @@
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 
+            box-shadow:
                 0 8px 20px rgba(111, 81, 193, 0.7),
                 inset 0 1px 0 rgba(255, 255, 255, 0.3);
             background: linear-gradient(135deg, #7d5fd4, var(--lavender--));
@@ -213,13 +214,13 @@
 
         button[type="submit"] {
             background: linear-gradient(135deg, var(--golden--), #d4b95c);
-            box-shadow: 
+            box-shadow:
                 0 4px 15px rgba(235, 211, 124, 0.5),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
         button[type="submit"]:hover {
-            box-shadow: 
+            box-shadow:
                 0 8px 20px rgba(235, 211, 124, 0.7),
                 inset 0 1px 0 rgba(255, 255, 255, 0.3);
             background: linear-gradient(135deg, #f0d780, var(--golden--));
@@ -240,12 +241,13 @@
             box-shadow: 0 5px 15px rgba(235, 211, 124, 0.3);
         }
 
-        /* Анимации */
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -256,11 +258,14 @@
             animation: fadeIn 0.6s ease-out;
         }
 
-        .type, .datetime, .title, .content {
+        .type,
+        .datetime,
+        .title,
+        .content {
             animation: fadeIn 0.8s ease-out;
         }
 
-        /* Стили для скрытой кнопки подтверждения */
+
         .hidden {
             display: none !important;
         }
@@ -270,12 +275,12 @@
             animation: fadeIn 0.4s ease-out;
         }
 
-        /* Desktop Styles */
+
         @media screen and (min-width: 768px) {
             body {
                 padding: 40px;
             }
-            
+
             h1 {
                 font-size: calc(var(--font-size--) * 2);
                 margin: 40px 0;
@@ -346,21 +351,21 @@
             }
         }
 
-        /* Landscape Orientation Enhancements */
+
         @media screen and (orientation: landscape) and (max-height: 600px) {
             body {
                 padding: 20px;
             }
-            
+
             form {
                 padding: 20px;
             }
-            
+
             img {
                 height: 200px;
                 margin-bottom: 15px;
             }
-            
+
             h1 {
                 margin: 15px 0;
                 padding: 10px;
@@ -368,32 +373,33 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Страница События</h1>
-    
-    {% if event %}
-        <form method="POST">
-            <img src="{{ url_for('static', filename=event['image']) }}" alt="{{ event['title'] }}">
-            
-            <p class="type">{{ event["type"] }}</p>
-            <p class="datetime">{{ event["datetime"] }}</p>
-            <p class="title">{{ event["title"] }}</p>
-            <p class="content">{{ event["content"] }}</p>
 
-            {% if current_user_id not in participants %}
-                <div class="button-container">
-                    <input type="hidden" value="{{ event['title'] }}" name="event">
-                    <button type="button" onclick="showButton()">Я приду</button>
-                    <button type="submit" id="submit" class="hidden">Точно?</button>
-                </div>
-            {% else %}
-                <p class="confirmation-message">Я иду!</p>
-            {% endif %}
-        </form>     
+    {% if event %}
+    <form method="POST">
+        <img src="{{ url_for('static', filename=event['image']) }}" alt="{{ event['title'] }}">
+
+        <p class="type">{{ event["type"] }}</p>
+        <p class="datetime">{{ event["datetime"] }}</p>
+        <p class="title">{{ event["title"] }}</p>
+        <p class="content">{{ event["content"] }}</p>
+
+        {% if current_user_id not in participants %}
+        <div class="button-container">
+            <input type="hidden" value="{{ event['title'] }}" name="event">
+            <button type="button" onclick="showButton()">Я приду</button>
+            <button type="submit" id="submit" class="hidden">Точно?</button>
+        </div>
+        {% else %}
+        <p class="confirmation-message">Я иду!</p>
+        {% endif %}
+    </form>
     {% else %}
-        <p>Event not found</p>
+    <p>Event not found</p>
     {% endif %}
-    
+
     <script>
         function showButton() {
             let submitButton = document.getElementById('submit');
@@ -402,274 +408,366 @@
         }
     </script>
 </body>
-<!-- MENU -->
+
 <style>
-.ltta-sidebar {
-    --font-size--: 20pt;
-    --text-color--: #ebd37c;
-    --golden--: #ebd37c;
-    --lavender--: #6f51c1;
-    --card-bg--: rgba(30, 30, 30, 0.95);
-    --border-radius--: 16px;
-    --transition--: all 0.3s ease;
-    --tennis-orange: #ebd37c;
-    --tennis-blue: #6f51c1;
-    
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translate(-290px, -50%);
-    width: 300px;
-    height: 80vh;
-    background: var(--card-bg--);
-    backdrop-filter: blur(10px);
-    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
-    padding: 25px 20px;
-    border: 1px solid rgba(111, 81, 193, 0.2);
-    border-left: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    z-index: 10000;
-    overflow-y: auto;
-    overflow-x: hidden;
-    transition: var(--transition--);
-}
-
-.ltta-sidebar:hover,
-.ltta-sidebar:focus-within {
-    transform: translate(0, -50%);
-}
-
-/* Создаем область для наведения */
-.ltta-sidebar-trigger {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 100px;
-    background: transparent;
-    z-index: 9999;
-    cursor: pointer;
-}
-
-.ltta-sidebar-trigger:hover + .ltta-sidebar,
-.ltta-sidebar:hover {
-    transform: translate(0, -50%);
-}
-
-.ltta-sidebar-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
-}
-
-.ltta-sidebar-logo {
-    font-size: calc(var(--font-size--) * 1.8);
-    color: var(--tennis-orange);
-    font-weight: 700;
-    letter-spacing: 3px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-
-.ltta-sidebar-subtitle {
-    font-size: calc(var(--font-size--) * 0.6);
-    color: rgba(235, 211, 124, 0.7);
-}
-
-.ltta-developer-info {
-    font-size: calc(var(--font-size--) * 0.5);
-    color: rgba(235, 211, 124, 0.5);
-    text-align: center;
-    margin-top: 10px;
-    line-height: 1.4;
-}
-
-.ltta-nav-section {
-    margin-bottom: 25px;
-}
-
-.ltta-nav-title {
-    font-size: calc(var(--font-size--) * 0.7);
-    color: var(--tennis-blue);
-    margin-bottom: 15px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding-left: 10px;
-}
-
-.ltta-nav-title::before {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--tennis-orange);
-}
-
-.ltta-nav-links {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.ltta-nav-link {
-    color: var(--text-color--);
-    text-decoration: none;
-    padding: 12px 15px;
-    border-radius: 10px;
-    transition: var(--transition--);
-    font-size: calc(var(--font-size--) * 0.65);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border: 1px solid transparent;
-}
-
-.ltta-nav-link:hover {
-    background: rgba(111, 81, 193, 0.15);
-    border-color: rgba(111, 81, 193, 0.3);
-    transform: translateX(5px);
-}
-
-.ltta-nav-link.active {
-    background: rgba(111, 81, 193, 0.2);
-    border-color: var(--tennis-blue);
-    color: var(--tennis-orange);
-}
-
-.ltta-nav-link::before {
-    content: '▶';
-    font-size: calc(var(--font-size--) * 0.5);
-    color: var(--tennis-blue);
-    transition: var(--transition--);
-}
-
-.ltta-nav-link:hover::before {
-    transform: translateX(3px);
-}
-
-.ltta-nav-link.active::before {
-    color: var(--tennis-orange);
-}
-
-.ltta-nav-badge {
-    background: var(--tennis-blue);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: calc(var(--font-size--) * 0.5);
-    margin-left: auto;
-    white-space: nowrap;
-}
-
-.ltta-nav-badge.admin {
-    background: var(--tennis-orange);
-    color: #000;
-}
-
-.ltta-sidebar-indicator {
-    position: absolute;
-    right: -20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 60px;
-    background: var(--tennis-blue);
-    border-radius: 0 10px 10px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 12px;
-    cursor: pointer;
-    transition: var(--transition--);
-}
-
-.ltta-sidebar:hover .ltta-sidebar-indicator {
-    opacity: 0;
-}
-
-.ltta-sidebar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-track {
-    background: rgba(111, 81, 193, 0.1);
-    border-radius: 3px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-thumb {
-    background: var(--tennis-blue);
-    border-radius: 3px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-thumb:hover {
-    background: var(--tennis-orange);
-}
-
-@media (max-width: 768px) {
     .ltta-sidebar {
-        transform: translateX(-100%);
-        width: 280px;
-        height: 100vh;
-        top: 0;
-        transform: translateX(-100%);
+        --font-size--: 20pt;
+        --text-color--: #ebd37c;
+        --golden--: #ebd37c;
+        --lavender--: #6f51c1;
+        --card-bg--: rgba(30, 30, 30, 0.95);
+        --border-radius--: 16px;
+        --transition--: all 0.3s ease;
+        --tennis-orange: #ebd37c;
+        --tennis-blue: #6f51c1;
+
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translate(-290px, -50%);
+        width: 300px;
+        height: 80vh;
+        background: var(--card-bg--);
+        backdrop-filter: blur(10px);
+        border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
+        padding: 25px 20px;
+        border: 1px solid rgba(111, 81, 193, 0.2);
+        border-left: none;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        z-index: 10000;
+        overflow-y: auto;
+        overflow-x: hidden;
+        transition: var(--transition--);
     }
-    
-    .ltta-sidebar.mobile-open {
-        transform: translateX(0);
+
+    .ltta-sidebar:hover,
+    .ltta-sidebar:focus-within {
+        transform: translate(0, -50%);
     }
-    
-    .ltta-menu-toggle {
+
+
+    .ltta-sidebar-trigger {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 100px;
+        background: transparent;
+        z-index: 9999;
+        cursor: pointer;
+    }
+
+    .ltta-sidebar-trigger:hover+.ltta-sidebar,
+    .ltta-sidebar:hover {
+        transform: translate(0, -50%);
+    }
+
+    .ltta-sidebar-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid rgba(111, 81, 193, 0.3);
+    }
+
+    .ltta-sidebar-logo {
+        font-size: calc(var(--font-size--) * 1.8);
+        color: var(--tennis-orange);
+        font-weight: 700;
+        letter-spacing: 3px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .ltta-sidebar-subtitle {
+        font-size: calc(var(--font-size--) * 0.6);
+        color: rgba(235, 211, 124, 0.7);
+    }
+
+    .ltta-developer-info {
+        font-size: calc(var(--font-size--) * 0.5);
+        color: rgba(235, 211, 124, 0.5);
+        text-align: center;
+        margin-top: 10px;
+        line-height: 1.4;
+    }
+
+    .ltta-nav-section {
+        margin-bottom: 25px;
+    }
+
+    .ltta-nav-title {
+        font-size: calc(var(--font-size--) * 0.7);
+        color: var(--tennis-blue);
+        margin-bottom: 15px;
+        font-weight: 600;
         display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 10px;
+    }
+
+    .ltta-nav-title::before {
+        content: '';
+        display: block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--tennis-orange);
+    }
+
+    .ltta-nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .ltta-nav-link {
+        color: var(--text-color--);
+        text-decoration: none;
+        padding: 12px 15px;
+        border-radius: 10px;
+        transition: var(--transition--);
+        font-size: calc(var(--font-size--) * 0.65);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid transparent;
+    }
+
+    .ltta-nav-link:hover {
+        background: rgba(111, 81, 193, 0.15);
+        border-color: rgba(111, 81, 193, 0.3);
+        transform: translateX(5px);
+    }
+
+    .ltta-nav-link.active {
+        background: rgba(111, 81, 193, 0.2);
+        border-color: var(--tennis-blue);
+        color: var(--tennis-orange);
+    }
+
+    .ltta-nav-link::before {
+        content: '▶';
+        font-size: calc(var(--font-size--) * 0.5);
+        color: var(--tennis-blue);
+        transition: var(--transition--);
+    }
+
+    .ltta-nav-link:hover::before {
+        transform: translateX(3px);
+    }
+
+    .ltta-nav-link.active::before {
+        color: var(--tennis-orange);
+    }
+
+    .ltta-nav-badge {
+        background: var(--tennis-blue);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: calc(var(--font-size--) * 0.5);
+        margin-left: auto;
+        white-space: nowrap;
+    }
+
+    .ltta-nav-badge.admin {
+        background: var(--tennis-orange);
+        color: #000;
+    }
+
+    .ltta-sidebar-indicator {
+        position: absolute;
+        right: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 60px;
+        background: var(--tennis-blue);
+        border-radius: 0 10px 10px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        cursor: pointer;
+        transition: var(--transition--);
+    }
+
+    .ltta-sidebar:hover .ltta-sidebar-indicator {
+        opacity: 0;
+    }
+
+    .ltta-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .ltta-sidebar::-webkit-scrollbar-track {
+        background: rgba(111, 81, 193, 0.1);
+        border-radius: 3px;
+    }
+
+    .ltta-sidebar::-webkit-scrollbar-thumb {
+        background: var(--tennis-blue);
+        border-radius: 3px;
+    }
+
+    .ltta-sidebar::-webkit-scrollbar-thumb:hover {
+        background: var(--tennis-orange);
+    }
+
+    .ltta-menu-toggle {
+        display: none !important;
         align-items: center;
         justify-content: center;
         position: fixed;
         top: 20px;
         left: 20px;
         z-index: 10001;
-        background: var(--golden--);
-        color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: none;
-        font-size: 20px;
+        background: var(--golden--) !important;
+        color: white !important;
+        width: 50px !important;
+        height: 50px !important;
+        border-radius: 50% !important;
+        border: none !important;
+        font-size: 20px !important;
         cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        transition: var(--transition--);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+        transition: var(--transition--) !important;
+        padding: 0 !important;
+        min-width: auto !important;
+        margin: 0 !important;
     }
-    
+
     .ltta-menu-toggle:hover {
-        background: var(--lavender--);
-        color: #000;
+        background: var(--lavender--) !important;
+        color: #000 !important;
+        transform: none !important;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
     }
-    
-    .ltta-sidebar-indicator {
-        display: none;
+
+
+    .ltta-menu-toggle::before {
+        display: none !important;
     }
-    
-    .ltta-sidebar-trigger {
-        display: none;
+
+    @media (max-width: 768px) {
+        .ltta-sidebar {
+            transform: translateX(-100%);
+            width: 280px;
+            height: 100vh;
+            top: 0;
+            transform: translateX(-100%);
+        }
+
+        .ltta-sidebar.mobile-open {
+            transform: translateX(0);
+        }
+
+        .ltta-menu-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10001;
+            background: var(--golden--);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: var(--transition--);
+        }
+
+        .ltta-menu-toggle:hover {
+            background: var(--lavender--);
+            color: #000;
+        }
+
+        .ltta-sidebar-indicator {
+            display: none;
+        }
+
+        .ltta-sidebar-trigger {
+            display: none;
+        }
     }
-}
+
+    @media (max-width: 768px) {
+        .ltta-menu-toggle {
+            display: flex !important;
+        }
+
+        .ltta-sidebar {
+            transform: translateX(-100%);
+            width: 280px;
+            height: 100vh;
+            top: 0;
+            transform: translateX(-100%);
+        }
+
+        .ltta-sidebar.mobile-open {
+            transform: translateX(0) !important;
+        }
+    }
+
+
+    @media (max-width: 768px) {
+
+        .ltta-sidebar:hover,
+        .ltta-sidebar:focus-within,
+        .ltta-sidebar-trigger:hover+.ltta-sidebar {
+            transform: translateX(-100%) !important;
+        }
+
+        .ltta-nav-link:hover {
+            background: transparent !important;
+            border-color: transparent !important;
+            transform: none !important;
+        }
+
+        .ltta-nav-link:hover::before {
+            transform: none !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        .ltta-sidebar:hover,
+        .ltta-sidebar:focus-within,
+        .ltta-sidebar-trigger:hover+.ltta-sidebar {
+            transform: translateX(-100%) !important;
+        }
+
+        .ltta-nav-link:hover {
+            background: transparent !important;
+            border-color: transparent !important;
+            transform: none !important;
+        }
+
+        .ltta-nav-link:hover::before {
+            transform: none !important;
+        }
+    }
 </style>
 
-<!-- Триггер для наведения -->
+
 <div class="ltta-sidebar-trigger"></div>
 
-<!-- Mobile Toggle Button -->
+
 <button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
 
-<!-- Sidebar Navigation -->
+
 <nav class="ltta-sidebar" id="lttaSidebar">
     <div class="ltta-sidebar-indicator">☰</div>
-    
+
     <div class="ltta-sidebar-header">
         <div class="ltta-sidebar-logo">LTTA</div>
     </div>
@@ -704,7 +802,7 @@
             </a>
         </div>
     </div>
-    
+
     <div class="ltta-nav-section">
         <div class="ltta-nav-title">Справка</div>
         <div class="ltta-nav-links">
@@ -717,49 +815,50 @@
 </nav>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.getElementById('lttaMenuToggle');
-    const sidebar = document.getElementById('lttaSidebar');
-    
-    const currentPath = window.location.pathname;
-    const links = document.querySelectorAll('.ltta-nav-link');
-    
-    links.forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-            link.classList.add('active');
+    document.addEventListener('DOMContentLoaded', function () {
+        const menuToggle = document.getElementById('lttaMenuToggle');
+        const sidebar = document.getElementById('lttaSidebar');
+
+
+        function checkMobile() {
+            if (window.innerWidth <= 768) {
+                menuToggle.style.display = 'flex';
+            } else {
+                menuToggle.style.display = 'none';
+                sidebar.classList.remove('mobile-open');
+            }
         }
+
+
+        menuToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            sidebar.classList.toggle('mobile-open');
+        });
+
+
+        document.addEventListener('click', function (e) {
+            if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+
+        document.querySelectorAll('.ltta-nav-link').forEach(link => {
+            link.addEventListener('click', function () {
+                sidebar.classList.remove('mobile-open');
+            });
+        });
+
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
     });
-    
-    function checkMobile() {
-        if (window.innerWidth <= 768) {
-            menuToggle.style.display = 'flex';
-            
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                sidebar.classList.toggle('mobile-open');
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (sidebar.classList.contains('mobile-open') &&
-                    !sidebar.contains(e.target) && 
-                    e.target !== menuToggle) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-            
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-        } else {
-            menuToggle.style.display = 'none';
-        }
-    }
-    
-    checkMobile();
-    
-    window.addEventListener('resize', checkMobile);
-});
 </script>
+
 </html>

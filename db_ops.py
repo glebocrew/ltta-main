@@ -14,6 +14,7 @@ DEFAULT_AVATAR = "img/avatars/default.png"
 
 # default user image
 
+
 class MariaConnection:
     def __init__(self, connection_conf: dict):
         """
@@ -25,25 +26,33 @@ class MariaConnection:
         self.mariaconnection = None
         self.cursor = None
         self.connect()
-        
+
     def connect(self):
         """Установка соединения с MariaDB"""
         try:
-            mariadb_logger.log("info", f"[{os.getpid()}] Connecting to mariadb to {self.conf['host']}:{self.conf['port']}.")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Connecting to mariadb to {self.conf['host']}:{self.conf['port']}.",
+            )
             self.mariaconnection = Connection(**self.conf)
             self.mariaconnection.autocommit = True
             self.cursor = self.mariaconnection.cursor()
-            
+
             # Устанавливаем таймауты для предотвращения разрыва соединения
             self.cursor.execute("SET SESSION wait_timeout = 28800")
             self.cursor.execute("SET SESSION interactive_timeout = 28800")
             self.cursor.execute("SET SESSION net_read_timeout = 600")
             self.cursor.execute("SET SESSION net_write_timeout = 600")
-            
+
             mariadb_logger.log("info", f"Successfully connected to database.")
         except Exception as e:
-            mariadb_logger.log("error", f"Connection to mariadb was not established: arguments are not correct. Full exception: {e}")
-            mariadb_logger.log("fatal", f"MariaDB module (.py) was stopped. Read logs upper.")
+            mariadb_logger.log(
+                "error",
+                f"Connection to mariadb was not established: arguments are not correct. Full exception: {e}",
+            )
+            mariadb_logger.log(
+                "fatal", f"MariaDB module (.py) was stopped. Read logs upper."
+            )
             sys.exit(2)
 
     def ensure_connection(self):
@@ -53,7 +62,9 @@ class MariaConnection:
             self.cursor.execute("SELECT 1")
             return True
         except Exception as e:
-            mariadb_logger.log("warning", f"Connection lost, reconnecting... Error: {e}")
+            mariadb_logger.log(
+                "warning", f"Connection lost, reconnecting... Error: {e}"
+            )
             try:
                 if self.mariaconnection:
                     self.mariaconnection.close()
@@ -74,10 +85,15 @@ class MariaConnection:
                     self.cursor.execute(query)
                 return True
             except Exception as e:
-                if ("server has gone away" in str(e).lower() or 
-                    "connection" in str(e).lower() or 
-                    attempt < max_retries - 1):
-                    mariadb_logger.log("warning", f"Connection issue detected (attempt {attempt + 1}), reconnecting: {e}")
+                if (
+                    "server has gone away" in str(e).lower()
+                    or "connection" in str(e).lower()
+                    or attempt < max_retries - 1
+                ):
+                    mariadb_logger.log(
+                        "warning",
+                        f"Connection issue detected (attempt {attempt + 1}), reconnecting: {e}",
+                    )
                     if self.ensure_connection():
                         time.sleep(0.5)  # Небольшая задержка
                         continue
@@ -100,14 +116,18 @@ class MariaConnection:
         """
         mariadb_logger.log("info", f"[{os.getpid()}] Selecting all from {table_name}")
         query = self.queries["select_all"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully selected all from {table_name}")
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully selected all from {table_name}"
+            )
             return self.cursor.fetchall()
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Selecting all from {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Selecting all from {table_name} failed!"
+            )
             return None
-    
+
     def find_user_by_username(self, table_name: str, username: str):
         """
         Returns True if user was found.
@@ -117,14 +137,18 @@ class MariaConnection:
         :param username: username of user
         """
         query = self.queries["find_user_by_username"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (username,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully looked for user in {table_name}")
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully looked for user in {table_name}"
+            )
             return bool(self.cursor.fetchone())
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Finding user in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Finding user in {table_name} failed!"
+            )
             return False
-        
+
     def find_user_by_email(self, table_name: str, email: str):
         """
         Returns True if email was found.
@@ -134,15 +158,21 @@ class MariaConnection:
         :param email: email of user
         """
         query = self.queries["find_user_by_email"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (email,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully looked for email in {table_name}")
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully looked for email in {table_name}"
+            )
             return bool(self.cursor.fetchone())
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Finding email in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Finding email in {table_name} failed!"
+            )
             return False
-        
-    def find_user_by_login_and_password(self, table_name: str, username: str, password: str):
+
+    def find_user_by_login_and_password(
+        self, table_name: str, username: str, password: str
+    ):
         """
         Returns True if user was found.
         Returns False if user was not found.
@@ -151,15 +181,23 @@ class MariaConnection:
         :param username: username of user
         :param password: password of user
         """
-        query = self.queries["find_user_by_login_and_password"].replace("table_name", table_name)
-        
+        query = self.queries["find_user_by_login_and_password"].replace(
+            "table_name", table_name
+        )
+
         if self.execute_with_reconnect(query, (username, password)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully looked for user by username and password in {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully looked for user by username and password in {table_name}",
+            )
             return bool(self.cursor.fetchone())
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Finding user by username and password in {table_name} failed!")
+            mariadb_logger.log(
+                "error",
+                f"[{os.getpid()}] Finding user by username and password in {table_name} failed!",
+            )
             return False
-        
+
     def get_user_role_by_username(self, table_name: str, username: str):
         """
         Gets user role by his username
@@ -169,16 +207,24 @@ class MariaConnection:
 
         Returns -1 if user not exists. If exists returns his role.
         """
-        query = self.queries["get_user_role_by_username"].replace("table_name", table_name)
-        
+        query = self.queries["get_user_role_by_username"].replace(
+            "table_name", table_name
+        )
+
         if self.execute_with_reconnect(query, (username,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got user role by email in {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully got user role by email in {table_name}",
+            )
             role = self.cursor.fetchone()
             return role if role else -1
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Getting user role by username in {table_name} failed!")
+            mariadb_logger.log(
+                "error",
+                f"[{os.getpid()}] Getting user role by username in {table_name} failed!",
+            )
             return -1
-        
+
     def delete_user_by_id(self, table_name: str, id: str):
         """
         Drops profile by id
@@ -187,12 +233,17 @@ class MariaConnection:
         :param id: id of user
         """
         query = self.queries["delete_user_by_id"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (id,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully dropped user by id in {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully dropped user by id in {table_name}",
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Dropping user by id in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Dropping user by id in {table_name} failed!"
+            )
             return False
 
     def drop_temp_profile_by_email(self, table_name: str, email: str):
@@ -202,16 +253,36 @@ class MariaConnection:
         :param table_name: name of table you want to delete from
         :param email: email of user
         """
-        query = self.queries["drop_temp_profile_by_email"].replace("table_name", table_name)
-        
+        query = self.queries["drop_temp_profile_by_email"].replace(
+            "table_name", table_name
+        )
+
         if self.execute_with_reconnect(query, (email,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully dropped temp user by email in {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully dropped temp user by email in {table_name}",
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Dropping for temp user by email in {table_name} failed!")
+            mariadb_logger.log(
+                "error",
+                f"[{os.getpid()}] Dropping for temp user by email in {table_name} failed!",
+            )
             return False
 
-    def insert_new_temp_profile(self, table_name: str, username: str, code: str, datetime: str, email: str, name: str, surname: str, grade: int, faculty: str, password: str):
+    def insert_new_temp_profile(
+        self,
+        table_name: str,
+        username: str,
+        code: str,
+        datetime: str,
+        email: str,
+        name: str,
+        surname: str,
+        grade: int,
+        faculty: str,
+        password: str,
+    ):
         """
         Inserts new temp profile
 
@@ -226,13 +297,24 @@ class MariaConnection:
         :param faculty: faculty of user
 
         """
-        query = self.queries["insert_new_temp_profile"].replace("table_name", table_name)
-        
-        if self.execute_with_reconnect(query, (email, code, datetime, name, surname, grade, faculty, username, password)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully inserted a temp user in {table_name}")
+        query = self.queries["insert_new_temp_profile"].replace(
+            "table_name", table_name
+        )
+
+        if self.execute_with_reconnect(
+            query,
+            (email, code, datetime, name, surname, grade, faculty, username, password),
+        ):
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully inserted a temp user in {table_name}",
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Inserting user by username and password in {table_name} failed!")
+            mariadb_logger.log(
+                "error",
+                f"[{os.getpid()}] Inserting user by username and password in {table_name} failed!",
+            )
             return False
 
     def get_temp_profile_by_email(self, table_name: str, email: str):
@@ -241,20 +323,39 @@ class MariaConnection:
 
         :param table_name: name of table you want to select
         :param email: email of user
-        
+
         Returns -1 if exception
         Returns all temp user information by email
         """
-        query = self.queries["get_temp_profile_by_email"].replace("table_name", table_name)
-        
+        query = self.queries["get_temp_profile_by_email"].replace(
+            "table_name", table_name
+        )
+
         if self.execute_with_reconnect(query, (email,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully looked for temp user by email in {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully looked for temp user by email in {table_name}",
+            )
             return self.cursor.fetchone()
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Looking for temp user by email in {table_name} failed!")
+            mariadb_logger.log(
+                "error",
+                f"[{os.getpid()}] Looking for temp user by email in {table_name} failed!",
+            )
             return -1
-        
-    def create_new_user(self, table_name: str, username: str, name: str, surname: str, email: str, password: str, grade: str, faculty: str, id: str):
+
+    def create_new_user(
+        self,
+        table_name: str,
+        username: str,
+        name: str,
+        surname: str,
+        email: str,
+        password: str,
+        grade: str,
+        faculty: str,
+        id: str,
+    ):
         """
         Creates new user
         :param table_name: name of table you want to insert
@@ -268,26 +369,43 @@ class MariaConnection:
         :param id: id of user
         """
         query = self.queries["create_new_user"].replace("table_name", table_name)
-        
-        if self.execute_with_reconnect(query, (username, name, surname, email, password, grade, faculty, DEFAULT_AVATAR, id)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully added user in {table_name}")
+
+        if self.execute_with_reconnect(
+            query,
+            (
+                username,
+                name,
+                surname,
+                email,
+                password,
+                grade,
+                faculty,
+                DEFAULT_AVATAR,
+                id,
+            ),
+        ):
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully added user in {table_name}"
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Adding user in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Adding user in {table_name} failed!"
+            )
             return False
-    
+
     def get_user_by_username(self, table_name: str, username: str):
         """
         Finds all user infomation by his username
-        
+
         :param table_name: name of table you want to select
         :param username: username of user
 
-        Returns dict with this user information: 
+        Returns dict with this user information:
         Username, Name, Surname, Email, Password, Rating, Role, Grade, Faculty, Avatar, Id
         """
         query = self.queries["get_user_by_username"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (username,)):
             user_info = self.cursor.fetchone()
             if user_info:
@@ -302,24 +420,26 @@ class MariaConnection:
                     "grade": user_info[7],
                     "faculty": user_info[8],
                     "avatar": user_info[9],
-                    "id": user_info[10]
+                    "id": user_info[10],
                 }
-                mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got user in {table_name}")
+                mariadb_logger.log(
+                    "info", f"[{os.getpid()}] Succesfully got user in {table_name}"
+                )
                 return mapped_user_info
         return -1
-            
+
     def get_user_by_id(self, table_name: str, id: str):
         """
         Finds all user infomation by his id
-        
+
         :param table_name: name of table you want to select
         :param id: id of user
 
-        Returns dict with this user information: 
+        Returns dict with this user information:
         Username, Name, Surname, Email, Password, Rating, Role, Grade, Faculty, Avatar, Id
         """
         query = self.queries["get_user_by_id"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (id,)):
             user_info = self.cursor.fetchone()
             if user_info:
@@ -334,13 +454,26 @@ class MariaConnection:
                     "grade": user_info[7],
                     "faculty": user_info[8],
                     "avatar": user_info[9],
-                    "id": user_info[10]
+                    "id": user_info[10],
                 }
-                mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got user in {table_name}")
+                mariadb_logger.log(
+                    "info", f"[{os.getpid()}] Succesfully got user in {table_name}"
+                )
                 return mapped_user_info
         return -1
 
-    def update_profile(self, table_name: str, username: str, name: str, surname: str, email: str, grade: int, faculty: str, avatar: str, old_username: str):
+    def update_profile(
+        self,
+        table_name: str,
+        username: str,
+        name: str,
+        surname: str,
+        email: str,
+        grade: int,
+        faculty: str,
+        avatar: str,
+        old_username: str,
+    ):
         """
         Updates updatable fields
 
@@ -355,15 +488,35 @@ class MariaConnection:
         :param old_username: old username of user
         """
         query = self.queries["update_profile"].replace("table_name", table_name)
-        
-        if self.execute_with_reconnect(query, (username, name, surname, email, grade, faculty, avatar, old_username)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully updated user in {table_name}")
+
+        if self.execute_with_reconnect(
+            query,
+            (username, name, surname, email, grade, faculty, avatar, old_username),
+        ):
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully updated user in {table_name}"
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Updating user in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Updating user in {table_name} failed!"
+            )
             return False
 
-    def admin_update_profile(self, table_name: str, username: str, name: str, surname: str, email: str, grade: int, faculty: str, avatar: str, rating: float, role: str, old_username: str):
+    def admin_update_profile(
+        self,
+        table_name: str,
+        username: str,
+        name: str,
+        surname: str,
+        email: str,
+        grade: int,
+        faculty: str,
+        avatar: str,
+        rating: float,
+        role: str,
+        old_username: str,
+    ):
         """
         Updates updatable fields
 
@@ -380,24 +533,44 @@ class MariaConnection:
         :param old_username: old username of user
         """
         query = self.queries["admin_update_profile"].replace("table_name", table_name)
-        
-        if self.execute_with_reconnect(query, (username, name, surname, email, grade, faculty, avatar, rating, role, old_username)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully updated user in {table_name}")
+
+        if self.execute_with_reconnect(
+            query,
+            (
+                username,
+                name,
+                surname,
+                email,
+                grade,
+                faculty,
+                avatar,
+                rating,
+                role,
+                old_username,
+            ),
+        ):
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully updated user in {table_name}"
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Updating user in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Updating user in {table_name} failed!"
+            )
             return False
-        
-    def  get_all_users(self, table_name: str):
+
+    def get_all_users(self, table_name: str):
         """
         Return all users from table
-        
-        :param table_name: name of table you want to select 
+
+        :param table_name: name of table you want to select
         """
         query = self.queries["get_all_users"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully selected all from {table_name}")
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully selected all from {table_name}"
+            )
             raw_info = self.cursor.fetchall()
             info = []
             for user in raw_info:
@@ -415,9 +588,11 @@ class MariaConnection:
                 info.append(temp_dict)
             return info
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Selecting all from {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Selecting all from {table_name} failed!"
+            )
             return []
-    
+
     def get_user_name_surname(self, table_name: str, id: str):
         """
         Updates updatable fields
@@ -426,16 +601,31 @@ class MariaConnection:
         :param id: id of user
         """
         query = self.queries["get_user_name_surname"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (id,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully selected name surname from {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully selected name surname from {table_name}",
+            )
             info = self.cursor.fetchone()
             return info if info else -1
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Selecting name surname from {table_name} failed!")
+            mariadb_logger.log(
+                "error",
+                f"[{os.getpid()}] Selecting name surname from {table_name} failed!",
+            )
             return -1
 
-    def create_event(self, table_name: str, type: str, title: str, datetime: str, content: str, image: str, id: str):
+    def create_event(
+        self,
+        table_name: str,
+        type: str,
+        title: str,
+        datetime: str,
+        content: str,
+        image: str,
+        id: str,
+    ):
         """
         Creates new event
 
@@ -448,24 +638,32 @@ class MariaConnection:
         :param id: id of event
         """
         query = self.queries["create_event"].replace("table_name", table_name)
-        
-        if self.execute_with_reconnect(query, (type, title, datetime, content, image, id)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully created event in {table_name}")
+
+        if self.execute_with_reconnect(
+            query, (type, title, datetime, content, image, id)
+        ):
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully created event in {table_name}"
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Creating event in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Creating event in {table_name} failed!"
+            )
             return False
-        
+
     def get_all_events(self, table_name: str):
         """
         Return all events from table
-        
-        :param table_name: name of table you want to select 
+
+        :param table_name: name of table you want to select
         """
         query = self.queries["get_all_events"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully selected all from {table_name}")
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully selected all from {table_name}"
+            )
             raw_info = self.cursor.fetchall()
             info = []
             for user in raw_info:
@@ -480,19 +678,23 @@ class MariaConnection:
                 info.append(temp_dict)
             return info
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Selecting all from {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Selecting all from {table_name} failed!"
+            )
             return []
-            
+
     def get_all_finished_events(self, table_name: str):
         """
         Return all finished events from table
-        
-        :param table_name: name of table you want to select 
+
+        :param table_name: name of table you want to select
         """
         query = self.queries["get_all_events"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully selected all from {table_name}")
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully selected all from {table_name}"
+            )
             raw_info = self.cursor.fetchall()
             info = []
             for user in raw_info:
@@ -508,9 +710,11 @@ class MariaConnection:
                 info.append(temp_dict)
             return info
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Selecting all from {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Selecting all from {table_name} failed!"
+            )
             return []
-    
+
     def delete_event_by_id(self, table_name: str, id: str):
         """
         Deletes event by id
@@ -519,14 +723,20 @@ class MariaConnection:
         :param id: id of event
         """
         query = self.queries["delete_event_by_title"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (id,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully deleted event by id from {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully deleted event by id from {table_name}",
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Deleting event by id from {table_name} failed!")
+            mariadb_logger.log(
+                "error",
+                f"[{os.getpid()}] Deleting event by id from {table_name} failed!",
+            )
             return False
-        
+
     def get_event_by_title(self, table_name: str, title: str):
         """
         Gets event info by title
@@ -535,9 +745,12 @@ class MariaConnection:
         :param title: title of event
         """
         query = self.queries["get_event_by_title"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (title,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got event info by title from {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully got event info by title from {table_name}",
+            )
             raw_info = self.cursor.fetchone()
             if raw_info:
                 info = {}
@@ -550,7 +763,7 @@ class MariaConnection:
                 info["id"] = raw_info[6]
                 return info
         return -1
-        
+
     def get_finished_event_by_title(self, table_name: str, title: str):
         """
         Gets finished event info by title
@@ -559,9 +772,12 @@ class MariaConnection:
         :param title: title of event
         """
         query = self.queries["get_event_by_title"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (title,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got event info by title from {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully got event info by title from {table_name}",
+            )
             raw_info = self.cursor.fetchone()
             if raw_info:
                 info = {}
@@ -584,16 +800,32 @@ class MariaConnection:
         :param title: title of event
         """
         query = self.queries["get_event_id_by_title"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (title,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got event id by title from {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully got event id by title from {table_name}",
+            )
             info = self.cursor.fetchone()
             return info[0] if info else -1
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Getting event id by title from {table_name} failed!")
+            mariadb_logger.log(
+                "error",
+                f"[{os.getpid()}] Getting event id by title from {table_name} failed!",
+            )
             return -1
 
-    def update_event(self, table_name: str, event_type: str, title: str, datetime: str, content: str, image: str, participants: int, old_title: str):
+    def update_event(
+        self,
+        table_name: str,
+        event_type: str,
+        title: str,
+        datetime: str,
+        content: str,
+        image: str,
+        participants: int,
+        old_title: str,
+    ):
         """
         Updates updatable fields
 
@@ -604,45 +836,65 @@ class MariaConnection:
         :param image: path to image of event
         :param participants: participants of event
         :param old_title: old_title of event
-        """   
+        """
         query = self.queries["update_event"].replace("table_name", table_name)
-        
-        if self.execute_with_reconnect(query, (event_type, title, datetime, content, image, participants, old_title)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully updated event in {table_name}")
+
+        if self.execute_with_reconnect(
+            query,
+            (event_type, title, datetime, content, image, participants, old_title),
+        ):
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully updated event in {table_name}"
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Updating event in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Updating event in {table_name} failed!"
+            )
             return False
 
-    def append_participant(self, table_name: str, participant_id: str, event_title: str):
+    def append_participant(
+        self, table_name: str, participant_id: str, event_title: str
+    ):
         """Updates updatable fields
 
         :param table_name: name of table you want to insert
-        
+
         :param participant_id: participan id you want to append
         :param event_title: title of event
         """
         query = self.queries["append_participant"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (participant_id, event_title)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully appended participant in event in {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully appended participant in event in {table_name}",
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Appending participant in event in {table_name} failed!")
+            mariadb_logger.log(
+                "error",
+                f"[{os.getpid()}] Appending participant in event in {table_name} failed!",
+            )
             return False
 
     def get_participants_by_title(self, table_name: str, title: str):
         """Gets participants by event title
 
         :param table_name: name of table you want to insert
-        
+
         :param participant_id: participan id you want to append
         :param event_title: title of event
         """
-        query = self.queries["get_participants_by_title"].replace("table_name", table_name)
-        
+        query = self.queries["get_participants_by_title"].replace(
+            "table_name", table_name
+        )
+
         if self.execute_with_reconnect(query, (title,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got all participants by event title from {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully got all participants by event title from {table_name}",
+            )
             raw_info = self.cursor.fetchone()
             if raw_info and raw_info[0]:
                 return raw_info[0].split(sep=",")
@@ -652,23 +904,32 @@ class MariaConnection:
         """Gets all matches by event title
 
         :param table_name: name of table you want to select
-        
+
         :param event_title: title of event
         """
         query = self.queries["get_matches_by_title"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (title,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got all matches by event title from {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully got all matches by event title from {table_name}",
+            )
             raw_info = self.cursor.fetchall()
             info = []
             for match in raw_info:
                 temp_match = {}
                 temp_match["title"] = match[0]
-                temp_match["player1"] = self.get_user_by_id("users", match[1])['username']
-                temp_match["player2"] = self.get_user_by_id("users", match[2])['username']
+                temp_match["player1"] = self.get_user_by_id("users", match[1])[
+                    "username"
+                ]
+                temp_match["player2"] = self.get_user_by_id("users", match[2])[
+                    "username"
+                ]
                 temp_match["winner"] = match[3]
                 if temp_match["winner"] != "None":
-                    temp_match["winner"] = self.get_user_by_id("users", match[3])['username']
+                    temp_match["winner"] = self.get_user_by_id("users", match[3])[
+                        "username"
+                    ]
                 temp_match["score"] = match[4]
                 info.append(temp_match)
             return info
@@ -678,48 +939,79 @@ class MariaConnection:
         """Gets all matches by event id
 
         :param table_name: name of table you want to select
-        
+
         :param id: id of event
         """
         query = self.queries["get_matches_by_id"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query, (id,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully got all matches by event id from {table_name}")
+            mariadb_logger.log(
+                "info",
+                f"[{os.getpid()}] Succesfully got all matches by event id from {table_name}",
+            )
             raw_info = self.cursor.fetchall()
             info = []
             for match in raw_info:
                 temp_match = {}
                 temp_match["title"] = match[0]
-                temp_match["player1"] = self.get_user_by_id("users", match[1])['username']
-                temp_match["player2"] = self.get_user_by_id("users", match[2])['username']
+                temp_match["player1"] = self.get_user_by_id("users", match[1])[
+                    "username"
+                ]
+                temp_match["player2"] = self.get_user_by_id("users", match[2])[
+                    "username"
+                ]
                 temp_match["winner"] = match[3]
                 if temp_match["winner"] != "None":
-                    temp_match["winner"] = self.get_user_by_id("users", match[3])['username']
+                    temp_match["winner"] = self.get_user_by_id("users", match[3])[
+                        "username"
+                    ]
                 temp_match["score"] = match[4]
                 info.append(temp_match)
             return info
         return []
-    
+
     def wrap_matches(self, table_name: str, matches: list, id: str):
         query_clear = self.queries["clear_matches"].replace("table_name", table_name)
         query_create = self.queries["create_match"].replace("table_name", table_name)
-        
+
         if self.execute_with_reconnect(query_clear, (id,)):
             for match in matches:
                 mariadb_logger.log("debug", f"{match['player1']} {match['player2']}")
-                player1_id = self.get_user_by_username("users", match['player1'])["id"]
-                player2_id = self.get_user_by_username("users", match['player2'])["id"]
-                winner_id = match['winner'] if match['winner'] == "None" else self.get_user_by_username("users", match['winner'])["id"]
-                
-                if not self.execute_with_reconnect(query_create, (match['title'], player1_id, player2_id, winner_id, match['score'])):
+                player1_id = self.get_user_by_username("users", match["player1"])["id"]
+                player2_id = self.get_user_by_username("users", match["player2"])["id"]
+                winner_id = (
+                    match["winner"]
+                    if match["winner"] == "None"
+                    else self.get_user_by_username("users", match["winner"])["id"]
+                )
+
+                if not self.execute_with_reconnect(
+                    query_create,
+                    (match["title"], player1_id, player2_id, winner_id, match["score"]),
+                ):
                     mariadb_logger.log("error", f"Failed to create match: {match}")
-            mariadb_logger.log("info", f"[{os.getpid()}] Succesfully wrapped matches in {table_name}")
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Succesfully wrapped matches in {table_name}"
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Wrapping matches in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Wrapping matches in {table_name} failed!"
+            )
             return False
-    
-    def create_finished_event(self, table_name: str, event_type: str, title: str, datetime: str, content: str, image: str, participants: str, id: str, winners: str):
+
+    def create_finished_event(
+        self,
+        table_name: str,
+        event_type: str,
+        title: str,
+        datetime: str,
+        content: str,
+        image: str,
+        participants: str,
+        id: str,
+        winners: str,
+    ):
         """
         Creates new finished event
 
@@ -733,23 +1025,30 @@ class MariaConnection:
         :param winners: winners of event
         """
         query = self.queries["create_finished_event"].replace("table_name", table_name)
-    
-        if self.execute_with_reconnect(query, (event_type, title, datetime, content, image, participants, id, winners)):
+
+        if self.execute_with_reconnect(
+            query,
+            (event_type, title, datetime, content, image, participants, id, winners),
+        ):
             # Если это соревнование - обновляем рейтинги по системе RTTF
             if event_type == "соревнование":
                 self.calculate_rttf_rating(id, winners)
-            
-            mariadb_logger.log("info", f"[{os.getpid()}] Successfully created event in {table_name}")
+
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Successfully created event in {table_name}"
+            )
             return True
         else:
-            mariadb_logger.log("error", f"[{os.getpid()}] Creating event in {table_name} failed!")
+            mariadb_logger.log(
+                "error", f"[{os.getpid()}] Creating event in {table_name} failed!"
+            )
             return False
 
     def calculate_rttf_rating(self, event_id: str, winners: str):
         """
         Calculate RTTF rating for table tennis competition
         Based on Russian Table Tennis Federation rating system
-    
+
         :param event_id: ID of the finished event
         :param winners: comma-separated string of winner IDs (1st,2nd,3rd)
         """
@@ -761,8 +1060,12 @@ class MariaConnection:
                 if not event_data:
                     return False
 
-                participants = [pid for pid in event_data[0].split(',') if pid and pid != "None"]
-                winners_list = [wid for wid in event_data[1].split(',') if wid and wid != "None"]
+                participants = [
+                    pid for pid in event_data[0].split(",") if pid and pid != "None"
+                ]
+                winners_list = [
+                    wid for wid in event_data[1].split(",") if wid and wid != "None"
+                ]
 
                 if not participants:
                     return True  # No participants, nothing to calculate
@@ -776,17 +1079,23 @@ class MariaConnection:
                         if rating_data:
                             participants_ratings[participant_id] = rating_data[0]
                         else:
-                            participants_ratings[participant_id] = 1000  # Default rating for new players
+                            participants_ratings[participant_id] = (
+                                1000  # Default rating for new players
+                            )
 
                 # Calculate RTTF rating changes
-                rating_changes = self._calculate_rttf_points(participants_ratings, winners_list)
+                rating_changes = self._calculate_rttf_points(
+                    participants_ratings, winners_list
+                )
 
                 # Apply rating changes
                 for participant_id, change in rating_changes.items():
                     update_query = "UPDATE users SET rating = rating + ? WHERE id = ?"
                     self.execute_with_reconnect(update_query, (change, participant_id))
 
-                mariadb_logger.log("info", f"Successfully updated RTTF ratings for event {event_id}")
+                mariadb_logger.log(
+                    "info", f"Successfully updated RTTF ratings for event {event_id}"
+                )
                 return True
 
         except Exception as e:
@@ -805,7 +1114,7 @@ class MariaConnection:
         player_count = len(participants_ratings)
 
         if player_count < 2:
-                return rating_changes  # Need at least 2 players
+            return rating_changes  # Need at least 2 players
 
         # RTTF coefficients based on tournament size
         k_factor = self._get_rttf_k_factor(player_count)
@@ -821,7 +1130,9 @@ class MariaConnection:
                     expected_score += self._expected_result(rating, opponent_rating)
 
             # Calculate actual score based on final position
-            player_position = self._get_player_position(player_id, winners, participants_ratings)
+            player_position = self._get_player_position(
+                player_id, winners, participants_ratings
+            )
             actual_score = self._get_actual_score(player_position, player_count)
 
             # Calculate rating change
@@ -859,7 +1170,9 @@ class MariaConnection:
             return 3  # 3rd place
         else:
             # For other players, sort by rating to determine position
-            sorted_players = sorted(all_players.items(), key=lambda x: x[1], reverse=True)
+            sorted_players = sorted(
+                all_players.items(), key=lambda x: x[1], reverse=True
+            )
             for position, (pid, _) in enumerate(sorted_players, 1):
                 if pid == player_id:
                     return position
@@ -883,18 +1196,22 @@ class MariaConnection:
             return 0.45
         else:
             return 0.35  # Bottom 50%
-    
+
     def get_events_ids_by_user_id(self, table_name: str, id: str):
         """
-        Gets events   
+        Gets events
 
         :param table_name: name of table you want to select
         :param id: id of event
         """
-        query = self.queries["get_events_ids_by_user_id"].replace("table_name", table_name)
-        
+        query = self.queries["get_events_ids_by_user_id"].replace(
+            "table_name", table_name
+        )
+
         if self.execute_with_reconnect(query, (id,)):
-            mariadb_logger.log("info", f"[{os.getpid()}] Getting all about event by id in {table_name}")
+            mariadb_logger.log(
+                "info", f"[{os.getpid()}] Getting all about event by id in {table_name}"
+            )
             raw_info = self.cursor.fetchall()
             info = []
             for event in raw_info:
@@ -904,7 +1221,7 @@ class MariaConnection:
                     "datetime": event[2],
                     "content": event[3],
                     "image": event[4],
-                    "participants": event[5]
+                    "participants": event[5],
                 }
                 info.append(event_info)
             return info

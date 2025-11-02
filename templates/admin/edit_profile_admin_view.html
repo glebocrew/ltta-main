@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='styles/edit_profile.css') }}" rel="stylesheet">
-    <title>Profile Page</title>
+    <title>Edit Profile</title>
     <style>
-        /* CSS Variables */
         :root {
             --background-color: #0a0a0a;
             --text-color: #ffffff;
@@ -17,7 +17,6 @@
             --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Base Styles */
         * {
             margin: 0;
             padding: 0;
@@ -33,7 +32,6 @@
             overflow-x: hidden;
         }
 
-        /* Main Container */
         .main-container {
             width: 100%;
             min-height: 100vh;
@@ -64,22 +62,22 @@
 
         .avatar-container {
             position: relative;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
             width: 300px;
             height: 300px;
-            margin: 0 auto 40px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid var(--golden);
-            background: #000;
-            cursor: pointer;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .avatar {
+            position: relative;
             width: 100%;
             height: 100%;
-            object-fit: cover;
             border-radius: 50%;
-            display: block;
+            object-fit: cover;
+            border: 3px solid var(--golden);
         }
 
         .avatar-change-icon {
@@ -95,6 +93,8 @@
             justify-content: center;
             opacity: 0;
             transition: opacity 0.3s ease;
+            cursor: pointer;
+            z-index: 2;
         }
 
         .avatar-container:hover .avatar-change-icon {
@@ -107,7 +107,6 @@
             fill: var(--golden);
         }
 
-        /* Input Fields */
         .input-block {
             position: relative;
             margin-left: auto;
@@ -138,7 +137,6 @@
             text-align: center !important;
         }
 
-        /* Select Styles */
         .select {
             width: 100%;
             border: 1px solid #000;
@@ -201,7 +199,6 @@
             display: none;
         }
 
-        /* Save Button */
         .save_1 {
             position: relative;
             margin-left: auto;
@@ -222,7 +219,6 @@
             border-radius: 5px;
         }
 
-        /* Avatar Editor */
         .avatar-editor {
             position: fixed;
             top: 50%;
@@ -277,7 +273,6 @@
             max-width: none;
             cursor: move;
             transform-origin: top left;
-            transform-origin: center center;
             touch-action: none;
             -webkit-user-drag: none;
             pointer-events: auto;
@@ -314,15 +309,6 @@
             display: none;
         }
 
-        #avatarData {
-            width: 100%;
-            padding: 10px;
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-
         .zoom-controls {
             display: flex;
             gap: 10px;
@@ -334,7 +320,6 @@
             font-size: 18px;
         }
 
-        /* Confirmation Dialog */
         .overlay {
             position: fixed;
             top: 0;
@@ -415,49 +400,6 @@
             cursor: not-allowed;
         }
 
-        /* Flashed Messages */
-        .flashed_messages {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            max-width: 350px;
-        }
-
-        .flashed_message {
-            background: var(--golden);
-            color: #000;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-weight: 500;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            animation: slide_in_out 5s ease-in-out forwards;
-        }
-
-        @keyframes slide_in_out {
-            0% {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            10% {
-                transform: translateX(0);
-                opacity: 1;
-            }
-
-            90% {
-                transform: translateX(0);
-                opacity: 1;
-            }
-
-            100% {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        /* Responsive Design */
         @media screen and (max-width: 768px) {
             .main-container {
                 padding: 15px;
@@ -500,7 +442,6 @@
             }
         }
 
-        /* Landscape orientation for mobile */
         @media screen and (max-height: 500px) and (orientation: landscape) {
             .main-container {
                 padding: 10px;
@@ -527,67 +468,77 @@
 </head>
 
 <body>
-    {% if user_data %}
     <div class="main-container">
+        {% if user_data %}
         <form method="POST" enctype="multipart/form-data" class="main-form" id="main-form">
+
+            <input type="file" id="avatarFileInput" name="avatar" style="display: none;" accept=".jpg,.jpeg,.png">
+
             <div class="content">
 
-                <!-- Аватар -->
-                <div class="avatar-container" onclick="changeAvatar()">
-                    <img src="{{ url_for('static', filename=user_data['avatar']) }}" class="avatar" id="current-avatar">
-                    <div class="avatar-change-icon">
+                <div class="avatar-container">
+                    <img src="{{ url_for('static', filename=user_data['avatar']) }}" class="avatar" id="avatarImage">
+                    <div class="avatar-change-icon" onclick="openAvatarEditor()">
                         <svg viewBox="0 0 24 24">
                             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 
-                     7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 
-                     0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                     7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 
+                                     0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                         </svg>
                     </div>
                 </div>
 
-                <!-- Редактор аватарки -->
-                <div class="avatar-editor" id="avatar-editor" style="display:none;">
+
+                <div class="avatar-editor" id="avatarEditor">
                     <div class="editor-container">
                         <div class="close-editor" onclick="closeAvatarEditor()">×</div>
+                        <h3 style="text-align: center; color: var(--golden); margin-bottom: 20px;">
+                            Редактирование аватарки
+                        </h3>
+                        <p style="text-align: center; color: var(--text-color); margin-bottom: 15px; font-size: 14px;">
+                            Изменения сохраняются автоматически при закрытии
+                        </p>
+
                         <div class="preview-container">
                             <img id="imagePreview" class="hidden">
                             <div class="crop-overlay"></div>
                         </div>
+
                         <div class="controls">
-                            <input type="file" id="imageUpload" accept=".png, .jpg, .gif">
+                            <input type="file" id="imageUpload" accept=".png, .jpg, .jpeg, .gif">
                             <div class="zoom-controls">
                                 <button id="zoomOut" type="button">-</button>
                                 <span>Масштаб</span>
                                 <button id="zoomIn" type="button">+</button>
                             </div>
                         </div>
+
                         <canvas id="cropCanvas" class="hidden"></canvas>
-                        <input type="file" id="avatarData" name="avatar" style="display:none;">
                     </div>
                 </div>
 
-                <!-- Остальные поля формы -->
-                <div id="username" class="input-block">
+
+                <div class="input-block">
                     <input type="text" value="{{ user_data['username'] }}" name="username" required pattern=".*\S+.*"
                         class="input" autocomplete="off">
                 </div>
 
-                <div id="name" class="input-block">
+                <div class="input-block">
                     <input type="text" value="{{ user_data['name'] }}" name="name" required pattern=".*\S+.*"
                         class="input" autocomplete="off">
                 </div>
 
-                <div id="surname" class="input-block">
+                <div class="input-block">
                     <input type="text" value="{{ user_data['surname'] }}" name="surname" required pattern=".*\S+.*"
                         class="input" autocomplete="off">
                 </div>
 
-                <div id="email" class="input-block">
+                <div class="input-block">
                     <input type="text" value="{{ user_data['email'] }}" name="email" required pattern=".*\S+.*"
                         class="input" autocomplete="off">
                 </div>
 
-                <div id="grade" class="input-block">
-                    <div class="select" tabindex="1">
+                <div class="input-block">
+                    <div class="select">
                         <span class="select_value">{{ user_data['grade'] }}</span>
                         <ul class="select_dropdown">
                             <li class="select_option">8</li>
@@ -599,8 +550,8 @@
                     <input type="hidden" value="{{ user_data['grade'] }}" name="grade" class="dropdown-input">
                 </div>
 
-                <div id="faculty" class="input-block">
-                    <div class="select" tabindex="1">
+                <div class="input-block">
+                    <div class="select">
                         <span class="select_value">{{ user_data['faculty'] }}</span>
                         <ul class="select_dropdown">
                             {% if faculties %}
@@ -613,34 +564,35 @@
                     <input type="hidden" value="{{ user_data['faculty'] }}" name="faculty" class="dropdown-input">
                 </div>
 
-                <div id="role" class="input-block">
-                    <div class="select" tabindex="1">
+
+                <div class="input-block">
+                    <div class="select">
                         <span class="select_value">{{ user_data['role'] }}</span>
                         <ul class="select_dropdown">
+                            <li class="select_option">user</li>
                             <li class="select_option">admin</li>
                             <li class="select_option">editor</li>
-                            <li class="select_option">user</li>
+
                         </ul>
                     </div>
                     <input type="hidden" value="{{ user_data['role'] }}" name="role" class="dropdown-input">
                 </div>
 
-                <div id="rating" class="input-block">
-                    <input type="text" value="{{ user_data['rating'] }}" name="rating" required pattern=".*\S+.*"
-                        class="input" autocomplete="off">
+                <div class="input-block">
+                    <input type="number" value="{{ user_data['rating'] }}" name="rating" required pattern=".*\S+.*"
+                        class="input" autocomplete="off" step="0.1" min="0">
                 </div>
-
-                <div id="submit" class="input-block">
+                <div class="input-block">
                     <button class="save_1" type="button" onclick="showConfirmation()">готово!</button>
                 </div>
             </div>
         </form>
 
-        <!-- Диалог подтверждения -->
+
         <div class="overlay" id="overlay"></div>
         <div class="confirm-dialog" id="confirmDialog">
             <h3>Подтверждение изменений</h3>
-            <p>Введите ваш Имя и Фамимлию для подтверждения:</p>
+            <p>Введите ваше Имя, Фамилию для подтверждения:</p>
             <input type="text" id="usernameConfirm" required pattern=".*\S+.*" autocomplete="off"
                 placeholder="{{ admin_name_surname['name'] }} {{ admin_name_surname['surname'] }}"
                 oninput="checkUsername()">
@@ -649,77 +601,17 @@
                 <button class="confirm-button" onclick="hideConfirmation()">Отмена</button>
             </div>
         </div>
+        {% endif %}
     </div>
-    {% endif %}
 
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="flashed_messages">
-        {% for message in messages %}
-        <p class="flashed_message">{{ message }}</p>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-
-    <script src="{{ url_for('static', filename='scripts/edit_profile.js') }}"></script>
     <script>
-        // Custom Select Functionality
-        document.addEventListener('DOMContentLoaded', function () {
-            const selects = document.querySelectorAll('.select');
-
-            selects.forEach(select => {
-                const value = select.querySelector('.select_value');
-                const options = select.querySelectorAll('.select_option');
-                const hiddenInput = select.nextElementSibling;
-
-                // Toggle dropdown
-                value.addEventListener('click', function () {
-                    select.classList.toggle('open');
-                });
-
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function (e) {
-                    if (!select.contains(e.target)) {
-                        select.classList.remove('open');
-                    }
-                });
-
-                // Select option
-                options.forEach(option => {
-                    option.addEventListener('click', function () {
-                        value.textContent = this.textContent;
-                        hiddenInput.value = this.textContent;
-                        select.classList.remove('open');
-                    });
-                });
-            });
-        });
 
         function checkUsername() {
             const input = document.getElementById("usernameConfirm").value.trim();
             const username = "{{ admin_name_surname['name'] }} {{ admin_name_surname['surname'] }}";
             document.getElementById("confirmSave").disabled = input !== username;
-            console.log(input, username)
         }
 
-        function changeAvatar() {
-            document.getElementById('avatar-editor').style.display = 'flex';
-        }
-
-        function closeAvatarEditor() {
-            const editor = document.getElementById('avatar-editor');
-            const preview = document.getElementById('imagePreview');
-            editor.style.display = 'none';
-            preview.src = '';
-            preview.classList.add('hidden');
-            preview.style.transform = 'translate(0px, 0px) scale(1)';
-            preview.style.left = '0';
-            preview.style.top = '0';
-            document.getElementById('imageUpload').value = '';
-            window.currentZoom = 1;
-            window.dragX = window.dragY = 0;
-        }
         function showConfirmation() {
             document.getElementById('overlay').style.display = 'block';
             document.getElementById('confirmDialog').style.display = 'block';
@@ -733,366 +625,271 @@
         function submitForm() {
             document.getElementById('main-form').submit();
         }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const selects = document.querySelectorAll('.select');
+
+            selects.forEach(select => {
+                const value = select.querySelector('.select_value');
+                const options = select.querySelectorAll('.select_option');
+                const hiddenInput = select.nextElementSibling;
+
+                value.addEventListener('click', function () {
+                    select.classList.toggle('open');
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!select.contains(e.target)) {
+                        select.classList.remove('open');
+                    }
+                });
+
+                options.forEach(option => {
+                    option.addEventListener('click', function () {
+                        value.textContent = this.textContent;
+                        hiddenInput.value = this.textContent;
+                        select.classList.remove('open');
+                    });
+                });
+            });
+
+
+            initAvatarEditor();
+        });
+
+
+        let avatarScale = 1;
+        let avatarOffsetX = 0;
+        let avatarOffsetY = 0;
+        let isDragging = false;
+        let dragStartX, dragStartY;
+        let imageWidth = 0, imageHeight = 0;
+        let containerSize = 0;
+        let hasAvatarChanges = false;
+
+        function initAvatarEditor() {
+            const imageUpload = document.getElementById('imageUpload');
+            const zoomIn = document.getElementById('zoomIn');
+            const zoomOut = document.getElementById('zoomOut');
+
+            if (imageUpload) {
+                imageUpload.addEventListener('change', handleImageUpload);
+            }
+
+            if (zoomIn && zoomOut) {
+                zoomIn.addEventListener('click', () => zoomAvatar(0.2));
+                zoomOut.addEventListener('click', () => zoomAvatar(-0.2));
+            }
+        }
+
+        function openAvatarEditor() {
+            document.getElementById('avatarEditor').style.display = 'flex';
+            resetAvatarEditor();
+        }
+
+        function closeAvatarEditor() {
+            if (hasAvatarChanges) {
+                saveAvatar();
+            }
+            document.getElementById('avatarEditor').style.display = 'none';
+        }
+
+        function resetAvatarEditor() {
+            avatarScale = 1;
+            avatarOffsetX = 0;
+            avatarOffsetY = 0;
+            hasAvatarChanges = false;
+            document.getElementById('imageUpload').value = '';
+            const preview = document.getElementById('imagePreview');
+            preview.classList.add('hidden');
+            preview.style.transform = 'translate(0px, 0px) scale(1)';
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('imagePreview');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+
+                    img.onload = function () {
+                        initializeImageEditor(img);
+                        hasAvatarChanges = true;
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function initializeImageEditor(img) {
+            const container = document.querySelector('.preview-container');
+            if (!container) return;
+
+            containerSize = container.clientWidth;
+            imageWidth = img.naturalWidth;
+            imageHeight = img.naturalHeight;
+
+            const scaleX = containerSize / imageWidth;
+            const scaleY = containerSize / imageHeight;
+            avatarScale = Math.max(scaleX, scaleY) * 1.1;
+
+            avatarOffsetX = (containerSize - imageWidth * avatarScale) / 2;
+            avatarOffsetY = (containerSize - imageHeight * avatarScale) / 2;
+
+            updateImageTransform();
+            setupImageInteractions(img);
+        }
+
+        function setupImageInteractions(img) {
+            img.addEventListener('mousedown', startDrag);
+            img.addEventListener('touchstart', startDragTouch);
+            img.addEventListener('wheel', handleWheel);
+        }
+
+        function startDrag(e) {
+            e.preventDefault();
+            isDragging = true;
+            dragStartX = e.clientX - avatarOffsetX;
+            dragStartY = e.clientY - avatarOffsetY;
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function startDragTouch(e) {
+            e.preventDefault();
+            if (e.touches.length === 1) {
+                isDragging = true;
+                dragStartX = e.touches[0].clientX - avatarOffsetX;
+                dragStartY = e.touches[0].clientY - avatarOffsetY;
+                document.addEventListener('touchmove', dragTouch);
+                document.addEventListener('touchend', stopDrag);
+            }
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            avatarOffsetX = e.clientX - dragStartX;
+            avatarOffsetY = e.clientY - dragStartY;
+            updateImageTransform();
+            hasAvatarChanges = true;
+        }
+
+        function dragTouch(e) {
+            if (!isDragging || e.touches.length !== 1) return;
+            avatarOffsetX = e.touches[0].clientX - dragStartX;
+            avatarOffsetY = e.touches[0].clientY - dragStartY;
+            updateImageTransform();
+            hasAvatarChanges = true;
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', dragTouch);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        function handleWheel(e) {
+            e.preventDefault();
+            const delta = -e.deltaY * 0.001;
+            zoomAvatar(delta);
+            hasAvatarChanges = true;
+        }
+
+        function zoomAvatar(delta) {
+            const prevScale = avatarScale;
+            avatarScale = Math.max(0.1, Math.min(5, avatarScale + delta));
+
+            const ratio = 1 - avatarScale / prevScale;
+            avatarOffsetX += (containerSize / 2 - avatarOffsetX) * ratio;
+            avatarOffsetY += (containerSize / 2 - avatarOffsetY) * ratio;
+
+            updateImageTransform();
+        }
+
+        function updateImageTransform() {
+            const img = document.getElementById('imagePreview');
+            if (img) {
+                img.style.transform = `translate(${avatarOffsetX}px, ${avatarOffsetY}px) scale(${avatarScale})`;
+            }
+        }
+
+        function saveAvatar() {
+            const img = document.getElementById('imagePreview');
+            const canvas = document.getElementById('cropCanvas');
+            const container = document.querySelector('.preview-container');
+
+            if (!img || !img.src || img.classList.contains('hidden') || !canvas || !container) {
+                return;
+            }
+
+            canvas.width = containerSize;
+            canvas.height = containerSize;
+
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const sx = -avatarOffsetX / avatarScale;
+            const sy = -avatarOffsetY / avatarScale;
+            const sWidth = containerSize / avatarScale;
+            const sHeight = containerSize / avatarScale;
+
+            const validSx = Math.max(0, sx);
+            const validSy = Math.max(0, sy);
+            const validSWidth = Math.min(sWidth, imageWidth - validSx);
+            const validSHeight = Math.min(sHeight, imageHeight - validSy);
+
+            let dx = 0, dy = 0;
+            let dWidth = containerSize, dHeight = containerSize;
+
+            if (sx < 0) {
+                dx = (-sx * avatarScale);
+                dWidth = validSWidth * avatarScale;
+            }
+            if (sy < 0) {
+                dy = (-sy * avatarScale);
+                dHeight = validSHeight * avatarScale;
+            }
+
+            ctx.drawImage(
+                img,
+                validSx, validSy, validSWidth, validSHeight,
+                dx, dy, dWidth, dHeight
+            );
+
+            canvas.toBlob(function (blob) {
+                if (!blob) return;
+
+                const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+
+                let fileInput = document.getElementById('avatarFileInput');
+                if (!fileInput) {
+                    fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.name = 'avatar';
+                    fileInput.id = 'avatarFileInput';
+                    fileInput.style.display = 'none';
+                    document.getElementById('main-form').appendChild(fileInput);
+                }
+
+                fileInput.files = dataTransfer.files;
+
+                const avatarImage = document.getElementById('avatarImage');
+                if (avatarImage) {
+                    avatarImage.src = URL.createObjectURL(blob);
+                }
+
+                hasAvatarChanges = false;
+            }, 'image/jpeg', 0.9);
+        }
     </script>
 </body>
-<!-- MENU -->
-<style>
-.ltta-sidebar {
-    --font-size--: 20pt;
-    --text-color--: #ebd37c;
-    --golden--: #ebd37c;
-    --lavender--: #6f51c1;
-    --card-bg--: rgba(30, 30, 30, 0.95);
-    --border-radius--: 16px;
-    --transition--: all 0.3s ease;
-    --tennis-orange: #ebd37c;
-    --tennis-blue: #6f51c1;
-    
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translate(-290px, -50%);
-    width: 300px;
-    height: 80vh;
-    background: var(--card-bg--);
-    backdrop-filter: blur(10px);
-    border-radius: 0 var(--border-radius--) var(--border-radius--) 0;
-    padding: 25px 20px;
-    border: 1px solid rgba(111, 81, 193, 0.2);
-    border-left: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    z-index: 10000;
-    overflow-y: auto;
-    overflow-x: hidden;
-    transition: var(--transition--);
-}
 
-.ltta-sidebar:hover,
-.ltta-sidebar:focus-within {
-    transform: translate(0, -50%);
-}
-
-/* Создаем область для наведения */
-.ltta-sidebar-trigger {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 100px;
-    background: transparent;
-    z-index: 9999;
-    cursor: pointer;
-}
-
-.ltta-sidebar-trigger:hover + .ltta-sidebar,
-.ltta-sidebar:hover {
-    transform: translate(0, -50%);
-}
-
-.ltta-sidebar-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid rgba(111, 81, 193, 0.3);
-}
-
-.ltta-sidebar-logo {
-    font-size: calc(var(--font-size--) * 1.8);
-    color: var(--tennis-orange);
-    font-weight: 700;
-    letter-spacing: 3px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-}
-
-.ltta-sidebar-subtitle {
-    font-size: calc(var(--font-size--) * 0.6);
-    color: rgba(235, 211, 124, 0.7);
-}
-
-.ltta-developer-info {
-    font-size: calc(var(--font-size--) * 0.5);
-    color: rgba(235, 211, 124, 0.5);
-    text-align: center;
-    margin-top: 10px;
-    line-height: 1.4;
-}
-
-.ltta-nav-section {
-    margin-bottom: 25px;
-}
-
-.ltta-nav-title {
-    font-size: calc(var(--font-size--) * 0.7);
-    color: var(--tennis-blue);
-    margin-bottom: 15px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding-left: 10px;
-}
-
-.ltta-nav-title::before {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--tennis-orange);
-}
-
-.ltta-nav-links {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.ltta-nav-link {
-    color: var(--text-color--);
-    text-decoration: none;
-    padding: 12px 15px;
-    border-radius: 10px;
-    transition: var(--transition--);
-    font-size: calc(var(--font-size--) * 0.65);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border: 1px solid transparent;
-}
-
-.ltta-nav-link:hover {
-    background: rgba(111, 81, 193, 0.15);
-    border-color: rgba(111, 81, 193, 0.3);
-    transform: translateX(5px);
-}
-
-.ltta-nav-link.active {
-    background: rgba(111, 81, 193, 0.2);
-    border-color: var(--tennis-blue);
-    color: var(--tennis-orange);
-}
-
-.ltta-nav-link::before {
-    content: '▶';
-    font-size: calc(var(--font-size--) * 0.5);
-    color: var(--tennis-blue);
-    transition: var(--transition--);
-}
-
-.ltta-nav-link:hover::before {
-    transform: translateX(3px);
-}
-
-.ltta-nav-link.active::before {
-    color: var(--tennis-orange);
-}
-
-.ltta-nav-badge {
-    background: var(--tennis-blue);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: calc(var(--font-size--) * 0.5);
-    margin-left: auto;
-    white-space: nowrap;
-}
-
-.ltta-nav-badge.admin {
-    background: var(--tennis-orange);
-    color: #000;
-}
-
-.ltta-sidebar-indicator {
-    position: absolute;
-    right: -20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 60px;
-    background: var(--tennis-blue);
-    border-radius: 0 10px 10px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 12px;
-    cursor: pointer;
-    transition: var(--transition--);
-}
-
-.ltta-sidebar:hover .ltta-sidebar-indicator {
-    opacity: 0;
-}
-
-.ltta-sidebar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-track {
-    background: rgba(111, 81, 193, 0.1);
-    border-radius: 3px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-thumb {
-    background: var(--tennis-blue);
-    border-radius: 3px;
-}
-
-.ltta-sidebar::-webkit-scrollbar-thumb:hover {
-    background: var(--tennis-orange);
-}
-
-@media (max-width: 768px) {
-    .ltta-sidebar {
-        transform: translateX(-100%);
-        width: 280px;
-        height: 100vh;
-        top: 0;
-        transform: translateX(-100%);
-    }
-    
-    .ltta-sidebar.mobile-open {
-        transform: translateX(0);
-    }
-    
-    .ltta-menu-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 10001;
-        background: var(--golden--);
-        color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: none;
-        font-size: 20px;
-        cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        transition: var(--transition--);
-    }
-    
-    .ltta-menu-toggle:hover {
-        background: var(--lavender--);
-        color: #000;
-    }
-    
-    .ltta-sidebar-indicator {
-        display: none;
-    }
-    
-    .ltta-sidebar-trigger {
-        display: none;
-    }
-}
-</style>
-
-<!-- Триггер для наведения -->
-<div class="ltta-sidebar-trigger"></div>
-
-<!-- Mobile Toggle Button -->
-<button class="ltta-menu-toggle" id="lttaMenuToggle" style="display: none;">☰</button>
-
-<!-- Sidebar Navigation -->
-<nav class="ltta-sidebar" id="lttaSidebar">
-    <div class="ltta-sidebar-indicator">☰</div>
-    
-    <div class="ltta-sidebar-header">
-        <div class="ltta-sidebar-logo">LTTA</div>
-    </div>
-
-    <div class="ltta-nav-section">
-        <div class="ltta-nav-title">Пользователь</div>
-        <div class="ltta-nav-links">
-            <a href="/login" class="ltta-nav-link">Вход в систему</a>
-            <a href="/registration" class="ltta-nav-link">Регистрация</a>
-            <a href="/profile" class="ltta-nav-link">Личный кабинет</a>
-            <a href="/events" class="ltta-nav-link">События</a>
-            <a href="/ratings" class="ltta-nav-link">Рейтинг</a>
-            <a href="/help" class="ltta-nav-link">Помощь</a>
-            <a href="/logout" class="ltta-nav-link">Выход</a>
-        </div>
-    </div>
-
-    <div class="ltta-nav-section">
-        <div class="ltta-nav-title">Администрирование</div>
-        <div class="ltta-nav-links">
-            <a href="/members" class="ltta-nav-link">
-                Участники
-                <span class="ltta-nav-badge admin">админ</span>
-            </a>
-            <a href="/events_list" class="ltta-nav-link">
-                Управление событиями
-                <span class="ltta-nav-badge">админ+</span>
-            </a>
-            <a href="/create_event" class="ltta-nav-link">
-                Создание события
-                <span class="ltta-nav-badge">админ+</span>
-            </a>
-        </div>
-    </div>
-    
-    <div class="ltta-nav-section">
-        <div class="ltta-nav-title">Справка</div>
-        <div class="ltta-nav-links">
-            <a href="/help#admin-scenarios" class="ltta-nav-link">
-                Для администраторов
-            </a>
-            <a href="/help#user-scenarios" class="ltta-nav-link">Руководство пользователя</a>
-        </div>
-    </div>
-</nav>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.getElementById('lttaMenuToggle');
-    const sidebar = document.getElementById('lttaSidebar');
-    
-    const currentPath = window.location.pathname;
-    const links = document.querySelectorAll('.ltta-nav-link');
-    
-    links.forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-            link.classList.add('active');
-        }
-    });
-    
-    function checkMobile() {
-        if (window.innerWidth <= 768) {
-            menuToggle.style.display = 'flex';
-            
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                sidebar.classList.toggle('mobile-open');
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (sidebar.classList.contains('mobile-open') &&
-                    !sidebar.contains(e.target) && 
-                    e.target !== menuToggle) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-            
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
-                    sidebar.classList.remove('mobile-open');
-                }
-            });
-        } else {
-            menuToggle.style.display = 'none';
-        }
-    }
-    
-    checkMobile();
-    
-    window.addEventListener('resize', checkMobile);
-});
-</script>
 </html>

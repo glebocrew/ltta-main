@@ -10,17 +10,14 @@ body {
 
 }
 
-html{
-    scroll-behavior: smooth; 
+html {
+    scroll-behavior: smooth;
 }
 
 .flashed_messages {
     position: fixed;
 
     z-index: 1000;
-
-    /* bottom: 15px;
-        right: 15px; */
 
     bottom: 15px;
     right: 15px;
@@ -69,33 +66,38 @@ html{
 @media (max-width: 768px) {
     .ltta-sidebar {
         transform: translateX(-100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Более плавная анимация */
-        -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        -webkit-overflow-scrolling: touch;
     }
-    
-    /* Улучшение производительности */
+
     * {
         -webkit-tap-highlight-color: transparent;
         -webkit-touch-callout: none;
     }
 }
 
-/* Улучшение производительности на мобильных */
 @media (max-width: 768px) {
     .ltta-sidebar {
-        will-change: transform; /* Подсказка браузеру для оптимизации */
+        will-change: transform;
         backface-visibility: hidden;
         -webkit-backface-visibility: hidden;
-        transform: translateZ(0); /* Аппаратное ускорение */
+        transform: translateZ(0);
     }
-    
-    /* Упрощаем анимации для мобильных */
+
     .ltta-nav-link {
         transition: transform 0.2s ease, background-color 0.2s ease;
     }
-    
-    /* Убираем сложные эффекты на мобильных */
+
     .bg-decoration {
         display: none;
     }
+}
+
+:root {
+    --background-color: #0a0a0a;
+    --text-color: #ffffff;
+    --golden: #ebd37c;
+    --lavender: #6f51c1;
+    --dark-lavender: #5a4199;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
