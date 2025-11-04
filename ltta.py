@@ -330,6 +330,7 @@ def verification(email):
                 uuid.uuid4(),
             )
             safe_db_operation(connection.drop_temp_profile_by_email, "codes", email)
+            flash("Учетная запись подтверждена! Для использования кабинета - войдите в него.")
             return redirect("/login")
         else:
             flash("Код неверный. Попробуйте снова!")

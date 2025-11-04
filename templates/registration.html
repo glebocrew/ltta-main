@@ -477,7 +477,7 @@
                     <div id="password" class="input-block">
                         <label for="password" class="label">Пароль</label>
                         <input type="password" name="password" required pattern=".*\S+.*" class="input"
-                            autocomplete="off" placeholder="Введите пароль">
+                            autocomplete="off" placeholder="Введите пароль" minlength="8">
                     </div>
 
                     <div id="repeat_password" class="input-block">
@@ -946,6 +946,62 @@
         checkMobile();
         window.addEventListener('resize', checkMobile);
     });
+
+    
+    
+</script>
+
+<script>
+// Простая валидация класса и факультета
+function setupGradeFacultyValidation() {
+    console.log('Setting up grade-faculty validation...');
+    
+    const forms = document.querySelectorAll('form');
+    
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const gradeInput = document.querySelector('input[name="grade"]');
+            const facultyInput = document.querySelector('input[name="faculty"]');
+            
+            if (!gradeInput || !facultyInput) {
+                console.log('Inputs not found');
+                return;
+            }
+            
+            const grade = gradeInput.value.trim();
+            const faculty = facultyInput.value.trim();
+            
+            console.log('Validation check:', { grade, faculty });
+            
+            // Проверяем только если оба поля заполнены
+            if (grade && faculty) {
+                if ((grade === '8' || grade === '9') && faculty !== 'Футуритет') {
+                    e.preventDefault();
+                    alert('❌ Для 8-9 классов доступен только факультет "Футуритет"');
+                    return false;
+                }
+                
+                if ((grade === '10' || grade === '11') && faculty === 'Футуритет') {
+                    e.preventDefault();
+                    alert('❌ Для 10-11 классов факультет "Футуритет" недоступен');
+                    return false;
+                }
+            }
+        });
+    });
+    
+    console.log('Grade-faculty validation setup complete');
+}
+
+// Запускаем при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(setupGradeFacultyValidation, 500);
+});
+    
+</script>
+
+<script>
+    
 </script>
 
 </html>

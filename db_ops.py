@@ -1226,7 +1226,9 @@ class MariaConnection:
                 info.append(event_info)
             return info
         return []
+    
 
+    
     # Словарь запросов остается без изменений
     queries = {
         "test": "SHOW DATABASES;",
