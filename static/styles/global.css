@@ -101,3 +101,31 @@ html {
     --dark-lavender: #5a4199;
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+.btn-remove {
+    background: transparent;
+    border: 2px solid #ff4757;
+    border-radius: 8px;
+    color: #ff4757;
+    font-size: 1rem;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+.btn-remove:hover {
+    background: #ff4757;
+    color: white;
+}
+
+.registration-status {
+    color: var(--success-color);
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.event-actions {
+    margin-top: 20px;
+    text-align: center;
+}

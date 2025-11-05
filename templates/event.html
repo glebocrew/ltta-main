@@ -386,7 +386,7 @@
         <p class="title">{{ event["title"] }}</p>
         <p class="content">{{ event["content"] }}</p>
 
-        {% if current_user_id not in participants %}
+        <!-- {% if current_user_id not in participants %}
         <div class="button-container">
             <input type="hidden" value="{{ event['title'] }}" name="event">
             <button type="button" onclick="showButton()">Я приду</button>
@@ -394,11 +394,26 @@
         </div>
         {% else %}
         <p class="confirmation-message">Вы зарегистрированны!</p>
-        {% endif %}
+        {% endif %} -->
     </form>
     {% else %}
     <p>Event not found</p>
     {% endif %}
+<!-- Добавьте эту секцию в event.html, где у вас отображается информация о событии -->
+
+    <div class="event-actions">
+        {% if is_registered %}
+            <form method="POST" style="display: inline;">
+                <input type="hidden" name="action" value="unregister">
+                <button type="submit" class="btn btn-warning">Отменить регистрацию</button>
+            </form>
+        {% else %}
+            <form method="POST" style="display: inline;">
+                <input type="hidden" name="action" value="register">
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            </form>
+        {% endif %}
+    </div>
 
     <script>
         function showButton() {

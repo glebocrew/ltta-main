@@ -672,6 +672,7 @@
             </div>
         </div>
 
+        <!-- В секции events-container обновите кнопку события -->
         <div class="events-container">
             {% if user_events and user_events != -1 %}
             {% for event in user_events %}
@@ -685,8 +686,15 @@
                     </div>
                 </div>
                 <p class="content">{{ event["content"] }}</p>
-                <input name="event_title" type="hidden" value="{{ event['title'] }}">
-                <button type="button" onclick="window.location.href='/event/{{ event['title'] }}'">View Event</button>
+
+                <!-- Добавьте форму для отмены регистрации -->
+                <form method="POST" action="{{ url_for('event', event=event['title']) }}" style="display: inline;">
+                    <input type="hidden" name="action" value="unregister">
+                    <button type="submit" class="btn-remove">Отменить регистрацию</button>
+                </form>
+
+                <button type="button" onclick="window.location.href='/event/{{ event['title'] }}'">Просмотр
+                    события</button>
             </div>
             {% endfor %}
             {% endif %}

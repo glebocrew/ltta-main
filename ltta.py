@@ -52,7 +52,7 @@ app.static_folder = "static/"
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = (
-    "Пожалуйста, зарегистрируйтесь чтобы перейти на данную страницу"
+    "Пожалуйста, войдите в учётную запись для просмотра этой страницы."
 )
 
 # flask app conf
@@ -158,6 +158,7 @@ def login():
                     user = User(user_data["id"], user_data["role"])
                     login_user(user)
                     logger.log("info", f"new SUCCESFULL login: username={username}")
+                    flash("Вы успешно авторизованы!")
                     return redirect(url_for("index"))
 
             flash("Неверные данные! Если у вас нет аккаунта, зарегистрируйте его.")
@@ -1137,26 +1138,43 @@ def event(event):
             connection.get_participants_by_title, "events", event
         )
 
+        # Check if current user is registered for this event
+        is_registered = str(current_user.id) in participants if participants else False
+
         if request.method == "POST":
-            event_title = request.form.get("event")
-
-            safe_db_operation(
-                connection.append_participant, "events", current_user.id, event_title
-            )
-
-            return redirect(url_for("event", event=event_title))
+            action = request.form.get("action")
+            
+            if action == "register":
+                # Register for event
+                safe_db_operation(
+                    connection.append_participant, "events", current_user.id, event
+                )
+                # flash("Вы успешно зарегистрировались на событие!")
+                
+            elif action == "unregister":
+                # Unregister from event
+                success = safe_db_operation(
+                    connection.remove_participant, "events", str(current_user.id), event
+                )
+                # if success:
+                #     flash("Вы успешно отменили регистрацию на событие!")
+                # else:
+                #     flash("Ошибка при отмене регистрации")
+            
+            return redirect(url_for("event", event=event))
 
         return render_template(
             "event.html",
             event=event_data,
             participants=participants,
             current_user_id=current_user.id,
+            is_registered=is_registered
         )
     except Exception as e:
         logger.log("error", f"Event error: {e}")
         flash("Ошибка загрузки события")
         return redirect("/events")
-
+    
 
 def download_finished_event(event_data, participants, winners):
     """

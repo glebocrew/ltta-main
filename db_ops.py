@@ -1227,8 +1227,42 @@ class MariaConnection:
             return info
         return []
     
+    def remove_participant(self, table_name: str, participant_id: str, event_title: str):
+        """
+        Removes participant from event
+        
+        :param table_name: name of table you want to update
+        :param participant_id: participant id to remove
+        :param event_title: title of event
+        """
+        # First get current participants
+        query_get = self.queries["get_participants_by_title"].replace("table_name", table_name)
+        
+        if self.execute_with_reconnect(query_get, (event_title,)):
+            current_participants = self.cursor.fetchone()
+            if current_participants and current_participants[0]:
+                # Remove the participant from the list
+                participants_list = current_participants[0].split(',')
+                if participant_id in participants_list:
+                    participants_list.remove(participant_id)
+                    updated_participants = ','.join(participants_list)
+                    
+                    # Update the event with new participants list
+                    query_update = "UPDATE table_name SET participants = ? WHERE title = ?".replace("table_name", table_name)
+                    
+                    if self.execute_with_reconnect(query_update, (updated_participants, event_title)):
+                        mariadb_logger.log(
+                            "info", 
+                            f"[{os.getpid()}] Successfully removed participant {participant_id} from event {event_title}"
+                        )
+                        return True
+        
+        mariadb_logger.log(
+            "error", 
+            f"[{os.getpid()}] Failed to remove participant {participant_id} from event {event_title}"
+        )
+        return False
 
-    
     # Словарь запросов остается без изменений
     queries = {
         "test": "SHOW DATABASES;",
